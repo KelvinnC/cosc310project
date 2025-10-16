@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List
+from datetime import date
 
 class Review(BaseModel):
     id: int
@@ -10,6 +11,7 @@ class Review(BaseModel):
     reviewBody: str
     flagged: bool = False
     votes: int = 0
+    date: date
 
 class ReviewCreate(BaseModel):
     movieId: int
@@ -17,6 +19,7 @@ class ReviewCreate(BaseModel):
     rating: float
     reviewTitle: str
     reviewBody: str
+    date: date
 
 class ReviewUpdate(BaseModel):
     rating: float
@@ -24,4 +27,5 @@ class ReviewUpdate(BaseModel):
     reviewBody: str
     flagged: bool = False
     votes: int = 0
+    date: date
 
