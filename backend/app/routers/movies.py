@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status
 from typing import List
-from schemas.movie import Movie, MovieCreate, MovieUpdate
-from services.movie_service import list_movies, create_movie, delete_movie, update_movie
+from app.schemas.movie import Movie, MovieCreate, MovieUpdate
+from app.services.movie_service import list_movies, create_movie, delete_movie, update_movie, get_movie_by_id
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
@@ -12,8 +12,6 @@ def get_movies():
 @router.post("", response_model=Movie, status_code=201)
 def post_movie(payload: MovieCreate):
     return create_movie(payload)
-
-from services.movie_service import list_movies, create_movies, get_movie_by_id
 
 @router.get("/{movie_id}", response_model=Movie)
 def get_movie(movie_id: str):

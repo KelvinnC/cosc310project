@@ -1,82 +1,82 @@
 [
-    {
-        "id": 1,
-        "title": "Joker",
-        "description": "A mentally troubled stand-up comedian embarks on a downward spiral that leads to the creation of an iconic villain.",
-        "duration": 122,
-        "genre": "Crime, Drama, Thriller",
-        "release": "2019-10-04"
-    },
-    {
-        "id": 2,
-        "title": "Avengers Endgame",
-        "description": "After the devastating events of Avengers: Infinity War (2018), the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos' actions and restore balance to the universe.",
-        "duration": 181,
-        "genre": "Action, Adventure, Drama",
-        "release": "2019-04-26"
-    },
-    {
-        "id": 3,
-        "title": "Forrest Gump",
-        "description": "The presidencies of Kennedy and Johnson, the Vietnam War, the Watergate scandal and other historical events unfold from the perspective of an Alabama man with an IQ of 75, whose only desire is to be reunited with his childhood swe...",
-        "duration": 142,
-        "genre": "Drama, Romance",
-        "release": "1994-07-06"
-    },
-    {
-        "id": 10,
-        "title": "John Wick Chapter 3  Parabellum",
-        "description": "John Wick is on the run after killing a member of the international assassins' guild, and with a $14 million price tag on his head, he is the target of hit men and women everywhere.",
-        "duration": 130,
-        "genre": "Action, Crime, Thriller",
-        "release": "2019-07-05"
-    },
-    {
-        "id": 4,
-        "title": "Morbius",
-        "description": "Biochemist Michael Morbius tries to cure himself of a rare blood disease, but he inadvertently infects himself with a form of vampirism instead.",
-        "duration": 104,
-        "genre": "Action, Adventure, Horror",
-        "release": "2022-04-01"
-    },
-    {
-        "id": 5,
-        "title": "Pulp Fiction",
-        "description": "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
-        "duration": 154,
-        "genre": "Crime, Drama",
-        "release": "1994-10-14"
-    },
-    {
-        "id": 6,
-        "title": "SpiderMan No Way Home",
-        "description": "With Spider-Man's identity now revealed, Peter asks Doctor Strange for help. When a spell goes wrong, dangerous foes from other worlds start to appear, forcing Peter to discover what it truly means to be Spider-Man.",
-        "duration": 148,
-        "genre": "Action, Adventure, Fantasy",
-        "release": "2021-12-17"
-    },
-    {
-        "id": 7,
-        "title": "The Avengers",
-        "description": "Earth's mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.",
-        "duration": 143,
-        "genre": "Action, Adventure, Sci-Fi",
-        "release": "2012-05-11"
-    },
-    {
-        "id": 8,
-        "title": "The Dark Knight",
-        "description": "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
-        "duration": 152,
-        "genre": "Action, Crime, Drama",
-        "release": "2008-07-18"
-    },
-    {
-        "id": 9,
-        "title": "Thor Ragnarok",
-        "description": "Imprisoned on the planet Sakaar, Thor must race against time to return to Asgard and stop Ragnarök, the destruction of his world, at the hands of the powerful and ruthless villain Hela.",
-        "duration": 130,
-        "genre": "Action, Adventure, Comedy",
-        "release": "2017-11-03"
-    }
+  {
+    "id": "6bca4027-ad52-414e-810c-b830571cc07d",
+    "title": "Joker",
+    "description": "A mentally troubled stand-up comedian embarks on a downward spiral that leads to the creation of an iconic villain.",
+    "duration": 122,
+    "genre": "Crime, Drama, Thriller",
+    "release": "2019-10-04"
+  },
+  {
+    "id": "56f8e975-49b0-4e74-8465-b5c249b0b53b",
+    "title": "Avengers Endgame",
+    "description": "After the devastating events of Avengers: Infinity War (2018), the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos' actions and restore balance to the universe.",
+    "duration": 181,
+    "genre": "Action, Adventure, Drama",
+    "release": "2019-04-26"
+  },
+  {
+    "id": "078fe357-26ae-4d77-88d8-5f6d7ece7760",
+    "title": "Forrest Gump",
+    "description": "The presidencies of Kennedy and Johnson, the Vietnam War, the Watergate scandal and other historical events unfold from the perspective of an Alabama man with an IQ of 75, whose only desire is to be reunited with his childhood swe...",
+    "duration": 142,
+    "genre": "Drama, Romance",
+    "release": "1994-07-06"
+  },
+  {
+    "id": "f8f0578d-410b-46ae-98eb-d0dc186ed857",
+    "title": "John Wick Chapter 3  Parabellum",
+    "description": "John Wick is on the run after killing a member of the international assassins' guild, and with a $14 million price tag on his head, he is the target of hit men and women everywhere.",
+    "duration": 130,
+    "genre": "Action, Crime, Thriller",
+    "release": "2019-07-05"
+  },
+  {
+    "id": "adae3fb8-246c-4373-8b52-90cc0137c2b4",
+    "title": "Morbius",
+    "description": "Biochemist Michael Morbius tries to cure himself of a rare blood disease, but he inadvertently infects himself with a form of vampirism instead.",
+    "duration": 104,
+    "genre": "Action, Adventure, Horror",
+    "release": "2022-04-01"
+  },
+  {
+    "id": "54904814-613c-4e63-8ab0-d4ce2a8dec08",
+    "title": "Pulp Fiction",
+    "description": "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
+    "duration": 154,
+    "genre": "Crime, Drama",
+    "release": "1994-10-14"
+  },
+  {
+    "id": "16683001-a991-4bff-b746-43113ff85b28",
+    "title": "SpiderMan No Way Home",
+    "description": "With Spider-Man's identity now revealed, Peter asks Doctor Strange for help. When a spell goes wrong, dangerous foes from other worlds start to appear, forcing Peter to discover what it truly means to be Spider-Man.",
+    "duration": 148,
+    "genre": "Action, Adventure, Fantasy",
+    "release": "2021-12-17"
+  },
+  {
+    "id": "13e850a4-76db-432a-bb78-6d82ca3e752b",
+    "title": "The Avengers",
+    "description": "Earth's mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.",
+    "duration": 143,
+    "genre": "Action, Adventure, Sci-Fi",
+    "release": "2012-05-11"
+  },
+  {
+    "id": "34a4c90d-8287-4bd1-a074-bf929a634ca1",
+    "title": "The Dark Knight",
+    "description": "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+    "duration": 152,
+    "genre": "Action, Crime, Drama",
+    "release": "2008-07-18"
+  },
+  {
+    "id": "fb64695f-e621-4577-8684-162a90e7a790",
+    "title": "Thor Ragnarok",
+    "description": "Imprisoned on the planet Sakaar, Thor must race against time to return to Asgard and stop RagnarÃ¶k, the destruction of his world, at the hands of the powerful and ruthless villain Hela.",
+    "duration": 130,
+    "genre": "Action, Adventure, Comedy",
+    "release": "2017-11-03"
+  }
 ]

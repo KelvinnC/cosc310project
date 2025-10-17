@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers.movies import router as movies_router
+from app.routers.movies import router as movies_router
 
 app = FastAPI()
 
