@@ -4,7 +4,7 @@ from datetime import date
 from .review import Review
 
 class Movie(BaseModel):
-    id: int
+    id: str
     title: str
     description: str
     duration: int
