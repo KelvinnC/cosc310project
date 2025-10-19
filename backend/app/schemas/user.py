@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Annotated, Literal, Optional
-from datetime import date
+from datetime import datetime
 from .review import Review
 
 UsernameStr = Annotated[str, Field(max_length=20, min_length=3)]
@@ -12,8 +12,8 @@ class User(BaseModel):
     username: UsernameStr
     hashed_password: str
     role: Literal["user", "admin"]
-    created_at: date
-    active: bool
+    created_at: datetime
+    active: bool = True
 
 class UserCreate(BaseModel):
     """Schema for user registration"""
