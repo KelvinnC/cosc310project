@@ -49,6 +49,10 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
     for idx, user in enumerate(users):
         if user.get("id") == user_id:
             username_update = payload.username if payload.username != None else user["username"]
+            #Check if the proposed username is already taken
+            if (payload.username != None):
+                if any(usr.get("username") == payload.username for usr in users):
+                    raise HTTPException(status_code=409, detail="Username collision; select another username")
             password_update = user["hashed_password"]
             if (payload.password != None):
                 salt = bcrypt.gensalt(12)

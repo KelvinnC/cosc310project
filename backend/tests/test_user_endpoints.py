@@ -81,6 +81,12 @@ def test_put_user_invalid_put(mocker, client, user_data):
         })
     assert response.status_code == 404
 
+def test_put_user_duplicate_username(mocker, client, user_data):
+    mocker.patch("app.services.user_service.load_all", return_value=[user_data])
+    mocker.patch("app.services.user_service.save_all")
+    response = client.put("/users/1234", json={"username": "testmovielover", "password": "mymoviepassword"})
+    assert response.status_code == 409
+
 def test_delete_user_valid_user(mocker, client, user_data):
     mocker.patch("app.services.user_service.load_all",
     return_value=[user_data])
