@@ -1,7 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
-import datetime
 
 @pytest.fixture
 def client():
@@ -54,6 +53,12 @@ def test_post_user_missing_json(mocker, client):
     mocker.patch("app.services.user_service.save_all")
     response = client.post("/users", json={})
     assert response.status_code == 422
+
+def test_post_user_duplicate_username(mocker, client, user_data):
+    mocker.patch("app.services.user_service.load_all", return_value=[user_data])
+    mocker.patch("app.services.user_service.save_all")
+    response = client.post("/users", json={"username": "testmovielover", "password": "mymoviepassword"})
+    assert response.status_code == 409
 
 def test_put_user_valid_put(mocker, client, user_data):
     mocker.patch("app.services.user_service.load_all",

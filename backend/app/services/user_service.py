@@ -19,6 +19,8 @@ def create_user(payload: UserCreate) -> User:
     new_user_id = str(uuid.uuid4())
     if any(usr.get("id") == new_user_id for usr in users):
         raise HTTPException(status_code=409, detail="ID collision; retry")
+    if any (usr.get("username") == payload.username for usr in users):
+        raise HTTPException(status_code=409, detail="Username collision; select another username")
     creation_date = datetime.datetime.now()
 
     #Hash and salt password to prevent plaintext storage of password
