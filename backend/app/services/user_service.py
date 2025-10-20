@@ -12,6 +12,7 @@ def list_users() -> List[User]:
     for user in users:
         user.hashed_password = None
     return users
+
 def create_user(payload: UserCreate) -> User:
     """Create a new user object and save it to the database"""
     users = load_all()

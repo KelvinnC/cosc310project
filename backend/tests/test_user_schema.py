@@ -30,6 +30,12 @@ def test_username_too_short(user_data):
         user_copy["username"] = "ab"
         User(**user_copy)
 
+def test_username_too_long(user_data):
+    with pytest.raises(ValidationError):
+        user_copy = user_data.copy()
+        user_copy["username"] = "12345678901234567890abcdefghijklmnopqrstuvwxyz"
+        User(**user_copy)
+
 def test_invalid_role(user_data):
     user_copy = user_data.copy()
     user_copy["role"] = "moviehater"
