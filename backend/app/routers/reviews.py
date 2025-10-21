@@ -1,27 +1,27 @@
 from fastapi import APIRouter, status
 from typing import List
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
-from app.services.movie_service import list_movies, create_movie, delete_movie, update_movie, get_movie_by_id
+from app.services.review_service import list_reviews, create_review, delete_review, update_review, get_review_by_id
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
-@router.get("", response_model=List[Movie])
-def get_movies():
-    return list_movies()
+@router.get("", response_model=List[Review])
+def get_reviews():
+    return list_reviews()
 
-@router.post("", response_model=Movie, status_code=201)
-def post_movie(payload: MovieCreate):
-    return create_movie(payload)
+@router.post("", response_model=Review, status_code=201)
+def post_movie(payload: ReviewCreate):
+    return create_review(payload)
 
-@router.get("/{movie_id}", response_model=Movie)
+@router.get("/{movie_id}", response_model=Review)
 def get_movie(movie_id: str):
-    return get_movie_by_id(movie_id)
+    return get_review_by_id(movie_id)
 
-@router.put("/{movie_id}", response_model=Movie)
-def put_movie(movie_id: str, payload: MovieUpdate):
-    return update_movie(movie_id, payload)
+@router.put("/{movie_id}", response_model=Review)
+def put_movie(movie_id: str, payload: ReviewUpdate):
+    return update_review(movie_id, payload)
 
 @router.delete("/{movie_id}", status_code=status.HTTP_204_NO_CONTENT)
 def remove_movie(movie_id: str):
-    delete_movie(movie_id)
+    delete_review(movie_id)
     return None

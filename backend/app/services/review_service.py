@@ -1,44 +1,44 @@
 import uuid
 from typing import List, Dict, Any
 from fastapi import HTTPException
-from app.schemas.review import Movie, MovieCreate, MovieUpdate
+from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.repositories.movie_repo import load_all, save_all
 
-def list_movies() -> List[Movie]:
-    return [Movie(**mv) for mv in load_all()]
+def list_reviews() -> List[Review]:
+    return [Review(**rw) for rw in load_all()]
 
-def create_movie(payload: MovieCreate) -> Movie:
-    movies = load_all()
-    new_movie_id = str(uuid.uuid4())
-    if any(mov.get("id") == new_movie_id for mov in movies):
+def create_review(payload: ReviewCreate) -> Review:
+    reviews = load_all()
+    new_review_id = str(uuid.uuid4())
+    if any(rev.get("id") == new_review_id for rev in reviews):
         raise HTTPException(status_code=409, detail="ID collision; retry")
-    new_movie = Movie(id=new_movie_id, title=payload.title.strip(), genre=payload.genre.strip(), release=payload.release, 
-                      description=payload.description.strip(), duration=payload.duration)
-    movies.append(new_movie.model_dump(mode="json")) #model_dump auto serializes fields like dates
-    save_all(movies)
-    return new_movie
+    new_review = Review(id=new_review_id, movieId=payload.movieId, authorId=payload.authorId, rating=payload.rating, reviewTitle=payload.reviewTitle.strip(), 
+                        reviewBody=payload.reviewBody.strip(), date=payload.date)
+    reviews.append(new_review.model_dump(mode="json")) #model_dump auto serializes fields like dates
+    save_all(reviews)
+    return new_review
 
-def get_movie_by_id(movie_id: str) -> Movie:
-    movies = load_all()
-    for movie in movies:
-        if str(movie.get("id")) == movie_id:
-            return Movie(**movie)
-    raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
+def get_review_by_id(review_id: str) -> Review:
+    reviews = load_all()
+    for review in reviews:
+        if str(review.get("id")) == review_id:
+            return Review(**review)
+    raise HTTPException(status_code=404, detail=f"Movie '{review_id}' not found")
 
-def update_movie(movie_id: str, payload: MovieUpdate) -> Movie:
-    movies = load_all()
-    for idx, movie in enumerate(movies):
-        if movie.get("id") == movie_id:
-            updated = Movie(id=movie_id, title=payload.title.strip(), genre=payload.genre.strip(), release=payload.release, 
-                      description=payload.description.strip(), duration=payload.duration)
-            movies[idx] = updated.model_dump(mode="json")
-            save_all(movies)
+def update_review(review_id: str, payload: ReviewUpdate) -> Review:
+    reviews = load_all()
+    for idx, review in enumerate(reviews):
+        if review.get("id") == review_id:
+            updated = Review(id=review_id, movieId=payload.movieId, authorId=payload.authorId, rating=payload.rating, reviewTitle=payload.reviewTitle.strip(), 
+                        reviewBody=payload.reviewBody.strip(), date=payload.date)
+            reviews[idx] = updated.model_dump(mode="json")
+            save_all(reviews)
             return updated
-    raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
+    raise HTTPException(status_code=404, detail=f"Movie '{review_id}' not found")
 
-def delete_movie(movie_id: str) -> None:
-    movies = load_all()
-    new_movies = [movie for movie in movies if movie.get("id") != movie_id]
-    if len(new_movies) == len(movies):
-        raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
-    save_all(new_movies)
+def delete_review(review_id: str) -> None:
+    reviews = load_all()
+    new_reviews = [review for review in reviews if review.get("id") != review_id]
+    if len(new_reviews) == len(reviews):
+        raise HTTPException(status_code=404, detail=f"Movie '{review_id}' not found")
+    save_all(new_reviews)
