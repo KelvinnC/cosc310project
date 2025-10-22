@@ -142,7 +142,7 @@ We met and discussed the responsibilities for the M2 submission. We made some de
 ### Responsibilities
 ---
 
-## Meeting Date: 2025-10-06
+## Meeting Date: 2025-10-17
 **Type of Meeting:** Co-Working  
 **Meeting Length:** 2:00-3:30  
 **Attendees:** Everyone  
@@ -169,3 +169,23 @@ We agreed to meet again in the lab on Monday, if time is available, or afterward
 - Duncan – Managing reviews
 - Kelvin – Finish M2 4.1, 4.2. 
 - Will – Finish remaining M2 sections (2.1, 2.2, 5), submit M2 document.
+---
+
+## Meeting Date: 2025-10-22
+**Type of Meeting:** In-person Scrum
+**Meeting Length:** 11:00-11:45
+**Attendees:** Everyone
+
+### Action Items
+- Assign coding tasks as we lead up to M3 submission. 
+- Review the code produced over the past week.
+- Team learning session
+
+### Meeting Notes
+Went over our user stories and assigned tasks based on dependencies/blockers. We aligned our schedule expectations, hoping to get a majority of the M3 submission done before reading week. 
+
+### Responsibilities
+- Brad - US-01, 02 (user registration/verification)
+- Duncan - US-03, 04, 05 (managing reviews)
+- Kelvin - US-11 (sorting and filtering reviews)
+- Will - US-13 (review battles)
