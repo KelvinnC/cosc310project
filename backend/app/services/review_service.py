@@ -2,7 +2,7 @@ import uuid
 from typing import List, Dict, Any
 from fastapi import HTTPException
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
-from app.repositories.movie_repo import load_all, save_all
+from app.repositories.review_repo import load_all, save_all
 
 def list_reviews() -> List[Review]:
     return [Review(**rw) for rw in load_all()]
