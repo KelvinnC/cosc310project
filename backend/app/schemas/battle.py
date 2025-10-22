@@ -3,9 +3,8 @@ from datetime import datetime
 from pydantic import BaseModel, field_validator, ValidationInfo
 
 class Battle(BaseModel):
-    """Represents a battle between two reviews for a specific movie"""
+    """Represents a battle between two reviews from any movie"""
     id: str # UUID
-    movieId: str # UUID 
     review1Id: int 
     review2Id: int 
     winnerId: Optional[int] = None # No winner until a vote is cast
@@ -14,7 +13,6 @@ class Battle(BaseModel):
 
 class BattleCreate(BaseModel):
     """Schema for creating a new battle"""
-    movieId: str # UUID
     review1Id: int
     review2Id: int
 
