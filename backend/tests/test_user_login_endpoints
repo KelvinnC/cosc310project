@@ -1,0 +1,32 @@
+import pytest
+from fastapi.testclient import TestClient
+from app.main import app
+from app.schemas.user_login import UserLogin
+
+@pytest.fixture
+def client():
+    with TestClient(app) as client:
+        yield client
+
+@pytest.fixture
+def user_data():
+    user = {
+        "id": "77d60efe-0870-4323-b164-3d76474f251f",
+        "username": "testuser",
+        "hashed_password": "$2b$12$B6mJk/6rXrgrTFnq9YseZu6AIvuEZr1O2lKI6kIa2BJyjyHWz6Kya",
+        "role": "user",
+        "created_at": "2025-10-23T17:10:27.600472",
+        "active": True
+  }
+    return user
+
+def test_user_login_endpoint_valid_login(mocker, client, user_data):
+    mocker.patch("app.services.user_login_service.load_all",
+                 return_value=[user_data])
+    response = client.post(payload = UserLogin(username="testuser", password="testpass"))
+    assert response.status_code == 201
+    assert response.json().get("access_token") is not None
+
+def test_user_login_endpoint_invalid_login(client):
+    response = client.post(payload = UserLogin(username="invalidlogin", password="invalidpassword"))
+    assert response.status_code == 401
