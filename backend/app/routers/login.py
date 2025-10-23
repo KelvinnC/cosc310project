@@ -6,4 +6,5 @@ router = APIRouter(prefix="/login", tags=["login"])
 
 @router.post("", status_code=201)
 def login(payload: UserLogin):
-    return user_login(payload)
+    token = user_login(payload)
+    return {"access_token": token, "token_type": "bearer"}
