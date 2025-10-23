@@ -205,4 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Github Copilot
+.github/copilot-instructions.md
+
+# macOS system file
 .DS_Store
