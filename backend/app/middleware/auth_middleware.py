@@ -1,7 +1,7 @@
-from fastapi import Request, HTTPException
+from fastapi import Request, HTTPException, Depends
 from app.services.validate_access import validate_user_access
 
-async def jwt_auth_middleware(request: Request):
+async def jwt_auth_dependency(request: Request):
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(status_code = 401, detail = "Access Token Missing")
@@ -10,7 +10,6 @@ async def jwt_auth_middleware(request: Request):
 
     try:
         payload = validate_user_access(access_token)
-        request.state.user = payload
+        return payload
     except Exception as ex:
         raise HTTPException(status_code=401, detail=str(ex))
-    return payload

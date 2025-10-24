@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Depends, Request
 from typing import List
 from app.schemas.user import User, UserCreate, UserUpdate
 from app.services.user_service import list_users, get_user_by_id, update_user, create_user, delete_user
