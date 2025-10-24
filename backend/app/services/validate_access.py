@@ -10,7 +10,7 @@ def validate_user_access(access_token):
         jwt_decoded = jwt.decode(access_token, JWT_SECRET, algorithms=["HS256"])
         return jwt_decoded
     except jwt.ExpiredSignatureError:
-        return jwt.ExpiredSignatureError
+        raise jwt.ExpiredSignatureError
     except jwt.InvalidTokenError:
-        return jwt.InvalidTokenError
+        raise jwt.InvalidTokenError
 

@@ -24,18 +24,18 @@ def test_valid_token():
 
 def test_expired_token():
     token = create_token({"username": "expired_user"}, expired=True)
-    result = validate_user_access(token)
-    assert result == jwt.ExpiredSignatureError
+    with pytest.raises(jwt.ExpiredSignatureError):
+        validate_user_access(token)
 
 
 def test_invalid_token():
     invalid_token = "this.is.not.a.valid.token"
-    result = validate_user_access(invalid_token)
-    assert result == jwt.InvalidTokenError
+    with pytest.raises(jwt.InvalidTokenError):
+        validate_user_access(invalid_token)
 
 
 def test_tampered_token():
     token = create_token({"username": "user123"})
     tampered = token[:-2] + "xx"
-    result = validate_user_access(tampered)
-    assert result == jwt.InvalidTokenError
+    with pytest.raises(jwt.InvalidTokenError):
+        validate_user_access(tampered)
