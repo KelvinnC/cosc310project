@@ -1,0 +1,25 @@
+[
+  {
+    "id": "57525708-7115-4512-9153-30b65ba431ec",
+    "userId": "user1",
+    "review1Id": 3,
+    "review2Id": 4
+  },
+  {
+    "id": "df904218-b6f5-41da-a33c-6c67adf79c97",
+    "userId": "user1",
+    "review1Id": 3,
+    "review2Id": 5
+  },
+  {
+    "id": "a1e6d963-2f73-4760-8a8d-f91d60d13030",
+    "userId": "user1",
+    "review1Id": 4,
+    "review2Id": 5
+  },
+  {
+    "id": "afe31f12-a113-42cb-b137-4fb2c23bd005",
+    "review1Id": 4,
+    "review2Id": 5,
+    "winnerId": null,
+    "startedAt": 

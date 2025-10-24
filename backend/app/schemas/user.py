@@ -15,6 +15,12 @@ class User(BaseModel):
     created_at: datetime
     active: bool = True
 
+    # Track which reviews the user has made
+
+    # Track the battle UUIDs the user has voted in (pairs the user has decided)
+    # These are only updated when a vote is submitted.
+    votedBattles: List[str] = []
+    
 class UserCreate(BaseModel):
     """Schema for user registration"""
     username: UsernameStr
