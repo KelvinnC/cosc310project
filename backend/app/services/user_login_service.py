@@ -4,15 +4,11 @@ import bcrypt
 from fastapi import HTTPException
 import jwt
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
-from dotenv import load_dotenv
 import os
 
-env_path = Path(__file__).resolve().parent.parent.parent.parent / ".env"
-load_dotenv(dotenv_path=env_path)
 JWT_SECRET = os.getenv("JWT_SECRET")
 if not JWT_SECRET:
-    raise RuntimeError(f"JWT SECRET not found at {env_path}")
+    raise RuntimeError("JWT SECRET could not be loaded")
 
 def user_login(payload: UserLogin) -> str:
     users = load_all()

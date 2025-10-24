@@ -2,15 +2,11 @@ import pytest
 from fastapi import HTTPException
 from app.services.user_login_service import user_login
 from app.schemas.user_login import UserLogin
-from pathlib import Path
-from dotenv import load_dotenv
 import os
 
-env_path = Path(__file__).resolve().parent.parent.parent.parent / ".env"
-load_dotenv(dotenv_path=env_path)
 JWT_SECRET = os.getenv("JWT_SECRET")
 if not JWT_SECRET:
-    raise RuntimeError(f"JWT SECRET not found at {env_path}")
+    raise RuntimeError("JWT SECRET could not be found")
 
 @pytest.fixture
 def user_data():

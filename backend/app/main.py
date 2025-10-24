@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from app.routers.movies import router as movies_router
 from app.routers.user_endpoints import router as users_router
