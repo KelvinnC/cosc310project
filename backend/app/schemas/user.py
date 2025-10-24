@@ -16,6 +16,7 @@ class User(BaseModel):
     active: bool = True
 
     # Track which reviews the user has made
+    ownReviewIds: List[int] = []
 
     # Track the battle UUIDs the user has voted in (pairs the user has decided)
     # These are only updated when a vote is submitted.
