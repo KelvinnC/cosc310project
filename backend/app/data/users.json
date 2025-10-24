@@ -6,5 +6,13 @@
     "role": "admin",
     "created_at": "2025-10-20T23:09:02.346841",
     "active": true
+  },
+  {
+    "id": "77d60efe-0870-4323-b164-3d76474f251f",
+    "username": "testuser",
+    "hashed_password": "$2b$12$B6mJk/6rXrgrTFnq9YseZu6AIvuEZr1O2lKI6kIa2BJyjyHWz6Kya",
+    "role": "user",
+    "created_at": "2025-10-23T17:10:27.600472",
+    "active": true
   }
 ]
