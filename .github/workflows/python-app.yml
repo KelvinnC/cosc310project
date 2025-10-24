@@ -38,9 +38,10 @@ jobs:
         pip install -r requirements.txt
     - name: Create .env file with JWT_SECRET
       run: |
-        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" > ../.env
+        echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" > $GITHUB_WORKSPACE/.env
     - name: Test with pytest
       run: |
         pytest
+      working-directory: backend
       env:
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
