@@ -23,33 +23,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create .env file
-        run: |
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" > backend/.env
-        shell: bash
-
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-
-      - name: Debug: show CWD and list files
-        run: |
-          echo "PWD: $(pwd)"
-          echo "List /:"
-          ls -la
-          echo "List backend/:"
-          ls -la backend || true
-
-      - name: Debug: check JWT env present (masked)
-        run: |
-          python - <<'PY'
-import os
-print("JWT_SECRET in os.environ?", "JWT_SECRET" in os.environ)
-import pathlib
-p = pathlib.Path("backend/.env")
-print("backend/.env exists?", p.exists())
-PY
 
       - name: Install dependencies
         run: |
