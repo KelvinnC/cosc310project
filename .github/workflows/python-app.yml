@@ -33,13 +33,31 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Debug: show CWD and list files
+        run: |
+          echo "PWD: $(pwd)"
+          echo "List /:"
+          ls -la
+          echo "List backend/:"
+          ls -la backend || true
+
+      - name: Debug: check JWT env present (masked)
+        run: |
+          python - <<'PY'
+import os
+print("JWT_SECRET in os.environ?", "JWT_SECRET" in os.environ)
+import pathlib
+p = pathlib.Path("backend/.env")
+print("backend/.env exists?", p.exists())
+PY
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
       - name: Test with pytest
-        run: |
-          pytest
+        working-directory: backend
+        run: pytest
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
