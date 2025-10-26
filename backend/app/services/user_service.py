@@ -74,26 +74,3 @@ def delete_user(user_id: str) -> None:
         raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
     save_all(new_users)
 
-def update_user_state(user: User) -> None:
-    """Update user state in storage while preserving existing data.
-    
-    Args:
-        user: User object with updated state
-        
-    Raises:
-        HTTPException: If user not found or save fails
-    """
-    try:
-        users = load_all()
-        for idx, u in enumerate(users):
-            if u["id"] == user.id:
-                # Preserve sensitive fields from stored user
-                stored_user = User(**u)
-                updated = user.model_dump()
-                updated["hashed_password"] = stored_user.hashed_password
-                users[idx] = updated
-                save_all(users)
-                return
-        raise HTTPException(status_code=404, detail=f"User '{user.id}' not found")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to update user state: {str(e)}")
