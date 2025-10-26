@@ -68,45 +68,5 @@ def createBattle(user: User, reviews: List[Review]) -> Battle:
     return battle
 
 
-def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
-    """Record a user's vote by persisting the battle with its winner.
-    
-    Args:
-        battle: The battle to persist with the vote result
-        winner_id: The ID of the winning review
-        user_id: ID of the user submitting this vote
-        
-    Raises:
-        ValueError: if winner_id is not one of the battle's reviews
-    """
-    # Validate winner is one of the battle reviews
-    if winner_id not in (battle.review1Id, battle.review2Id):
-        raise ValueError(f"Winner {winner_id} not in battle {battle.id}")
-        
-    # Prepare battle data
-    battle_dict = battle.model_dump()
-    battle_dict.update({
-        "userId": user_id,
-        "winnerId": winner_id,
-        "endedAt": datetime.now().isoformat()
-    })
-    
-    # Update repositories atomically
-    try:
-        # Save battle result
-        all_battles = list(battle_repo.load_all())
-        all_battles.append(battle_dict)
-        battle_repo.save_all(all_battles)
-        
-        # Update user's vote history
-        from app.services.user_service import get_user_by_id, update_user_state
-        user = get_user_by_id(user_id)
-        if not hasattr(user, "votedBattles"):
-            user.votedBattles = []
-        user.votedBattles.append(battle.id)
-        update_user_state(user)
-            
-    except Exception as e:
-        raise ValueError(f"Failed to record vote: {str(e)}")
 
 
