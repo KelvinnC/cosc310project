@@ -161,8 +161,6 @@ def test_update_user_state_updates_fields_and_preserves_password(mocker):
         "role": "user",
         "created_at": datetime.datetime(2023, 1, 1),
         "active": True,
-        "ownReviewIds": [1, 2],
-        "votedBattles": ["old-battle-id"],
     }
     mocker.patch("app.services.user_service.load_all", return_value=[stored])
     mock_save = mocker.patch("app.services.user_service.save_all")
@@ -174,8 +172,6 @@ def test_update_user_state_updates_fields_and_preserves_password(mocker):
         role="user",
         created_at=stored["created_at"],
         active=False,
-        ownReviewIds=[3],
-        votedBattles=["b1", "b2"],
     )
 
     update_user_state(updated_user)
@@ -187,8 +183,6 @@ def test_update_user_state_updates_fields_and_preserves_password(mocker):
     # Non-sensitive fields updated
     assert saved["username"] == "newname"
     assert saved["active"] == False
-    assert saved["ownReviewIds"] == [3]
-    assert saved["votedBattles"] == ["b1", "b2"]
     # Sensitive field preserved
     assert saved["hashed_password"] == "storedhash"
 
@@ -201,8 +195,6 @@ def test_update_user_state_user_not_found_raises_404(mocker):
         "role": "user",
         "created_at": datetime.datetime(2023, 1, 1),
         "active": True,
-        "ownReviewIds": [],
-        "votedBattles": [],
     }])
     user = User(
         id="missing",
@@ -211,8 +203,6 @@ def test_update_user_state_user_not_found_raises_404(mocker):
         role="user",
         created_at=datetime.datetime(2023, 1, 1),
         active=True,
-        ownReviewIds=[],
-        votedBattles=[],
     )
     with pytest.raises(HTTPException) as ex:
         update_user_state(user)
@@ -228,8 +218,6 @@ def test_update_user_state_save_failure_raises_500(mocker):
         "role": "user",
         "created_at": datetime.datetime(2023, 1, 1),
         "active": True,
-        "ownReviewIds": [],
-        "votedBattles": [],
     }
     mocker.patch("app.services.user_service.load_all", return_value=[stored])
     mocker.patch("app.services.user_service.save_all", side_effect=Exception("disk full"))
@@ -241,8 +229,6 @@ def test_update_user_state_save_failure_raises_500(mocker):
         role="user",
         created_at=stored["created_at"],
         active=True,
-        ownReviewIds=[],
-        votedBattles=[],
     )
 
     with pytest.raises(HTTPException) as ex:

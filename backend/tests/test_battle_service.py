@@ -155,8 +155,6 @@ def test_submit_battle_result_success(user, reviews, mocker):
     )
     mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.battle_repo.save_all")
-    mock_get_user = mocker.patch("app.services.user_service.get_user_by_id", return_value=user)
-    mock_update_user = mocker.patch("app.services.user_service.update_user_state")
 
     # Submit the vote
     battle_service.submitBattleResult(battle, winner_id=3, user_id=user.id)
@@ -164,10 +162,8 @@ def test_submit_battle_result_success(user, reviews, mocker):
     mock_save.assert_called_once()
     saved = mock_save.call_args[0][0][0]
     assert saved["winnerId"] == 3
+    assert saved["userId"] == user.id
     assert saved["endedAt"] is not None
-    # User's votedBattles should have been appended and update_user_state called
-    assert battle.id in user.votedBattles
-    mock_update_user.assert_called_once()
 
 
 def test_submit_battle_result_invalid_winner(user, mocker):
@@ -197,8 +193,6 @@ def test_submit_battle_result_marks_end_time(user, mocker):
     )
     mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.battle_repo.save_all")
-    mocker.patch("app.services.user_service.get_user_by_id", return_value=user)
-    mocker.patch("app.services.user_service.update_user_state")
 
     battle_service.submitBattleResult(battle, winner_id=3, user_id=user.id)
 
@@ -206,3 +200,4 @@ def test_submit_battle_result_marks_end_time(user, mocker):
     updated_battle = mock_save.call_args[0][0][0]
     assert updated_battle["endedAt"] is not None
     assert updated_battle["winnerId"] == 3
+    assert updated_battle["userId"] == user.id

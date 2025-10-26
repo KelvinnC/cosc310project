@@ -9,6 +9,7 @@ from app.schemas.review import Review
 from app.schemas.battle import Battle
 from app.repositories import battle_repo
 
+## -------------------- Helper functions -------------------- ##
 def _get_user_voted_pairs(user_id: str) -> set:
     """Return set of unordered pairs the user has already voted on.
 
@@ -25,6 +26,7 @@ def _is_own_review(user: User, review: Review) -> bool:
     """Check if the review was authored by the given user."""
     return str(review.authorId) == user.id
 
+## -------------------- Services -------------------- ##
 def createBattle(user: User, reviews: List[Review]) -> Battle:
     """
     Generate a battle between two reviews for a user to vote on.
@@ -79,6 +81,9 @@ def createBattle(user: User, reviews: List[Review]) -> Battle:
 def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
     """Record a user's vote by persisting the battle with its winner.
     
+    Note: User's votedBattles are now dynamically derived from persisted battles,
+    so we only need to save the battle result - no user update required.
+    
     Args:
         battle: The battle to persist with the vote result
         winner_id: The ID of the winning review
@@ -99,21 +104,11 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
         "endedAt": datetime.now().isoformat()
     })
     
-    # Update repositories atomically
+    # Save battle result - votedBattles will be derived from this
     try:
-        # Save battle result
         all_battles = list(battle_repo.load_all())
         all_battles.append(battle_dict)
         battle_repo.save_all(all_battles)
-        
-        # Update user's vote history
-        from app.services.user_service import get_user_by_id, update_user_state
-        user = get_user_by_id(user_id)
-        if not hasattr(user, "votedBattles"):
-            user.votedBattles = []
-        user.votedBattles.append(battle.id)
-        update_user_state(user)
-            
     except Exception as e:
         raise ValueError(f"Failed to record vote: {str(e)}")
 
