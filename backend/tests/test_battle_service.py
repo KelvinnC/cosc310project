@@ -12,15 +12,13 @@ from app.schemas.battle import Battle
 
 @pytest.fixture
 def user():
-    # Mock a user with some own reviews and some previous battle UUIDs
+    # Mock a user with a UUID4 id (string)
     return User(
-        id="user1",
+        id="123e4567-e89b-12d3-a456-426614174000",
         username="testuser",
         hashed_password="hashed",
         role="user",
         created_at=datetime.now(),
-        ownReviewIds=[1, 2],  # user cannot battle their own reviews
-        votedBattles=["battle1", "battle2"]  # previously voted battles
     )
 
 @pytest.fixture
@@ -47,14 +45,12 @@ def reviews():
 def test_create_battle_excludes_own_reviews(mocker):
     # --- Setup user ---
     user = User(
-        id="user1",
+        id="123e4567-e89b-12d3-a456-426614174000",
         username="testuser",
         hashed_password="hashed",
         role="user",
         created_at=datetime(2025, 10, 23, 15, 13, 59, 543758),
         active=True,
-        ownReviewIds=[1, 2],
-        votedBattles=["battle1", "battle2"]
     )
 
     # --- Setup reviews ---
@@ -68,8 +64,8 @@ def test_create_battle_excludes_own_reviews(mocker):
 
     # --- Mock previous battles for this user ---
     previous_battles = [
-        {"id": "battle1", "userId": "user1", "review1Id": 3, "review2Id": 4},
-        {"id": "battle2", "userId": "user1", "review1Id": 4, "review2Id": 5},
+        {"id": "battle1", "userId": user.id, "review1Id": 3, "review2Id": 4, "winnerId": 3},
+        {"id": "battle2", "userId": user.id, "review1Id": 4, "review2Id": 5, "winnerId": 4},
     ]
 
     mocker.patch("app.repositories.battle_repo.load_all", return_value=previous_battles)
@@ -78,13 +74,16 @@ def test_create_battle_excludes_own_reviews(mocker):
     # --- Patch random.choice to make the test deterministic ---
     mocker.patch("random.choice", return_value=(3, 5))
 
+    # Simulate that reviews with ids 1 and 2 are owned by the user
+    mocker.patch("app.services.battle_service._is_own_review", side_effect=lambda u, r: r.id in {1,2})
+
     # --- Run the function ---
     battle = battle_service.createBattle(user, reviews)
 
     # --- Validate results ---
-    # 1. User should not battle their own reviews
-    assert battle.review1Id not in user.ownReviewIds
-    assert battle.review2Id not in user.ownReviewIds
+    # 1. User should not battle their own reviews (ids 1 and 2 marked as owned)
+    assert battle.review1Id not in {1,2}
+    assert battle.review2Id not in {1,2}
 
     # 2. The chosen pair should not be one the user already voted on
     voted_pairs = {frozenset((b["review1Id"], b["review2Id"])) for b in previous_battles}
@@ -96,14 +95,13 @@ def test_create_battle_excludes_own_reviews(mocker):
 
 def test_create_battle_no_eligible_pairs(user, reviews, mocker):
     # All eligible pairs already voted
-    battle_ids = ["battle1", "battle2", "battle3"]
     previous_battles = [
-        {"id": "battle1", "userId": user.id, "review1Id": 3, "review2Id": 4},
-        {"id": "battle2", "userId": user.id, "review1Id": 3, "review2Id": 5},
-        {"id": "battle3", "userId": user.id, "review1Id": 4, "review2Id": 5},
+        {"id": "battle1", "userId": user.id, "review1Id": 3, "review2Id": 4, "winnerId": 3},
+        {"id": "battle2", "userId": user.id, "review1Id": 3, "review2Id": 5, "winnerId": 3},
+        {"id": "battle3", "userId": user.id, "review1Id": 4, "review2Id": 5, "winnerId": 4},
     ]
-    # Update user's votedBattles to match the previous battles
-    user.votedBattles = battle_ids
+    # Mark reviews 1 and 2 as owned to leave only 3,4,5 eligible
+    mocker.patch("app.services.battle_service._is_own_review", side_effect=lambda u, r: r.id in {1,2})
     
     mocker.patch("app.repositories.battle_repo.load_all", return_value=previous_battles)
 
@@ -115,10 +113,10 @@ def test_create_battle_single_eligible_pair(user, reviews, mocker):
     """Test battle creation when only one valid pair remains."""
     # Set user to have voted on all pairs except (3,5)
     previous_battles = [
-        {"id": "battle1", "userId": user.id, "review1Id": 3, "review2Id": 4},
-        {"id": "battle2", "userId": user.id, "review1Id": 4, "review2Id": 5},
+        {"id": "battle1", "userId": user.id, "review1Id": 3, "review2Id": 4, "winnerId": 3},
+        {"id": "battle2", "userId": user.id, "review1Id": 4, "review2Id": 5, "winnerId": 5},
     ]
-    user.votedBattles = ["battle1", "battle2"]
+    mocker.patch("app.services.battle_service._is_own_review", side_effect=lambda u, r: r.id in {1,2})
     mocker.patch("app.repositories.battle_repo.load_all", return_value=previous_battles)
     mock_save = mocker.patch("app.repositories.battle_repo.save_all")
     
@@ -131,7 +129,7 @@ def test_create_battle_single_eligible_pair(user, reviews, mocker):
 
 def test_create_battle_all_reviews_owned(user, reviews, mocker):
     """Test when all available reviews are owned by the user."""
-    user.ownReviewIds = [r.id for r in reviews]  # User owns all reviews
+    mocker.patch("app.services.battle_service._is_own_review", return_value=True)
     mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
     
     with pytest.raises(ValueError, match="No eligible review pairs available"):

@@ -9,6 +9,21 @@ from app.schemas.review import Review
 from app.schemas.battle import Battle
 from app.repositories import battle_repo
 
+def _get_user_voted_pairs(user_id: str) -> set:
+    """Return set of unordered pairs the user has already voted on.
+
+    Uses battles persisted with userId == user_id and a winner set, validating the vote is complete.
+    Each pair is represented as frozenset({review1Id, review2Id}).
+    """
+    voted_pairs = set()
+    for b in battle_repo.load_all() or []:
+        if b.get("userId") == user_id and b.get("winnerId") is not None:
+            voted_pairs.add(frozenset((b["review1Id"], b["review2Id"])) )
+    return voted_pairs
+
+def _is_own_review(user: User, review: Review) -> bool:
+    """Check if the review was authored by the given user."""
+    return str(review.authorId) == user.id
 
 def createBattle(user: User, reviews: List[Review]) -> Battle:
     """
@@ -29,17 +44,11 @@ def createBattle(user: User, reviews: List[Review]) -> Battle:
     Raises:
         ValueError: If no eligible pairs exist (all voted or only own reviews)
     """
-    # Get all existing battles
-    all_battles = list(battle_repo.load_all())
+    # Build set of review-id pairs the user has already voted on by scanning battles
+    voted_pairs = _get_user_voted_pairs(user.id)
 
-    # Build set of review-id pairs the user has already voted on using
-    # user's `votedBattles` list of battle ids.
-    user_battle_ids = set(getattr(user, "votedBattles", []))
-    user_battles = [b for b in all_battles if b.get("id") in user_battle_ids]
-    voted_pairs = {frozenset((b["review1Id"], b["review2Id"])) for b in user_battles}
-
-    # Filter out user's own reviews
-    eligible_reviews = [r for r in reviews if r.id not in set(user.ownReviewIds)]
+    # Filter out user's own reviews via authorId comparison
+    eligible_reviews = [r for r in reviews if not _is_own_review(user, r)]
 
     # Generate all unique unordered pairs from eligible reviews and filter out
     # pairs the user has already voted on
