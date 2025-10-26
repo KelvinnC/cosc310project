@@ -9,7 +9,6 @@ app = FastAPI()
 def root():
     return {"message": "Hello Movie World!"}
 
-# Include routers
 app.include_router(movies_router)
 app.include_router(users_router)
 app.include_router(searches_router)

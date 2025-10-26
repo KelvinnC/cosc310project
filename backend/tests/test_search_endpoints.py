@@ -10,7 +10,6 @@ def client():
 
 
 def test_search_reviews_partial_case_insensitive(mocker, client):
-    # Mock movies and reviews to a tiny, deterministic dataset
     mocker.patch(
         "app.services.search_service.load_movies",
         return_value=[
@@ -23,7 +22,7 @@ def test_search_reviews_partial_case_insensitive(mocker, client):
         return_value=[
             {
                 "id": 10,
-                "movieId": 2,  # Inception (second in list -> id 2)
+                "movieId": 2,
                 "date": "2020-01-01",
                 "authorId": 1,
                 "reviewTitle": "Great!",
@@ -45,7 +44,7 @@ def test_search_reviews_partial_case_insensitive(mocker, client):
             },
             {
                 "id": 12,
-                "movieId": 1,  # Joker
+                "movieId": 1,
                 "date": "2020-01-03",
                 "authorId": 2,
                 "reviewTitle": "Intense",
@@ -70,7 +69,6 @@ def test_search_reviews_no_match_returns_empty(mocker, client):
         "app.services.search_service.load_movies",
         return_value=[{"id": "m1", "title": "Joker", "description": "", "duration": 120, "genre": "Drama", "release": "2019-10-04"}],
     )
-    # Even if reviews exist, none should be returned when movies don't match
     mocker.patch(
         "app.services.search_service.load_reviews",
         return_value=[
