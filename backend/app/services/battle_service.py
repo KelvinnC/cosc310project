@@ -11,7 +11,8 @@ from app.repositories import battle_repo
 
 ## -------------------- Helper functions -------------------- ##
 def _get_user_voted_pairs(user_id: str) -> set:
-    """Return set of unordered pairs the user has already voted on.
+    """
+    Return set of unordered pairs the user has already voted on.
 
     Uses battles persisted with userId == user_id and a winner set, validating the vote is complete.
     Each pair is represented as frozenset({review1Id, review2Id}).
@@ -32,9 +33,9 @@ def createBattle(user: User, reviews: List[Review]) -> Battle:
     Generate a battle between two reviews for a user to vote on.
     
     Creates a battle by selecting two reviews the user hasn't voted on before,
-    excluding their own reviews. Uses the user's `votedBattles` to avoid
-    showing previously-decided pairs. Returns a Battle object but does not
-    persist it; the battle is saved when a vote is submitted.
+    excluding their own reviews. Already-voted pairs are derived from persisted
+    battle records so previously-decided pairs are not shown. Returns a Battle
+    object but does not persist it; the battle is saved when a vote is submitted.
 
     Args:
         user: User requesting the battle
@@ -79,11 +80,13 @@ def createBattle(user: User, reviews: List[Review]) -> Battle:
     return battle
 
 def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
-    """Record a user's vote by persisting the battle with its winner.
-    
-    Note: User's votedBattles are now dynamically derived from persisted battles,
-    so we only need to save the battle result - no user update required.
-    
+    """
+    Record a user's vote by persisting the battle with its winner.
+
+    The system derives which pairs a user has voted on by scanning persisted
+    battle records. Persisting the finished battle is sufficient to record the
+    vote; no additional user-side fields are required.
+
     Args:
         battle: The battle to persist with the vote result
         winner_id: The ID of the winning review
@@ -104,7 +107,7 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
         "endedAt": datetime.now().isoformat()
     })
     
-    # Save battle result - votedBattles will be derived from this
+    # Save battle result 
     try:
         all_battles = list(battle_repo.load_all())
         all_battles.append(battle_dict)
