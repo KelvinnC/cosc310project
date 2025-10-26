@@ -93,11 +93,16 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
         user_id: ID of the user submitting this vote
         
     Raises:
-        ValueError: if winner_id is not one of the battle's reviews
+        ValueError: if winner_id is not one of the battle's reviews or if user has already voted on this pair
     """
     # Validate winner is one of the battle reviews
     if winner_id not in (battle.review1Id, battle.review2Id):
         raise ValueError(f"Winner {winner_id} not in battle {battle.id}")
+    
+    # Prevent duplicate votes by checking if user already voted on this pair
+    pair = frozenset((battle.review1Id, battle.review2Id))
+    if pair in _get_user_voted_pairs(user_id):
+        raise ValueError("User has already voted on this review pair")
         
     # Prepare battle data
     battle_dict = battle.model_dump()
@@ -114,5 +119,16 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
         battle_repo.save_all(all_battles)
     except Exception as e:
         raise ValueError(f"Failed to record vote: {str(e)}")
+    
+    # Increment the winning review's vote count
+    # TODO: Implement review_service.increment_vote(winner_id) once review service is available
+    try:
+        from app.services import review_service
+        review_service.increment_vote(winner_id)
+    except ImportError:
+        # Review service not yet implemented
+        pass
+    except Exception as e:
+        raise ValueError(f"Failed to increment review vote count: {str(e)}")
 
 
