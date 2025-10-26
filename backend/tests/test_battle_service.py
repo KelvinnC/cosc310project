@@ -43,7 +43,6 @@ def reviews():
 
 
 ## ------------- createBattle tests ------------- ##
-
 def test_create_battle_excludes_own_reviews(mocker):
     # --- Setup user ---
     user = User(
@@ -145,3 +144,67 @@ def test_create_battle_empty_reviews(user, mocker):
         battle_service.createBattle(user, [])
 
 
+
+## ------------- submitBattleResult tests ------------- ##
+def test_submit_battle_result_success(user, reviews, mocker):
+    battle = Battle(
+        id=str(uuid4()),
+        review1Id=3,
+        review2Id=4,
+        startedAt=datetime.now(),
+        winnerId=None,
+        endedAt=None
+    )
+    mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
+    mock_save = mocker.patch("app.repositories.battle_repo.save_all")
+    mock_get_user = mocker.patch("app.services.user_service.get_user_by_id", return_value=user)
+    mock_update_user = mocker.patch("app.services.user_service.update_user_state")
+
+    # Submit the vote
+    battle_service.submitBattleResult(battle, winner_id=3, user_id=user.id)
+
+    mock_save.assert_called_once()
+    saved = mock_save.call_args[0][0][0]
+    assert saved["winnerId"] == 3
+    assert saved["endedAt"] is not None
+    # User's votedBattles should have been appended and update_user_state called
+    assert battle.id in user.votedBattles
+    mock_update_user.assert_called_once()
+
+
+def test_submit_battle_result_invalid_winner(user, mocker):
+    """Submitting a winner that's not part of the battle should raise."""
+    battle = Battle(
+        id=str(uuid4()),
+        review1Id=3,
+        review2Id=4,
+        startedAt=datetime.now(),
+        winnerId=None,
+        endedAt=None,
+    )
+
+    with pytest.raises(ValueError, match="Winner .* not in battle"):
+        battle_service.submitBattleResult(battle, winner_id=99, user_id=user.id)
+
+def test_submit_battle_result_marks_end_time(user, mocker):
+    """Test that submitting result properly sets endedAt timestamp."""
+    # Create a Battle object and assert saved dict contains winner/endedAt
+    battle = Battle(
+        id=str(uuid4()),
+        review1Id=3,
+        review2Id=4,
+        startedAt=datetime.now(),
+        winnerId=None,
+        endedAt=None,
+    )
+    mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
+    mock_save = mocker.patch("app.repositories.battle_repo.save_all")
+    mocker.patch("app.services.user_service.get_user_by_id", return_value=user)
+    mocker.patch("app.services.user_service.update_user_state")
+
+    battle_service.submitBattleResult(battle, winner_id=3, user_id=user.id)
+
+    # Verify battle was updated with end time and winner
+    updated_battle = mock_save.call_args[0][0][0]
+    assert updated_battle["endedAt"] is not None
+    assert updated_battle["winnerId"] == 3
