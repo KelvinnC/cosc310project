@@ -1,11 +1,11 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Union
 from datetime import date
 
 class Review(BaseModel):
     id: int
-    movieId: int
-    authorId: int
+    movieId: str
+    authorId: Union[int, str]  # Accept both int (-1 for system) and str (UUID for users)
     rating: float
     reviewTitle: str
     reviewBody: str
@@ -14,7 +14,7 @@ class Review(BaseModel):
     date: date
 
 class ReviewCreate(BaseModel):
-    movieId: int
+    movieId: str
     authorId: int
     rating: float
     reviewTitle: str
