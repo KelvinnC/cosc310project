@@ -11,6 +11,15 @@ class Battle(BaseModel):
     startedAt: datetime
     endedAt: Optional[datetime] = None # Ends when a vote is cast
 
+    @field_validator('review2Id')
+    @classmethod
+    def reviews_must_be_different(cls, v: int, info: ValidationInfo) -> int:
+        """Ensure review1Id and review2Id are different."""
+        review1_id = info.data.get('review1Id')
+        if review1_id is not None and v == review1_id:
+            raise ValueError('Battle must have two different reviews')
+        return v
+
 class BattleResult(BaseModel):
     """Request payload for submitting a vote"""
     battle: Battle
