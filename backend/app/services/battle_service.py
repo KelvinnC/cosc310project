@@ -153,4 +153,26 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
     except Exception as e:
         raise ValueError(f"Failed to increment review vote count: {str(e)}")
 
+def get_battle_by_id(battle_id: str) -> Battle:
+    """
+    Get a battle by ID.
+    
+    Args:
+        battle_id: The ID of the battle to retrieve
+        
+    Returns:
+        Battle object
+        
+    Raises:
+        ValueError: If battle not found
+    """
+    battle_dict = battle_repo.get_by_id(battle_id)
+    if not battle_dict:
+        raise ValueError(f"Battle {battle_id} not found")
+    
+    try:
+        return Battle(**battle_dict)
+    except (ValueError, TypeError) as e:
+        raise ValueError(f"Invalid battle data for {battle_id}: {str(e)}")
+
 

@@ -10,14 +10,13 @@ from app.schemas.battle import Battle, VoteRequest
 from app.schemas.review import Review
 from app.services import battle_service
 from app.services.user_service import get_user_by_id
-from app.repositories import battle_repo
 
 
 router = APIRouter(tags=["battles"])
 
 ## TODO: Replace with Review service implementation 
 @lru_cache(maxsize=1)
-def _load_reviews_raw():
+def _load_reviews_raw() -> List[dict]:
     """
     Load raw review data from JSON file once using 
     fast orjson parser and cache in memory.
@@ -102,20 +101,12 @@ def submit_vote(battle_id: str, user_id: str, payload: VoteRequest) -> None:
     user = get_user_by_id(user_id)
     
     # Load the battle by ID
-    battle_dict = battle_repo.get_by_id(battle_id)
-    if not battle_dict:
+    try:
+        battle = battle_service.get_battle_by_id(battle_id)
+    except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Battle {battle_id} not found"
-        )
-    
-    # Convert to Battle object for service layer
-    try:
-        battle = Battle(**battle_dict)
-    except (ValueError, TypeError) as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Invalid battle data: {str(e)}"
+            detail=str(e)
         )
     
     # Submit the vote

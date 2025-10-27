@@ -16,15 +16,6 @@ def load_all() -> List[Dict[str, Any]]:
     except json.JSONDecodeError:
         return []
 
-
-def get_by_id(battle_id: str) -> Dict[str, Any] | None:
-    """Load a specific battle by ID"""
-    battles = load_all()
-    for battle in battles:
-        if battle.get("id") == battle_id:
-            return battle
-    return None
-
 def save_all(battles: List[Dict[str, Any]]) -> None:
     """Save all battles to battles.json safely using a temp file"""
     tmp = DATA_PATH.with_suffix(".tmp")

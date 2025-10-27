@@ -130,7 +130,7 @@ def test_create_battle_file_error(mocker, mock_user, mock_response):
 def test_submit_vote_success(mocker, mock_user, mock_battle):
     """Test successful vote submission."""
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.routers.battles.battle_repo.get_by_id", return_value=mock_battle.model_dump())
+    mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)
     mocker.patch("app.routers.battles.battle_service.submitBattleResult", return_value=None)
     
     vote_request = VoteRequest(winnerId=1)
@@ -157,7 +157,7 @@ def test_submit_vote_user_not_found(mocker, mock_battle):
 def test_submit_vote_battle_not_found(mocker, mock_user):
     """Test vote submission when battle doesn't exist."""
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.routers.battles.battle_repo.get_by_id", return_value=None)
+    mocker.patch("app.routers.battles.battle_service.get_battle_by_id", side_effect=ValueError("Battle nonexistent-battle not found"))
     
     vote_request = VoteRequest(winnerId=1)
     
@@ -172,7 +172,7 @@ def test_submit_vote_battle_not_found(mocker, mock_user):
 def test_submit_vote_invalid_winner(mocker, mock_user, mock_battle):
     """Test when winner is not one of the battle's reviews."""
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.routers.battles.battle_repo.get_by_id", return_value=mock_battle.model_dump())
+    mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)
     mocker.patch(
         "app.routers.battles.battle_service.submitBattleResult",
         side_effect=ValueError(f"Winner 999 not in battle {mock_battle.id}")
@@ -189,7 +189,7 @@ def test_submit_vote_invalid_winner(mocker, mock_user, mock_battle):
 def test_submit_vote_duplicate_vote(mocker, mock_user, mock_battle):
     """Test when user has already voted on this pair (409 Conflict)."""
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.routers.battles.battle_repo.get_by_id", return_value=mock_battle.model_dump())
+    mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)
     mocker.patch(
         "app.routers.battles.battle_service.submitBattleResult",
         side_effect=ValueError("User has already voted on this review pair")
