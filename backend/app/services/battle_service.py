@@ -104,13 +104,16 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
     if pair in _get_user_voted_pairs(user_id):
         raise ValueError("User has already voted on this review pair")
         
-    # Prepare battle data
-    battle_dict = battle.model_dump()
-    battle_dict.update({
-        "userId": user_id,
+    # Prepare battle data - convert all datetime fields to ISO format for JSON serialization
+    battle_dict = {
+        "id": battle.id,
+        "review1Id": battle.review1Id,
+        "review2Id": battle.review2Id,
         "winnerId": winner_id,
+        "userId": user_id,
+        "startedAt": battle.startedAt.isoformat(),
         "endedAt": datetime.now().isoformat()
-    })
+    }
     
     # Save battle result 
     try:

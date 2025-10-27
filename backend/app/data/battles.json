@@ -1,0 +1,11 @@
+[
+  {
+    "id": "string",
+    "review1Id": 0,
+    "review2Id": 0,
+    "winnerId": 0,
+    "userId": "f3dca9ef-ec93-47c4-bf1c-746331171d25",
+    "startedAt": "2025-10-27T00:42:33.948000+00:00",
+    "endedAt": "2025-10-27T00:44:46.786285"
+  }
+]
