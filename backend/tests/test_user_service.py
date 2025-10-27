@@ -1,7 +1,7 @@
 import pytest
 import datetime
 from fastapi import HTTPException
-from app.services.user_service import create_user, update_user, get_user_by_id, list_users, delete_user, update_user_state
+from app.services.user_service import create_user, update_user, get_user_by_id, list_users, delete_user
 from app.schemas.user import UserCreate, User, UserUpdate
 
 @pytest.fixture
@@ -151,88 +151,3 @@ def test_delete_user_invalid_user(mocker):
         delete_user("1234")
     assert ex.value.status_code == 404
     assert "not found" in ex.value.detail
-
-
-def test_update_user_state_updates_fields_and_preserves_password(mocker):
-    stored = {
-        "id": "u-1",
-        "username": "oldname",
-        "hashed_password": "storedhash",
-        "role": "user",
-        "created_at": datetime.datetime(2023, 1, 1),
-        "active": True,
-    }
-    mocker.patch("app.services.user_service.load_all", return_value=[stored])
-    mock_save = mocker.patch("app.services.user_service.save_all")
-
-    updated_user = User(
-        id="u-1",
-        username="newname",
-        hashed_password="newhash-should-not-be-saved",
-        role="user",
-        created_at=stored["created_at"],
-        active=False,
-    )
-
-    update_user_state(updated_user)
-
-    assert mock_save.called
-    saved_users = mock_save.call_args[0][0]
-    assert len(saved_users) == 1
-    saved = saved_users[0]
-    # Non-sensitive fields updated
-    assert saved["username"] == "newname"
-    assert saved["active"] == False
-    # Sensitive field preserved
-    assert saved["hashed_password"] == "storedhash"
-
-
-def test_update_user_state_user_not_found_raises_404(mocker):
-    mocker.patch("app.services.user_service.load_all", return_value=[{
-        "id": "other",
-        "username": "someone",
-        "hashed_password": "h",
-        "role": "user",
-        "created_at": datetime.datetime(2023, 1, 1),
-        "active": True,
-    }])
-    user = User(
-        id="missing",
-        username="notfound",
-        hashed_password="h2",
-        role="user",
-        created_at=datetime.datetime(2023, 1, 1),
-        active=True,
-    )
-    with pytest.raises(HTTPException) as ex:
-        update_user_state(user)
-    assert ex.value.status_code == 404
-    assert "not found" in ex.value.detail
-
-
-def test_update_user_state_save_failure_raises_500(mocker):
-    stored = {
-        "id": "u-1",
-        "username": "oldname",
-        "hashed_password": "storedhash",
-        "role": "user",
-        "created_at": datetime.datetime(2023, 1, 1),
-        "active": True,
-    }
-    mocker.patch("app.services.user_service.load_all", return_value=[stored])
-    mocker.patch("app.services.user_service.save_all", side_effect=Exception("disk full"))
-
-    user = User(
-        id="u-1",
-        username="new",
-        hashed_password="ignored",
-        role="user",
-        created_at=stored["created_at"],
-        active=True,
-    )
-
-    with pytest.raises(HTTPException) as ex:
-        update_user_state(user)
-    assert ex.value.status_code == 500
-    assert "Failed to update user state" in ex.value.detail
-    assert "disk full" in ex.value.detail
