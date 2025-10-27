@@ -10,7 +10,7 @@ app = FastAPI()
 
 @app.get("/")
 def root():
-        return {"message": "Hello Movie World!"}
+    return {"message": "Hello Movie World!"}
 
 app.include_router(movies_router)
 app.include_router(users_router)
