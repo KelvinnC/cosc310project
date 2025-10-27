@@ -19,6 +19,7 @@ def user():
         hashed_password="hashed",
         role="user",
         created_at=datetime.now(),
+        warnings=0
     )
 
 @pytest.fixture
@@ -27,7 +28,7 @@ def reviews():
     return [
         Review(
             id=i,
-            movieId=1,
+            movieId="a",
             authorId=100 + i,
             rating=4.5,
             reviewTitle=f"Title {i}",
@@ -51,15 +52,16 @@ def test_create_battle_excludes_own_reviews(mocker):
         role="user",
         created_at=datetime(2025, 10, 23, 15, 13, 59, 543758),
         active=True,
+        warnings=0
     )
 
     # --- Setup reviews ---
     reviews = [
-    Review(id=1, movieId=1, authorId=101, rating=4.5, reviewTitle="Title 1", reviewBody="Body 1", flagged=False, votes=0, date=date(2025, 10, 23)),
-    Review(id=2, movieId=1, authorId=101, rating=4.0, reviewTitle="Title 2", reviewBody="Body 2", flagged=False, votes=0, date=date(2025, 10, 23)),
-    Review(id=3, movieId=1, authorId=102, rating=3.5, reviewTitle="Title 3", reviewBody="Body 3", flagged=False, votes=0, date=date(2025, 10, 23)),
-    Review(id=4, movieId=1, authorId=103, rating=5.0, reviewTitle="Title 4", reviewBody="Body 4", flagged=False, votes=0, date=date(2025, 10, 23)),
-    Review(id=5, movieId=1, authorId=104, rating=2.5, reviewTitle="Title 5", reviewBody="Body 5", flagged=False, votes=0, date=date(2025, 10, 23)),
+    Review(id=1, movieId="a", authorId=101, rating=4.5, reviewTitle="Title 1", reviewBody="Body 1", flagged=False, votes=0, date=date(2025, 10, 23)),
+    Review(id=2, movieId="a", authorId=101, rating=4.0, reviewTitle="Title 2", reviewBody="Body 2", flagged=False, votes=0, date=date(2025, 10, 23)),
+    Review(id=3, movieId="a", authorId=102, rating=3.5, reviewTitle="Title 3", reviewBody="Body 3", flagged=False, votes=0, date=date(2025, 10, 23)),
+    Review(id=4, movieId="a", authorId=103, rating=5.0, reviewTitle="Title 4", reviewBody="Body 4", flagged=False, votes=0, date=date(2025, 10, 23)),
+    Review(id=5, movieId="a", authorId=104, rating=2.5, reviewTitle="Title 5", reviewBody="Body 5", flagged=False, votes=0, date=date(2025, 10, 23)),
     ]
 
     # --- Mock previous battles for this user ---

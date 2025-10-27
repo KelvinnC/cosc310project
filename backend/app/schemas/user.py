@@ -14,6 +14,7 @@ class User(BaseModel):
     role: Literal["user", "admin"]
     created_at: datetime
     active: bool = True
+    warnings: int = 0
     
 class UserCreate(BaseModel):
     """Schema for user registration"""
