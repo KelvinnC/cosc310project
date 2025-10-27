@@ -83,8 +83,7 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
     """
     Record a user's vote by persisting the battle with its winner.
 
-    The system derives which pairs a user has voted on by scanning persisted
-    battle records. Persisting the finished battle is sufficient to record the
+    Persisting the finished battle is sufficient to record the
     vote; no additional user-side fields are required.
 
     Args:
@@ -93,7 +92,7 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
         user_id: ID of the user submitting this vote
         
     Raises:
-        ValueError: if winner_id is not one of the battle's reviews or if user has already voted on this pair
+        ValueError: if winner_id is not one of the battle's reviews.
     """
     # Validate winner is one of the battle reviews
     if winner_id not in (battle.review1Id, battle.review2Id):
