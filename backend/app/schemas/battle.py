@@ -10,6 +10,7 @@ class Battle(BaseModel):
     winnerId: Optional[int] = None # No winner until a vote is cast
     startedAt: datetime
     endedAt: Optional[datetime] = None # Ends when a vote is cast
+    
 
     @field_validator('review2Id')
     @classmethod
