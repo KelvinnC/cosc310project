@@ -1,11 +1,11 @@
 from pathlib import Path
 import json
-from typing import Dict, Any, Iterator
+from typing import Dict, Any, Iterator, List
 
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "reviews.json"
 
 
-def iter_all(chunk_size: int = 1 << 20, _shrink_threshold: int = 1 << 19) -> Iterator[Dict[str, Any]]:
+def _stream_items(chunk_size: int = 1 << 20, _shrink_threshold: int = 1 << 19) -> Iterator[Dict[str, Any]]:
     if not DATA_PATH.exists():
         return
     try:
@@ -69,3 +69,34 @@ def iter_all(chunk_size: int = 1 << 20, _shrink_threshold: int = 1 << 19) -> Ite
                     if not more:
                         raise
                     buf += more
+
+
+def list_page(page: int, per_page: int) -> List[Dict[str, Any]]:
+    if page < 1:
+        raise ValueError("page must be >= 1")
+    if per_page < 1:
+        raise ValueError("per_page must be >= 1")
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    items: List[Dict[str, Any]] = []
+    for idx, item in enumerate(_stream_items()):
+        if idx < start:
+            continue
+        if idx >= end:
+            break
+        items.append(item)
+    return items
+
+
+def iter_pages(per_page: int) -> Iterator[List[Dict[str, Any]]]:
+    if per_page < 1:
+        raise ValueError("per_page must be >= 1")
+    page: List[Dict[str, Any]] = []
+    for item in _stream_items():
+        page.append(item)
+        if len(page) >= per_page:
+            yield page
+            page = []
+    if page:
+        yield page
