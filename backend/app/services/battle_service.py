@@ -134,10 +134,17 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
         "endedAt": datetime.now().isoformat()
     }
     
-    # Save battle result 
+    # Save battle result - update existing battle instead of appending
     try:
         all_battles = list(battle_repo.load_all())
-        all_battles.append(battle_dict)
+        # Find and update the existing battle
+        for i, b in enumerate(all_battles):
+            if b.get("id") == battle.id:
+                all_battles[i] = battle_dict
+                break
+        else:
+            # If battle not found (shouldn't happen), append it
+            all_battles.append(battle_dict)
         battle_repo.save_all(all_battles)
     except Exception as e:
         raise ValueError(f"Failed to record vote: {str(e)}")
