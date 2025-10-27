@@ -10,15 +10,15 @@ class Battle(BaseModel):
     winnerId: Optional[int] = None # No winner until a vote is cast
     startedAt: datetime
     endedAt: Optional[datetime] = None # Ends when a vote is cast
-    
+
+class BattleResult(BaseModel):
+    """Request payload for submitting a vote"""
+    battle: Battle
+    winnerId: int
+
 
 """Deleted redundant schemas below; validation moved to service layer. 
 These schemas are not needed because battles are never created directly from user input."""
-
-# class BattleResult(BaseModel):
-#     """Schema for submitting a vote in a battle"""
-#     battleId: str # UUID
-#     winnerId: int
 
 # class BattleCreate(BaseModel): 
 #     """Schema for creating a new battle"""
