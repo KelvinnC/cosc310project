@@ -73,3 +73,4 @@ def delete_user(user_id: str) -> None:
     if len(new_users) == len(users):
         raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
     save_all(new_users)
+
