@@ -21,8 +21,13 @@ class Battle(BaseModel):
         return v
 
 class BattleResult(BaseModel):
-    """Request payload for submitting a vote"""
+    """Request payload for submitting a vote (legacy, use VoteRequest)"""
     battle: Battle
+    winnerId: int
+
+
+class VoteRequest(BaseModel):
+    """RESTful vote submission payload"""
     winnerId: int
 
 
