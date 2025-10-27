@@ -2,7 +2,7 @@ from typing import List, Dict, Any, Set
 from app.schemas.search import MovieSearch
 from app.schemas.review import Review
 from app.repositories.movie_repo import load_all as load_movies
-from app.repositories.review_repo import load_all as load_reviews
+from app.repositories.review_repo import iter_all as iter_reviews
 
 
 def _matching_movie_ids(search: MovieSearch) -> Set[str]:
@@ -26,7 +26,7 @@ def search_reviews_by_title(search: MovieSearch) -> List[Review]:
     idx_to_uuid: Dict[int, str] = {idx + 1: mv.get("id") for idx, mv in enumerate(movies) if isinstance(mv.get("id"), str)}
 
     results: List[Review] = []
-    for rv in load_reviews():
+    for rv in iter_reviews():
         movie_id = rv.get("movieId")
         # UUID
         if isinstance(movie_id, str):
