@@ -33,7 +33,7 @@ def createBattle(user: User, reviews: List[Review]) -> Battle:
     Creates a battle by selecting two reviews the user hasn't voted on before,
     excluding their own reviews. Already-voted pairs are derived from persisted
     battle records so previously-decided pairs are not shown. Returns a Battle
-    object but does not persist it; the caller is responsible for persisting the battle. 
+    object and persists it.
 
     Args:
         user: User requesting the battle
