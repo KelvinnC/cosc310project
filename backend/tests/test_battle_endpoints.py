@@ -117,7 +117,7 @@ def test_create_battle_file_error(mocker, mock_user, mock_response):
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
     mocker.patch(
         "app.routers.battles._sample_reviews_for_battle",
-        side_effect=Exception("File error")
+        side_effect=OSError("File error")
     )
     
     with pytest.raises(HTTPException) as exc_info:

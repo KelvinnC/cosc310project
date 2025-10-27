@@ -13,7 +13,7 @@ from app.services.user_service import get_user_by_id
 from app.repositories import battle_repo
 
 
-router = APIRouter(prefix="/battles", tags=["battles"])
+router = APIRouter(tags=["battles"])
 
 ## TODO: Replace with Review service implementation 
 @lru_cache(maxsize=1)
@@ -46,8 +46,6 @@ def _sample_reviews_for_battle(user_id: str, sample_size: int = 200) -> List[Rev
 def create_battle(user_id: str, response: Response) -> Battle:
     """
     Create a new battle for the user.
-    
-    RESTful endpoint: POST /battles/users/{user_id}/battles
     Returns 201 Created with Location header pointing to the battle resource.
     """
     user = get_user_by_id(user_id)
@@ -60,7 +58,7 @@ def create_battle(user_id: str, response: Response) -> Battle:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No reviews available"
         )
-    except Exception as e:
+    except (OSError, ValueError) as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to load reviews: {str(e)}"
@@ -73,29 +71,8 @@ def create_battle(user_id: str, response: Response) -> Battle:
         )
     
     try:
+        # Create the battle, persisted by the service layer, and return it
         battle = battle_service.createBattle(user, reviews)
-        # Persist the created battle so the resource at Location exists.
-        # Convert datetimes to ISO strings for JSON persistence.
-        battle_dict = {
-            "id": battle.id,
-            "review1Id": battle.review1Id,
-            "review2Id": battle.review2Id,
-            "winnerId": None,
-            "userId": user.id,
-            "startedAt": battle.startedAt.isoformat(),
-            "endedAt": None,
-        }
-
-        try:
-            all_battles = list(battle_repo.load_all())
-            all_battles.append(battle_dict)
-            battle_repo.save_all(all_battles)
-        except Exception as e:
-            # Persist failure: raise 500 since creation cannot be completed atomically
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to persist created battle: {str(e)}",
-            )
 
         # Set Location header to point to the created resource
         response.headers["Location"] = f"/battles/{battle.id}"
@@ -105,6 +82,12 @@ def create_battle(user_id: str, response: Response) -> Battle:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+    except Exception as e:
+        # Persistence or unexpected errors from service layer
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create battle: {str(e)}"
+        )
 
 
 @router.post("/battles/{battle_id}/votes", status_code=204)
@@ -112,9 +95,8 @@ def submit_vote(battle_id: str, user_id: str, payload: VoteRequest) -> None:
     """
     Submit a vote for a battle.
     
-    RESTful endpoint: POST /battles/{battle_id}/votes
     Returns 204 No Content on success.
-    Requires user_id as query parameter (would typically come from auth token).
+    Requires user_id as query parameter, should come from token (TODO: auth token).
     """
     # Validate user exists
     user = get_user_by_id(user_id)
@@ -130,7 +112,7 @@ def submit_vote(battle_id: str, user_id: str, payload: VoteRequest) -> None:
     # Convert to Battle object for service layer
     try:
         battle = Battle(**battle_dict)
-    except Exception as e:
+    except (ValueError, TypeError) as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Invalid battle data: {str(e)}"

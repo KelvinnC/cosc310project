@@ -88,8 +88,8 @@ def test_create_battle_excludes_own_reviews(mocker):
     voted_pairs = {frozenset((b["review1Id"], b["review2Id"])) for b in previous_battles}
     assert frozenset((battle.review1Id, battle.review2Id)) not in voted_pairs
 
-    # 3. createBattle should NOT persist the battle yet
-    mock_save.assert_not_called()
+    # 3. createBattle should have persisted the created battle
+    mock_save.assert_called_once()
 
 
 def test_create_battle_no_eligible_pairs(user, reviews, mocker):
@@ -123,8 +123,8 @@ def test_create_battle_single_eligible_pair(user, reviews, mocker):
     
     # Should select the only remaining pair (3,5)
     assert frozenset((battle.review1Id, battle.review2Id)) == frozenset((3, 5))
-    # createBattle should NOT persist the battle yet
-    mock_save.assert_not_called()
+    # createBattle should have persisted the created battle
+    mock_save.assert_called_once()
 
 def test_create_battle_all_reviews_owned(user, reviews, mocker):
     """Test when all available reviews are owned by the user."""

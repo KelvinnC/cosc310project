@@ -9,7 +9,6 @@ from app.schemas.review import Review
 from app.schemas.battle import Battle
 from app.repositories import battle_repo
 
-## -------------------- Helper functions -------------------- ##
 def _get_user_voted_pairs(user_id: str) -> set:
     """
     Return set of unordered pairs the user has already voted on.
@@ -27,7 +26,6 @@ def _is_own_review(user: User, review: Review) -> bool:
     """Check if the review was authored by the given user."""
     return str(review.authorId) == user.id
 
-## -------------------- Services -------------------- ##
 def createBattle(user: User, reviews: List[Review]) -> Battle:
     """
     Generate a battle between two reviews for a user to vote on.
@@ -35,17 +33,18 @@ def createBattle(user: User, reviews: List[Review]) -> Battle:
     Creates a battle by selecting two reviews the user hasn't voted on before,
     excluding their own reviews. Already-voted pairs are derived from persisted
     battle records so previously-decided pairs are not shown. Returns a Battle
-    object but does not persist it; the battle is saved when a vote is submitted.
+    object but does not persist it; the caller is responsible for persisting the battle. 
 
     Args:
         user: User requesting the battle
         reviews: Available review pool
     
     Returns:
-        New Battle object ready for voting
+        New Battle object ready for voting (and persisted to storage)
     
     Raises:
         ValueError: If no eligible pairs exist (all voted or only own reviews)
+        Exception: If persisting the created battle fails
     """
     # Build set of review-id pairs the user has already voted on by scanning battles
     voted_pairs = _get_user_voted_pairs(user.id)
@@ -66,7 +65,8 @@ def createBattle(user: User, reviews: List[Review]) -> Battle:
     if not eligible_pairs:
         raise ValueError("No eligible review pairs available for this user.")
 
-    # Randomly choose a pair and return a Battle object. 
+    # Randomly choose a pair and create a Battle object. Persist it so callers
+    # can immediately reference the created resource.
     review1Id, review2Id = random.choice(eligible_pairs)
     battle = Battle(
         id=str(uuid4()),
@@ -76,6 +76,26 @@ def createBattle(user: User, reviews: List[Review]) -> Battle:
         endedAt=None,
         winnerId=None,
     )
+
+    # Prepare serializable dict for persistence
+    battle_dict = {
+        "id": battle.id,
+        "review1Id": battle.review1Id,
+        "review2Id": battle.review2Id,
+        "winnerId": None,
+        "userId": user.id,
+        "startedAt": battle.startedAt.isoformat(),
+        "endedAt": None,
+    }
+
+    try:
+        all_battles = list(battle_repo.load_all())
+        all_battles.append(battle_dict)
+        battle_repo.save_all(all_battles)
+    except Exception as e:
+        # Persist failure - propagate as generic exception so the caller (router)
+        # returns an HTTP 500.
+        raise Exception(f"Failed to persist created battle: {str(e)}")
 
     return battle
 

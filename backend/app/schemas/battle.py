@@ -20,12 +20,6 @@ class Battle(BaseModel):
             raise ValueError('Battle must have two different reviews')
         return v
 
-class BattleResult(BaseModel):
-    """Request payload for submitting a vote (legacy, use VoteRequest)"""
-    battle: Battle
-    winnerId: int
-
-
 class VoteRequest(BaseModel):
     """RESTful vote submission payload"""
     winnerId: int
@@ -45,4 +39,9 @@ These schemas are not needed because battles are never created directly from use
 #         if review1 is not None and v == review1:
 #             raise ValueError('review2Id must be different from review1Id')
 #         return v
+
+# class BattleResult(BaseModel):
+#     """Request payload for submitting a vote (legacy, use VoteRequest)"""
+#     battle: Battle
+#     winnerId: int
     

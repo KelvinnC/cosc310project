@@ -1,29 +1,11 @@
 [
   {
-    "id": "9d978832-3254-4580-93ef-42d80f938f49",
-    "review1Id": 31269,
-    "review2Id": 12051,
+    "id": "6332f886-0ea4-4cd8-8667-e2bc833b3f9b",
+    "review1Id": 33268,
+    "review2Id": 15021,
     "winnerId": null,
-    "userId": "f3dca9ef-ec93-47c4-bf1c-746331171d25",
-    "startedAt": "2025-10-27T17:32:48.941045",
-    "endedAt": null
-  },
-  {
-    "id": "9d978832-3254-4580-93ef-42d80f938f49",
-    "review1Id": 31269,
-    "review2Id": 12051,
-    "winnerId": 31269,
-    "userId": "f3dca9ef-ec93-47c4-bf1c-746331171d25",
-    "startedAt": "2025-10-27T17:32:48.941045",
-    "endedAt": "2025-10-27T17:33:55.193623"
-  },
-  {
-    "id": "a63a81ca-76c8-468b-873e-857befa3a782",
-    "review1Id": 1,
-    "review2Id": 2,
-    "winnerId": null,
-    "userId": "test-user-uuid-123",
-    "startedAt": "2025-10-27T10:37:22.226769",
+    "userId": "77d60efe-0870-4323-b164-3d76474f251f",
+    "startedAt": "2025-10-27T17:53:25.989624",
     "endedAt": null
   }
 ]
