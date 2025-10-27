@@ -49,11 +49,16 @@ def create_battle(user_id: str):
 def submit_vote(user_id: str, payload: BattleResult):
     """Submit vote for a battle."""
     user = get_user_by_id(user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
     
-    battle_service.submitBattleResult(
-        battle=payload.battle,
-        winner_id=payload.winnerId,
-        user_id=user_id
-    )
+    try:
+        battle_service.submitBattleResult(
+            battle=payload.battle,
+            winner_id=payload.winnerId,
+            user_id=user_id
+        )
+    except ValueError as e:
+        if "already voted" in str(e).lower():
+            raise HTTPException(status_code=409, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
+    
+    return
