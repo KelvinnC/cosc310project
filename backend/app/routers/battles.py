@@ -70,10 +70,9 @@ def create_battle(user_id: str, response: Response) -> Battle:
         )
     
     try:
-        # Create the battle, persisted by the service layer, and return it
+        # Create the battle
         battle = battle_service.createBattle(user, reviews)
-
-        # Set Location header to point to the created resource
+        
         response.headers["Location"] = f"/battles/{battle.id}"
         return battle
     except ValueError as e:
@@ -97,10 +96,9 @@ def submit_vote(battle_id: str, user_id: str, payload: VoteRequest) -> None:
     Returns 204 No Content on success.
     Requires user_id as query parameter, should come from token (TODO: auth token).
     """
-    # Validate user exists
     user = get_user_by_id(user_id)
     
-    # Load the battle by ID
+    # Get the battle by ID
     try:
         battle = battle_service.get_battle_by_id(battle_id)
     except ValueError as e:
