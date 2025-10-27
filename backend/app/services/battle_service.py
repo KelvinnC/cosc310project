@@ -166,13 +166,10 @@ def get_battle_by_id(battle_id: str) -> Battle:
     Raises:
         ValueError: If battle not found
     """
-    battle_dict = battle_repo.get_by_id(battle_id)
-    if not battle_dict:
-        raise ValueError(f"Battle {battle_id} not found")
-    
-    try:
-        return Battle(**battle_dict)
-    except (ValueError, TypeError) as e:
-        raise ValueError(f"Invalid battle data for {battle_id}: {str(e)}")
+    battles = battle_repo.load_all()
+    for battle in battles:
+        if battle.get("id") == battle_id:
+            return Battle(**battle)
+    raise ValueError(f"Battle {battle_id} not found")
 
 
