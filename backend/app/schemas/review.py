@@ -4,7 +4,7 @@ from datetime import date
 
 class Review(BaseModel):
     id: int
-    movieId: int
+    movieId: str
     authorId: int
     rating: float
     reviewTitle: str
@@ -14,7 +14,7 @@ class Review(BaseModel):
     date: date
 
 class ReviewCreate(BaseModel):
-    movieId: int
+    movieId: str
     authorId: int
     rating: float
     reviewTitle: str
