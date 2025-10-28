@@ -22,3 +22,23 @@ def unwarn_user(user_id: str) -> User:
     users.append(user.model_dump(mode="json"))
     save_all(users)
     return user
+
+def ban_user(user_id: str) -> User:
+    user = get_user_by_id_unsafe(user_id)
+    if user == None:
+        raise HTTPException(404, detail=f"User {user_id} not found")
+    user.active = False
+    users = [usr for usr in load_all() if usr.get("id") != user_id]
+    users.append(user.model_dump(mode="json"))
+    save_all(users)
+    return user
+
+def unban_user(user_id: str) -> User:
+    user = get_user_by_id_unsafe(user_id)
+    if user == None:
+        raise HTTPException(404, detail=f"User {user_id} not found")
+    user.active = True
+    users = [usr for usr in load_all() if usr.get("id") != user_id]
+    users.append(user.model_dump(mode="json"))
+    save_all(users)
+    return user
