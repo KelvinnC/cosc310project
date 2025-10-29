@@ -23,7 +23,7 @@ def get_review_by_id(review_id: str) -> Review:
     for review in reviews:
         if str(review.get("id")) == review_id:
             return Review(**review)
-    raise HTTPException(status_code=404, detail=f"Movie '{review_id}' not found")
+    raise HTTPException(status_code=404, detail=f"Review '{review_id}' not found")
 
 def update_review(review_id: str, payload: ReviewUpdate) -> Review:
     reviews = load_all()
@@ -34,11 +34,11 @@ def update_review(review_id: str, payload: ReviewUpdate) -> Review:
             reviews[idx] = updated.model_dump(mode="json")
             save_all(reviews)
             return updated
-    raise HTTPException(status_code=404, detail=f"Movie '{review_id}' not found")
+    raise HTTPException(status_code=404, detail=f"Review '{review_id}' not found")
 
 def delete_review(review_id: str) -> None:
     reviews = load_all()
     new_reviews = [review for review in reviews if review.get("id") != review_id]
     if len(new_reviews) == len(reviews):
-        raise HTTPException(status_code=404, detail=f"Movie '{review_id}' not found")
+        raise HTTPException(status_code=404, detail=f"Review '{review_id}' not found")
     save_all(new_reviews)
