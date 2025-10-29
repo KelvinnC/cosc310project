@@ -18,10 +18,10 @@ def get_review(review_id: int):
     return get_review_by_id(review_id)
 
 @router.put("/{review_id}", response_model=Review)
-def put_review(review_id: str, payload: ReviewUpdate):
+def put_review(review_id: int, payload: ReviewUpdate):
     return update_review(review_id, payload)
 
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove_review(review_id: str):
+def remove_review(review_id: int):
     delete_review(review_id)
     return None
