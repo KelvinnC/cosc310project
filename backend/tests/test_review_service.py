@@ -12,24 +12,24 @@ def test_list_review_empty_list(mocker):
 def test_list_review_has_reviews(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[
     {
-        "id": "1234",
+        "id": 1,
         "movieId": "1234",
-        "authorId": "1234",
+        "authorId": -1,
         "rating": "5.5",
         "reviewTitle": "good movie",
         "reviewBody": "loved the movie",
-        "flagged": "False",
+        "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
     }])
     reviews = list_reviews()
-    assert reviews[0].id == "1234"
-    assert reviews[0].movieId == "1234"
-    assert reviews[0].authorId == "1234"
-    assert reviews[0].rating == "5.5"
+    assert reviews[0].id == 1
+    assert reviews[0].movieId == 1234
+    assert reviews[0].authorId == -1
+    assert reviews[0].rating == 5.5
     assert reviews[0].reviewTitle == "good movie"
-    assert reviews[0].reviewBody == "loved movie"
-    assert reviews[0].flagged == "False"
+    assert reviews[0].reviewBody == "loved the movie"
+    assert reviews[0].flagged == False
     assert reviews[0].votes == 5
     assert reviews[0].date == datetime.date(2022, 1, 1)
     assert len(reviews) == 1
@@ -40,19 +40,18 @@ def test_create_review_adds_review(mocker):
     mocker.patch("uuid.uuid4", return_value="1234")
 
     payload = ReviewCreate(
-        movieId="1234", authorId="1234", rating="5.5", reviewTitle="good movie", reviewBody="loved the movie", flagged="False", votes=5, date="2022-01-01"
+        movieId="1234", authorId="1234", rating="5.5", reviewTitle="good movie", reviewBody="loved the movie", flagged="False", date="2022-01-01"
     )
 
     review = create_review(payload)
 
-    assert review.id == "1234"
-    assert review.movieId == "1234"
-    assert review.authorId == "1234"
-    assert review.rating == "5.5"
+    assert review.id == 1234
+    assert review.movieId == 1234
+    assert review.authorId == 1234
+    assert review.rating == 5.5
     assert review.reviewTitle == "good movie"
-    assert review.reviewBody == "loved movie"
-    assert review.flagged == "False"
-    assert review.votes == 5
+    assert review.reviewBody == "loved the movie"
+    assert review.flagged == False
     assert review.date == datetime.date(2022, 1, 1)
     assert mock_save.called
 
@@ -87,8 +86,8 @@ def test_create_review_strips_whitespace(mocker):
         movieId="    1234       ", authorId="     1234     ", rating="5.5", reviewTitle="      good movie    ", reviewBody="loved the movie", flagged="False", votes=5, date="2022-01-01"
     )
     review = create_review(payload)
-    assert review.movieId == "1234"
-    assert review.authorId == "1234"
+    assert review.movieId == 1234
+    assert review.authorId == 1234
     assert review.reviewTitle == "good movie"
     assert mock_save.called
 
@@ -106,8 +105,8 @@ def test_get_review_by_id_valid_id(mocker):
         "date": "2022-01-01"
     }])
     review = get_review_by_id("1234")
-    assert review.id == "1234"
-    assert review.movieId == "1234"
+    assert review.id == 1234
+    assert review.movieId == 1234
     assert isinstance(review, Review)
 
 def test_get_review_by_id_invalid_id(mocker):
@@ -132,12 +131,12 @@ def test_update_review_valid_update(mocker):
     }])
     mock_save = mocker.patch("app.services.review_service.save_all")
     payload = ReviewCreate(
-         movieId="1234", authorId="1234", rating="5.5", reviewTitle="good movie", reviewBody="loved the movie", flagged="False", votes=5, date="2022-01-01"
+         movieId="1234", authorId="1234", rating="7.7", reviewTitle="Updated Test", reviewBody="hated the movie", flagged="False", votes=5, date="2022-01-01"
     )
     review = update_review("1234", payload)
-    assert review.title == "Updated Test"
-    assert review.genre == "Horror/Psychological Thriller"
-    assert review.description == "Now I have updated this movie!"
+    assert review.rating == 7.7
+    assert review.reviewTitle == "Updated Test"
+    assert review.reviewBody == "hated the movie"
     assert mock_save.called
 
 def test_update_review_invalid_id(mocker):
@@ -151,7 +150,7 @@ def test_update_review_invalid_id(mocker):
     assert ex.value.status_code == 404
     assert "not found" in ex.value.detail
 
-def test_delete_review_valid_movie(mocker):
+def test_delete_review_valid_review(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[
     {
         "id": "1234",

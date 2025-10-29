@@ -25,12 +25,25 @@ def test_list_reviews(mocker, client):
     data = response.json()
     assert len(data) == 1
 
-def test_get_review_by_id_valid_id(client):
+def test_get_review_by_id_valid_id(mocker, client):
+    mocker.patch("app.services.review_service.load_all", return_value=[
+        {
+            "id": 3,
+            "movieId": "abc123",
+            "authorId": "user456",
+            "rating": "4.0",
+            "reviewTitle": "Venice 76 review",
+            "reviewBody": "A thoughtful take on the Joker.",
+            "flagged": False,
+            "votes": 10,
+            "date": "2019-10-15"
+        }
+    ])
     response = client.get('/reviews/3')
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == 3
-    assert data["title"] == "Venice 76 review"
+    assert data["reviewTitle"] == "Venice 76 review"
 
 def test_get_review_by_id_invalid_id(client):
     response = client.get('/reviews/NotAValidID')
@@ -40,13 +53,13 @@ def test_post_review_valid_review(mocker, client):
     mocker.patch("app.services.review_service.load_all", return_value=[])
     mock_save = mocker.patch("app.services.review_service.save_all")
     payload = {
-        "id": "1234",
-        "movieId": "1234",
-        "authorId": "1234",
-        "rating": "5.5",
+        "id": 1234,
+        "movieId": 1234,
+        "authorId": 1234,
+        "rating": 5.5,
         "reviewTitle": "good movie",
         "reviewBody": "loved the movie",
-        "flagged": "False",
+        "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
     }
@@ -54,6 +67,7 @@ def test_post_review_valid_review(mocker, client):
     assert response.status_code == 201
     data = response.json()
     assert data["reviewTitle"] == "Test"
+    assert mock_save.called
 
 def test_post_review_missing_json(mocker, client):
     mocker.patch("app.services.review_service.load_all", return_value=[])
