@@ -3,7 +3,7 @@ from typing import List
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.services.review_service import list_reviews, create_review, delete_review, update_review, get_review_by_id
 
-router = APIRouter(prefix="/review", tags=["reviews"])
+router = APIRouter(prefix="/reviews", tags=["reviews"])
 
 @router.get("", response_model=List[Review])
 def get_reviews():

@@ -1,7 +1,7 @@
 import pytest
 import json
 from pathlib import Path
-from app.repositories.reviews_repo import load_all, save_all, DATA_PATH
+from app.repositories.review_repo import load_all, save_all, DATA_PATH
 
 def test_load_all_file_missing(mocker):
     mocker.patch.object(Path, "exists", return_value=False)
@@ -26,7 +26,7 @@ def test_load_all_with_data(mocker):
     mock_open.assert_called_once_with("r", encoding="utf-8")
 
 def test_save_all_saves_data(mocker):
-    movies = [{
+    reviews = [{
         "id": "1234",
         "movieId": "1234",
         "authorId": "1234",
@@ -41,9 +41,9 @@ def test_save_all_saves_data(mocker):
     mock_file = mocker.mock_open()
     mocker.patch.object(Path, "open", mock_file)
 
-    mock_replace = mocker.patch("app.repositories.reviews_repo.os.replace")
+    mock_replace = mocker.patch("app.repositories.review_repo.os.replace")
 
-    save_all(movies)
+    save_all(reviews)
 
     tmp_path = DATA_PATH.with_suffix(".tmp")
     mock_file.assert_called_once_with("w", encoding="utf-8")

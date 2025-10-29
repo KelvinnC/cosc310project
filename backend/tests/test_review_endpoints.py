@@ -26,11 +26,11 @@ def test_list_reviews(mocker, client):
     assert len(data) == 1
 
 def test_get_review_by_id_valid_id(client):
-    response = client.get('/reviews/1234')
+    response = client.get('/reviews/3')
     assert response.status_code == 200
     data = response.json()
-    assert data["id"] == "1234"
-    assert data["title"] == "I would not call it a masterpiece as some did"
+    assert data["id"] == "3"
+    assert data["title"] == "Venice 76 review"
 
 def test_get_review_by_id_invalid_id(client):
     response = client.get('/reviews/NotAValidID')
@@ -53,7 +53,7 @@ def test_post_review_valid_review(mocker, client):
     response = client.post("/reviews", json=payload)
     assert response.status_code == 201
     data = response.json()
-    assert data["title"] == "Test"
+    assert data["reviewTitle"] == "Test"
 
 def test_post_review_missing_json(mocker, client):
     mocker.patch("app.services.review_service.load_all", return_value=[])
