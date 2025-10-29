@@ -20,6 +20,9 @@ def user_login(payload: UserLogin) -> str:
     if not password_valid:
         raise HTTPException(401, detail="Invalid credentials")
     
+    if found_user.get("active") == False:
+        raise BannedUserException(403, detail="Account banned")
+    
     current_datetime = datetime.now(timezone.utc)
     expiration_time = current_datetime + timedelta(hours=1)
     user_payload = {"user_id": found_user.get("id"),
@@ -30,3 +33,5 @@ def user_login(payload: UserLogin) -> str:
     
     return encoded_jwt
     
+class BannedUserException(HTTPException):
+    pass
