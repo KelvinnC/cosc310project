@@ -100,8 +100,8 @@ def test_put_review_valid_put(mocker, client):
     assert response.status_code == 200
     data = response.json()
     assert data["reviewTitle"] == "updated movie"
-    assert data["movieId"] == 1234  # Should preserve original
-    assert data["authorId"] == 5678  # Should preserve original
+    assert data["movieId"] == 1234  
+    assert data["authorId"] == 5678  
     assert data["votes"] == 10
 
 def test_put_review_invalid_put(mocker, client):
