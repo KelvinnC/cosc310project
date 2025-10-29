@@ -14,7 +14,7 @@ def post_review(payload: ReviewCreate):
     return create_review(payload)
 
 @router.get("/{review_id}", response_model=Review)
-def get_review(review_id: str):
+def get_review(review_id: int):
     return get_review_by_id(review_id)
 
 @router.put("/{review_id}", response_model=Review)

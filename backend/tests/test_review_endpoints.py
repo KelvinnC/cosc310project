@@ -29,7 +29,7 @@ def test_get_review_by_id_valid_id(client):
     response = client.get('/reviews/3')
     assert response.status_code == 200
     data = response.json()
-    assert data["id"] == "3"
+    assert data["id"] == 3
     assert data["title"] == "Venice 76 review"
 
 def test_get_review_by_id_invalid_id(client):

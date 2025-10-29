@@ -18,10 +18,10 @@ def create_review(payload: ReviewCreate) -> Review:
     save_all(reviews)
     return new_review
 
-def get_review_by_id(review_id: str) -> Review:
+def get_review_by_id(review_id: int) -> Review:
     reviews = load_all()
     for review in reviews:
-        if str(review.get("id")) == review_id:
+        if review.get("id") == review_id:
             return Review(**review)
     raise HTTPException(status_code=404, detail=f"Review '{review_id}' not found")
 
