@@ -154,7 +154,7 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
     try:
         from app.services import review_service
         review_service.increment_vote(winner_id)
-    except ImportError:
+    except AttributeError:
         # Review service not yet implemented
         pass
     except Exception as e:

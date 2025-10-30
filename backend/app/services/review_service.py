@@ -20,7 +20,7 @@ def create_review(payload: ReviewCreate) -> Review:
     
     new_review = Review(
         id=new_review_id,
-        movieId=payload.movieId,
+        movieId=payload.movieId.strip(),
         authorId=payload.authorId,
         rating=payload.rating,
         reviewTitle=payload.reviewTitle.strip(),
