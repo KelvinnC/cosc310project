@@ -24,3 +24,12 @@ class MovieUpdate(BaseModel):
     release: date
     description: str
     duration: int
+
+
+class MovieSummary(BaseModel):
+    id: str
+    title: str
+
+
+class MovieWithReviews(Movie):
+    reviews: List[Review] = []

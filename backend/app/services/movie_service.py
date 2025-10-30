@@ -1,8 +1,9 @@
 import uuid
 from typing import List, Dict, Any
 from fastapi import HTTPException
-from app.schemas.movie import Movie, MovieCreate, MovieUpdate
+from app.schemas.movie import Movie, MovieCreate, MovieUpdate, MovieSummary, MovieWithReviews
 from app.repositories.movie_repo import load_all, save_all
+from app.repositories.review_repo import load_all as load_reviews
 
 def list_movies() -> List[Movie]:
     return [Movie(**mv) for mv in load_all()]
@@ -18,12 +19,54 @@ def create_movie(payload: MovieCreate) -> Movie:
     save_all(movies)
     return new_movie
 
-def get_movie_by_id(movie_id: str) -> Movie:
+def get_movie_by_id(movie_id: str) -> MovieWithReviews:
     movies = load_all()
-    for movie in movies:
+    target = None
+    target_index = None
+    for idx, movie in enumerate(movies):
         if str(movie.get("id")) == movie_id:
-            return Movie(**movie)
-    raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
+            target = movie
+            target_index = idx
+            break
+    if target is None:
+        raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
+
+    index_1_based = (target_index or 0) + 1
+    reviews_data = load_reviews()
+    reviews_list = []
+    for rv in reviews_data:
+        mv_id = rv.get("movieId")
+        if isinstance(mv_id, str) and mv_id == movie_id:
+            reviews_list.append(rv)
+        elif isinstance(mv_id, int) and mv_id == index_1_based:
+            reviews_list.append({**rv, "movieId": movie_id})
+
+    wrapped_reviews = [
+        rv
+        for rv in reviews_list
+    ]
+
+    return MovieWithReviews(
+        id=target.get("id"),
+        title=target.get("title"),
+        description=target.get("description"),
+        duration=target.get("duration"),
+        genre=target.get("genre"),
+        release=target.get("release"),
+        reviews=wrapped_reviews,
+    )
+
+def search_movies_titles(query: str) -> List[MovieSummary]:
+    q = (query or "").strip().lower()
+    if not q:
+        return []
+    movies = load_all()
+    results: List[MovieSummary] = []
+    for mv in movies:
+        title = (mv.get("title") or "").lower()
+        if q in title:
+            results.append(MovieSummary(id=mv.get("id"), title=mv.get("title")))
+    return results
 
 def update_movie(movie_id: str, payload: MovieUpdate) -> Movie:
     movies = load_all()

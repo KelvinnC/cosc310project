@@ -1,7 +1,14 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Query
 from typing import List
-from app.schemas.movie import Movie, MovieCreate, MovieUpdate
-from app.services.movie_service import list_movies, create_movie, delete_movie, update_movie, get_movie_by_id
+from app.schemas.movie import Movie, MovieCreate, MovieUpdate, MovieWithReviews, MovieSummary
+from app.services.movie_service import (
+    list_movies,
+    create_movie,
+    delete_movie,
+    update_movie,
+    get_movie_by_id,
+    search_movies_titles,
+)
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
@@ -13,7 +20,7 @@ def get_movies():
 def post_movie(payload: MovieCreate):
     return create_movie(payload)
 
-@router.get("/{movie_id}", response_model=Movie)
+@router.get("/{movie_id}", response_model=MovieWithReviews)
 def get_movie(movie_id: str):
     return get_movie_by_id(movie_id)
 
@@ -25,3 +32,7 @@ def put_movie(movie_id: str, payload: MovieUpdate):
 def remove_movie(movie_id: str):
     delete_movie(movie_id)
     return None
+
+@router.get("/search", response_model=List[MovieSummary])
+def search_movies(title: str = Query(..., min_length=1)):
+    return search_movies_titles(title)
