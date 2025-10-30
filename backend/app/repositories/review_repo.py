@@ -12,6 +12,6 @@ def load_all() -> List[Dict[str, Any]]:
     
 def save_all(reviews: List[Dict[str, Any]]) -> None:
     tmp = DATA_PATH.with_suffix(".tmp")
-    with tmp.open("w", encoding="utf-8") as f:
+    with tmp.open("w", encoding="utf-8-sig") as f:
         json.dump(reviews, f, ensure_ascii=False, indent=2)
     os.replace(tmp, DATA_PATH)

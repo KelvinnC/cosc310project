@@ -23,7 +23,7 @@ def test_load_all_with_data(mocker):
     mock_open = mocker.patch.object(Path, "open", mocker.mock_open(read_data=json.dumps(payload)))
     result = load_all()
     assert result == payload
-    mock_open.assert_called_once_with("r", encoding="utf-8")
+    mock_open.assert_called_once_with("r", encoding="utf-8-sig")
 
 def test_save_all_saves_data(mocker):
     reviews = [{
@@ -46,7 +46,7 @@ def test_save_all_saves_data(mocker):
     save_all(reviews)
 
     tmp_path = DATA_PATH.with_suffix(".tmp")
-    mock_file.assert_called_once_with("w", encoding="utf-8")
+    mock_file.assert_called_once_with("w", encoding="utf-8-sig")
 
     handle = mock_file()
     handle.write.assert_called()
