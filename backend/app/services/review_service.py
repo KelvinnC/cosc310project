@@ -56,6 +56,7 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
 
 def delete_review(review_id: int):
     reviews = load_all()
+ 
     updated_reviews = [r for r in reviews if r.get("id") != review_id]
     
     if len(updated_reviews) == len(reviews):
