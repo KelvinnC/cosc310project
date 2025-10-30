@@ -10,8 +10,11 @@ def load_all() -> List[Dict[str, Any]]:
     """Load all battles from battles.json"""
     if not DATA_PATH.exists():
         return []
-    with DATA_PATH.open("r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with DATA_PATH.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except json.JSONDecodeError:
+        return []
 
 def save_all(battles: List[Dict[str, Any]]) -> None:
     """Save all battles to battles.json safely using a temp file"""

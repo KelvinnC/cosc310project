@@ -32,6 +32,17 @@ def test_battle_with_winner(battle_data):
     battle = Battle(**battle_data)
     assert battle.winnerId == 201
 
+
+def test_battle_same_review_ids_raises_error(battle_data):
+    """Test that battle with same review1Id and review2Id raises ValidationError."""
+    battle_data["review1Id"] = 201
+    battle_data["review2Id"] = 201  # Same as review1Id
+    
+    with pytest.raises(ValidationError) as exc_info:
+        Battle(**battle_data)
+    
+    assert "Battle must have two different reviews" in str(exc_info.value)
+
 # -------------------- BattleCreate Tests --------------------
 
 # def test_valid_battle_create():
