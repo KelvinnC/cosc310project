@@ -9,7 +9,7 @@ def client():
         yield c
 
 
-def test_search_reviews_partial_case_insensitive_uuid_ids(mocker, client):
+def test_search_movies_with_reviews_uuid_ids(mocker, client):
     movies = [
         {"id": "uuid-joker", "title": "Joker", "description": "", "duration": 120, "genre": "Drama", "release": "2019-10-04"},
         {"id": "uuid-inception", "title": "Inception", "description": "", "duration": 148, "genre": "Sci-Fi", "release": "2010-07-16"},
@@ -25,11 +25,16 @@ def test_search_reviews_partial_case_insensitive_uuid_ids(mocker, client):
     resp = client.get("/reviews/search", params={"title": "Incep"})
     assert resp.status_code == 200
     data = resp.json()
-    assert len(data) == 2
-    assert all(r["movieId"] == "uuid-inception" for r in data)
+    assert isinstance(data, list)
+    assert len(data) == 1
+    mv = data[0]
+    assert mv["id"] == "uuid-inception"
+    assert mv["title"] == "Inception"
+    assert isinstance(mv.get("reviews"), list)
+    assert {r["id"] for r in mv["reviews"]} == {10, 11}
 
 
-def test_search_reviews_legacy_integer_ids_still_match(mocker, client):
+def test_search_movies_with_reviews_legacy_integer_ids(mocker, client):
     movies = [
         {"id": "uuid-joker", "title": "Joker", "description": "", "duration": 120, "genre": "Drama", "release": "2019-10-04"},
         {"id": "uuid-inception", "title": "Inception", "description": "", "duration": 148, "genre": "Sci-Fi", "release": "2010-07-16"},
@@ -45,10 +50,13 @@ def test_search_reviews_legacy_integer_ids_still_match(mocker, client):
     assert resp.status_code == 200
     data = resp.json()
     assert len(data) == 1
-    assert data[0]["reviewTitle"] == "Great!"
+    mv = data[0]
+    assert mv["id"] == "uuid-inception"
+    assert len(mv["reviews"]) == 1
+    assert mv["reviews"][0]["reviewTitle"] == "Great!"
 
 
-def test_search_reviews_no_match_returns_empty(mocker, client):
+def test_search_movies_with_reviews_no_match_returns_empty(mocker, client):
     mocker.patch("app.services.search_service.load_movies", return_value=[{"id": "uuid-joker", "title": "Joker", "description": "", "duration": 120, "genre": "Drama", "release": "2019-10-04"}])
     mocker.patch("app.services.search_service.load_reviews", return_value=[{"id": 99, "movieId": "uuid-joker", "date": "2020-01-01", "authorId": 1, "reviewTitle": "ok", "reviewBody": "ok", "rating": 5.0, "votes": 0, "flagged": False}])
 
