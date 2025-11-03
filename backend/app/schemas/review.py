@@ -15,7 +15,7 @@ class Review(BaseModel):
 
 class ReviewCreate(BaseModel):
     movieId: str
-    authorId: int
+    authorId: str
     rating: float
     reviewTitle: str
     reviewBody: str
