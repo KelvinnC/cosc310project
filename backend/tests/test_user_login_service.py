@@ -51,3 +51,13 @@ def test_user_login_credentials_valid(mocker, user_data):
     jwt_decoded = jwt.decode(jwt_response, JWT_SECRET, algorithms=["HS256"])
     assert jwt_decoded["user_id"] == user_data["id"]
     assert jwt_decoded["username"] == user_data["username"]
+
+def test_user_login_banned_user(mocker, user_data):
+    banned_user = user_data.copy()
+    banned_user["active"] = False
+    mocker.patch("app.services.user_login_service.load_all", return_value=[banned_user])
+    from app.services.user_login_service import BannedUserException
+    with pytest.raises(BannedUserException) as ex:
+        user_login(payload=UserLogin(username="testuser", password="testpass"))
+    assert "banned" in ex.value.detail
+    assert ex.value.status_code == 403

@@ -7,18 +7,6 @@ def client():
     with TestClient(app) as client:
         yield client
 
-@pytest.fixture
-def user_data():
-    payload = {
-        "id": "1234",
-        "username": "testmovielover",
-        "hashed_password": "$2y$10$b1d2DgDhd1bdRbiwSqfZs.MhtyNCMHaYbQp3.6D3ngYLQ9ySTM/HO",
-        "role": "user",
-        "created_at": "2025-10-20 16:23:33.447838",
-        "active": True
-    }
-    return payload
-
 def test_list_users(mocker, client, user_data):
     mocker.patch("app.services.user_service.load_all",
     return_value=[user_data])
