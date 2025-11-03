@@ -15,7 +15,7 @@ def create_movie(payload: MovieCreate) -> Movie:
         raise HTTPException(status_code=409, detail="ID collision; retry")
     new_movie = Movie(id=new_movie_id, title=payload.title.strip(), genre=payload.genre.strip(), release=payload.release, 
                       description=payload.description.strip(), duration=payload.duration)
-    movies.append(new_movie.model_dump(mode="json")) #model_dump auto serializes fields like dates
+    movies.append(new_movie.model_dump(mode="json"))
     save_all(movies)
     return new_movie
 
@@ -67,6 +67,13 @@ def search_movies_titles(query: str) -> List[MovieSummary]:
         if q in title:
             results.append(MovieSummary(id=mv.get("id"), title=mv.get("title")))
     return results
+
+def movie_summary_by_id(movie_id: str) -> List[MovieSummary]:
+    movies = load_all()
+    for mv in movies:
+        if str(mv.get("id")) == str(movie_id):
+            return [MovieSummary(id=mv.get("id"), title=mv.get("title"))]
+    return []
 
 def update_movie(movie_id: str, payload: MovieUpdate) -> Movie:
     movies = load_all()

@@ -8,6 +8,7 @@ from app.services.movie_service import (
     update_movie,
     get_movie_by_id,
     search_movies_titles,
+    movie_summary_by_id,
 )
 
 router = APIRouter(prefix="/movies", tags=["movies"])
@@ -20,9 +21,17 @@ def get_movies():
 def post_movie(payload: MovieCreate):
     return create_movie(payload)
 
-@router.get("/{movie_id}", response_model=MovieWithReviews)
+@router.get("/search", response_model=List[MovieSummary])
+def search_movies(title: str = Query(..., min_length=1)):
+    return search_movies_titles(title)
+
+@router.get("/search/", include_in_schema=False, response_model=List[MovieSummary])
+def search_movies_slash(title: str = Query(..., min_length=1)):
+    return search_movies_titles(title)
+
+@router.get("/{movie_id}", response_model=List[MovieSummary])
 def get_movie(movie_id: str):
-    return get_movie_by_id(movie_id)
+    return movie_summary_by_id(movie_id)
 
 @router.put("/{movie_id}", response_model=Movie)
 def put_movie(movie_id: str, payload: MovieUpdate):
@@ -32,7 +41,3 @@ def put_movie(movie_id: str, payload: MovieUpdate):
 def remove_movie(movie_id: str):
     delete_movie(movie_id)
     return None
-
-@router.get("/search", response_model=List[MovieSummary])
-def search_movies(title: str = Query(..., min_length=1)):
-    return search_movies_titles(title)
