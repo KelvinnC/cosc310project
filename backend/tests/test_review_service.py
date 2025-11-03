@@ -1,7 +1,7 @@
 import pytest
 import datetime
 from fastapi import HTTPException
-from app.services.review_service import create_review, update_review, get_review_by_id, list_reviews, delete_review
+from app.services.review_service import create_review, update_review, get_review_by_id, list_reviews, delete_review, increment_vote
 from app.schemas.review import ReviewCreate, Review
 
 def test_list_review_empty_list(mocker):
@@ -171,3 +171,97 @@ def test_delete_review_invalid_review(mocker):
         delete_review(1234)
     assert ex.value.status_code == 404
     assert "not found" in ex.value.detail
+
+def test_increment_vote_successful(mocker):
+    """Test incrementing votes on an existing review."""
+    review_data = {
+        "id": 1234,
+        "movieId": "movie-uuid",
+        "authorId": "author-uuid",
+        "rating": 4.5,
+        "reviewTitle": "Great movie",
+        "reviewBody": "Really enjoyed it",
+        "flagged": False,
+        "votes": 10,
+        "date": "2022-01-01"
+    }
+    mocker.patch("app.services.review_service.load_all", return_value=[review_data])
+    mock_save = mocker.patch("app.services.review_service.save_all")
+    
+    increment_vote(1234)
+    
+    # Verify save was called
+    assert mock_save.called
+    # Verify the vote count was incremented
+    saved_reviews = mock_save.call_args[0][0]
+    assert saved_reviews[0]["votes"] == 11
+
+def test_increment_vote_from_zero(mocker):
+    """Test incrementing votes when initial count is 0."""
+    review_data = {
+        "id": 5678,
+        "movieId": "movie-uuid",
+        "authorId": "author-uuid",
+        "rating": 3.0,
+        "reviewTitle": "Okay movie",
+        "reviewBody": "It was fine",
+        "flagged": False,
+        "votes": 0,
+        "date": "2023-01-01"
+    }
+    mocker.patch("app.services.review_service.load_all", return_value=[review_data])
+    mock_save = mocker.patch("app.services.review_service.save_all")
+    
+    increment_vote(5678)
+    
+    saved_reviews = mock_save.call_args[0][0]
+    assert saved_reviews[0]["votes"] == 1
+
+def test_increment_vote_missing_votes_field(mocker):
+    """Test incrementing votes when votes field is missing (defaults to 0)."""
+    review_data = {
+        "id": 9999,
+        "movieId": "movie-uuid",
+        "authorId": "author-uuid",
+        "rating": 5.0,
+        "reviewTitle": "Amazing",
+        "reviewBody": "Best ever",
+        "flagged": False,
+        "date": "2024-01-01"
+        # votes field intentionally missing
+    }
+    mocker.patch("app.services.review_service.load_all", return_value=[review_data])
+    mock_save = mocker.patch("app.services.review_service.save_all")
+    
+    increment_vote(9999)
+    
+    saved_reviews = mock_save.call_args[0][0]
+    assert saved_reviews[0]["votes"] == 1
+
+def test_increment_vote_review_not_found(mocker):
+    """Test incrementing votes for non-existent review raises 404."""
+    mocker.patch("app.services.review_service.load_all", return_value=[])
+    
+    with pytest.raises(HTTPException) as ex:
+        increment_vote(99999)
+    
+    assert ex.value.status_code == 404
+    assert "not found" in ex.value.detail.lower()
+
+def test_increment_vote_multiple_reviews(mocker):
+    """Test incrementing votes only affects the target review."""
+    reviews = [
+        {"id": 1, "movieId": "m1", "authorId": "a1", "rating": 4.0, "reviewTitle": "Good", "reviewBody": "Nice", "flagged": False, "votes": 5, "date": "2022-01-01"},
+        {"id": 2, "movieId": "m2", "authorId": "a2", "rating": 3.0, "reviewTitle": "Ok", "reviewBody": "Fine", "flagged": False, "votes": 3, "date": "2022-02-01"},
+        {"id": 3, "movieId": "m3", "authorId": "a3", "rating": 5.0, "reviewTitle": "Great", "reviewBody": "Best", "flagged": False, "votes": 15, "date": "2022-03-01"}
+    ]
+    mocker.patch("app.services.review_service.load_all", return_value=reviews)
+    mock_save = mocker.patch("app.services.review_service.save_all")
+    
+    increment_vote(2)
+    
+    saved_reviews = mock_save.call_args[0][0]
+    # Only review 2 should be incremented
+    assert saved_reviews[0]["votes"] == 5  # unchanged
+    assert saved_reviews[1]["votes"] == 4  # incremented
+    assert saved_reviews[2]["votes"] == 15  # unchanged

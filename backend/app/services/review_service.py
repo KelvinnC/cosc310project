@@ -74,3 +74,24 @@ def sample_reviews_for_battle(user_id: str, sample_size: int = 200) -> List[Revi
         return random.sample(filtered_reviews, sample_size)
     
     return filtered_reviews
+
+def increment_vote(review_id: int) -> None:
+    """
+    Increment the vote count for a review.
+    
+    Args:
+        review_id: The ID of the review to increment votes for
+        
+    Raises:
+        HTTPException: If review not found (404)
+    """
+    reviews = load_all()
+    
+    # Find and increment the target review
+    for review in reviews:
+        if review.get("id") == review_id:
+            review["votes"] = review.get("votes", 0) + 1
+            save_all(reviews)
+            return
+    
+    raise HTTPException(status_code=404, detail="Review not found")

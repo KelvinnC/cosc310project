@@ -150,13 +150,9 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
         raise ValueError(f"Failed to record vote: {str(e)}")
     
     # Increment the winning review's vote count
-    # TODO: Implement review_service.increment_vote(winner_id) once review service is available
     try:
         from app.services import review_service
         review_service.increment_vote(winner_id)
-    except AttributeError:
-        # Review service not yet implemented
-        pass
     except Exception as e:
         raise ValueError(f"Failed to increment review vote count: {str(e)}")
 

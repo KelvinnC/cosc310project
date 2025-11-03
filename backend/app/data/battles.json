@@ -9,12 +9,12 @@
     "endedAt": "2025-10-27T18:17:32.502824"
   },
   {
-    "id": "41831b32-1d1d-4aeb-b4b6-bd92c29ce690",
-    "review1Id": 31682,
-    "review2Id": 31711,
-    "winnerId": null,
+    "id": "0f56f612-639d-493f-87ef-08c4fcf00279",
+    "review1Id": 45238,
+    "review2Id": 26316,
+    "winnerId": 45238,
     "userId": "77d60efe-0870-4323-b164-3d76474f251f",
-    "startedAt": "2025-11-03T22:26:57.438996",
-    "endedAt": null
+    "startedAt": "2025-11-03T22:57:37.999822",
+    "endedAt": "2025-11-03T23:00:01.389470"
   }
 ]
