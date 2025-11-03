@@ -17,7 +17,7 @@ def unwarn_user(user_id: str) -> User:
     user = get_user_by_id_unsafe(user_id)
     if user == None:
         raise HTTPException(404, detail=f"User {user_id} not found")
-    user.warnings -= 1
+    user.warnings = max(0, user.warnings - 1)
     users = [usr for usr in load_all() if usr.get("id") != user_id]
     users.append(user.model_dump(mode="json"))
     save_all(users)
