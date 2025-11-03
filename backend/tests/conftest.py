@@ -1,9 +1,13 @@
-import sys
 import os
+import sys
 import pytest
 
-def pytest_configure():
-    load_dotenv()
+_HERE = os.path.dirname(__file__)
+_BACKEND_DIR = os.path.dirname(_HERE)
+if _BACKEND_DIR not in sys.path:
+    sys.path.insert(0, _BACKEND_DIR)
+
+os.environ.setdefault("JWT_SECRET", "testsecret")
 
 @pytest.fixture
 def user_data():
