@@ -63,7 +63,7 @@ def mock_response():
 def test_create_battle_success(mocker, mock_user, sample_reviews, mock_battle, mock_response):
     """Test successful battle creation with Location header."""
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.routers.battles._sample_reviews_for_battle", return_value=sample_reviews)
+    mocker.patch("app.services.review_service.sample_reviews_for_battle", return_value=sample_reviews)
     mocker.patch("app.routers.battles.battle_service.createBattle", return_value=mock_battle)
     
     result = create_battle(user_id=mock_user.id, response=mock_response)
@@ -89,7 +89,7 @@ def test_create_battle_user_not_found(mocker, mock_response):
 def test_create_battle_no_reviews(mocker, mock_user, mock_response):
     """Test when reviews are not available."""
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.routers.battles._sample_reviews_for_battle", return_value=[])
+    mocker.patch("app.services.review_service.sample_reviews_for_battle", return_value=[])
     
     with pytest.raises(HTTPException) as exc_info:
         create_battle(user_id=mock_user.id, response=mock_response)
@@ -100,7 +100,7 @@ def test_create_battle_no_reviews(mocker, mock_user, mock_response):
 def test_create_battle_no_eligible_pairs(mocker, mock_user, sample_reviews, mock_response):
     """Test when user has voted on all available pairs."""
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.routers.battles._sample_reviews_for_battle", return_value=sample_reviews)
+    mocker.patch("app.services.review_service.sample_reviews_for_battle", return_value=sample_reviews)
     mocker.patch(
         "app.routers.battles.battle_service.createBattle",
         side_effect=ValueError("No eligible review pairs available for this user.")
@@ -116,7 +116,7 @@ def test_create_battle_file_error(mocker, mock_user, mock_response):
     """Test when reviews loading fails."""
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
     mocker.patch(
-        "app.routers.battles._sample_reviews_for_battle",
+        "app.services.review_service.sample_reviews_for_battle",
         side_effect=OSError("File error")
     )
     

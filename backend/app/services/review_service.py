@@ -1,3 +1,4 @@
+import random
 from typing import List
 from fastapi import HTTPException
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
@@ -63,3 +64,13 @@ def delete_review(review_id: int):
         raise HTTPException(status_code=404, detail="Review not found")
     
     save_all(updated_reviews)
+
+def sample_reviews_for_battle(user_id: str, sample_size: int = 200) -> List[Review]:
+    reviews = load_all()
+
+    filtered_reviews = [Review(**review) for review in reviews if review["authorId"] != user_id]
+
+    if len(filtered_reviews) > sample_size:
+        return random.sample(filtered_reviews, sample_size)
+    
+    return filtered_reviews

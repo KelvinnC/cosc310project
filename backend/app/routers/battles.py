@@ -10,36 +10,10 @@ from app.schemas.battle import Battle, VoteRequest
 from app.schemas.review import Review
 from app.services import battle_service
 from app.services.user_service import get_user_by_id
+from app.services import review_service
 
 
 router = APIRouter(tags=["battles"])
-
-## TODO: Replace with Review service implementation 
-@lru_cache(maxsize=1)
-def _load_reviews_raw() -> List[dict]:
-    """
-    Load raw review data from JSON file once using 
-    fast orjson parser and cache in memory.
-    """
-    data_path = Path(__file__).resolve().parents[1] / "data" / "reviews.json"
-    if not data_path.exists():
-        raise FileNotFoundError("reviews.json not found")
-    with data_path.open("rb") as f:
-        return orjson.loads(f.read())
-
-## TODO: Replace with Review service implementation 
-def _sample_reviews_for_battle(user_id: str, sample_size: int = 200) -> List[Review]:
-    """
-    Sample a subset of reviews for battle creation to avoid converting all 
-    517k into Review objects.
-    """
-    reviews_data = _load_reviews_raw()
-    
-    if len(reviews_data) > sample_size:
-        sampled_data = random.sample(reviews_data, sample_size)
-    else:
-        sampled_data = reviews_data
-    return [Review(**r) for r in sampled_data]
 
 @router.post("/users/{user_id}/battles", response_model=Battle, status_code=201)
 def create_battle(user_id: str, response: Response) -> Battle:
@@ -50,8 +24,7 @@ def create_battle(user_id: str, response: Response) -> Battle:
     user = get_user_by_id(user_id)
 
     try:
-        ## TODO: Replace _sample_reviews_for_battle with Review service implementation
-        reviews = _sample_reviews_for_battle(user_id, sample_size=200) 
+        reviews = review_service.sample_reviews_for_battle(user_id, sample_size=200)
     except FileNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
