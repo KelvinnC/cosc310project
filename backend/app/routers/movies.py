@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Query
+from fastapi import APIRouter, status, Query, HTTPException
 from typing import List
 from app.schemas.movie import Movie, MovieCreate, MovieUpdate, MovieWithReviews, MovieSummary
 from app.services.movie_service import (
@@ -29,9 +29,14 @@ def search_movies(title: str = Query(..., min_length=1)):
 def search_movies_slash(title: str = Query(..., min_length=1)):
     return search_movies_titles(title)
 
-@router.get("/{movie_id}", response_model=List[MovieSummary])
+@router.get("/{movie_id}", response_model=List[MovieWithReviews])
 def get_movie(movie_id: str):
-    return movie_summary_by_id(movie_id)
+    try:
+        return [get_movie_by_id(movie_id)]
+    except HTTPException as exc:
+        if getattr(exc, "status_code", None) == 404:
+            return []
+        raise
 
 @router.put("/{movie_id}", response_model=Movie)
 def put_movie(movie_id: str, payload: MovieUpdate):
