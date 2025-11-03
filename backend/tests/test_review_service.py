@@ -39,14 +39,14 @@ def test_create_review_adds_review(mocker):
     mock_save = mocker.patch("app.services.review_service.save_all")
     # Empty store -> next integer ID should be 1
     payload = ReviewCreate(
-        movieId="1234", authorId=1234, rating=5.5, reviewTitle="good movie", reviewBody="loved the movie", date="2022-01-01"
+        movieId="UUID-movie-5678", authorId="UUID-author-5678", rating=5.5, reviewTitle="good movie", reviewBody="loved the movie", date="2022-01-01"
     )
 
     review = create_review(payload)
 
     assert review.id == 1
-    assert review.movieId == "1234"
-    assert review.authorId == 1234
+    assert review.movieId == "UUID-movie-5678"
+    assert review.authorId == "UUID-author-5678"
     assert review.rating == 5.5
     assert review.reviewTitle == "good movie"
     assert review.reviewBody == "loved the movie"
@@ -59,8 +59,8 @@ def test_create_review_collides_id(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[
     {
         "id": 1234,
-        "movieId": "1234",
-        "authorId": 1234,
+        "movieId": "UUID-movie-1234",
+        "authorId": "UUID-author-1234",
         "rating": 5.5,
         "reviewTitle": "good movie",
         "reviewBody": "loved the movie",
@@ -69,7 +69,7 @@ def test_create_review_collides_id(mocker):
         "date": "2022-01-01"
     }])
     mock_save = mocker.patch("app.services.review_service.save_all")
-    payload = ReviewCreate(movieId="1234", authorId=1234, rating=5.5, reviewTitle="good movie", reviewBody="loved the movie", date="2022-01-01")
+    payload = ReviewCreate(movieId="1234", authorId="UUID-author-1234", rating=5.5, reviewTitle="good movie", reviewBody="loved the movie", date="2022-01-01")
 
     review = create_review(payload)
     assert review.id == 1235
@@ -80,11 +80,11 @@ def test_create_review_strips_whitespace(mocker):
     mock_save = mocker.patch("app.services.review_service.save_all")
     mocker.patch("uuid.uuid4", return_value="1234")
     payload = ReviewCreate(
-        movieId="    1234       ", authorId=1234, rating=5.5, reviewTitle="      good movie    ", reviewBody="loved the movie", flagged=False, votes=5, date="2022-01-01"
+        movieId="    1234       ", authorId="UUID-author-5678", rating=5.5, reviewTitle="      good movie    ", reviewBody="loved the movie", flagged=False, votes=5, date="2022-01-01"
     )
     review = create_review(payload)
     assert review.movieId == "1234"
-    assert review.authorId == 1234
+    assert review.authorId == "UUID-author-5678"
     assert review.reviewTitle == "good movie"
     assert mock_save.called
 

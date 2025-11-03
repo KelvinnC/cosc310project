@@ -56,7 +56,7 @@ def test_post_review_valid_review(mocker, client):
     payload = {
         "movieId": 'UUID-movie-1234',
         "date": "2022-01-01",
-        "authorId": 1234,
+        "authorId": 'UUID-author-1234',
         "reviewTitle": "good movie",
         "reviewBody": "loved the movie",
         "rating": 5.5,

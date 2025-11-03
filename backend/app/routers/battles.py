@@ -94,7 +94,6 @@ def submit_vote(battle_id: str, user_id: str, payload: VoteRequest) -> None:
     Submit a vote for a battle.
     
     Returns 204 No Content on success.
-    Requires user_id as query parameter, should come from token (TODO: auth token).
     """
     user = get_user_by_id(user_id)
     
