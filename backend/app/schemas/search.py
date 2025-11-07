@@ -1,6 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from .movie import Movie
+from .review import Review
 
 try:
     from pydantic import field_validator, model_validator, computed_field
@@ -68,4 +69,9 @@ class MovieSearchResult(BaseModel):
     @property
     def total(self) -> int:
         return len(self.results)
+
+
+class MovieWithReviews(Movie):
+    reviews: List[Review] = []
+
 

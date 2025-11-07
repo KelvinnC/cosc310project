@@ -43,6 +43,15 @@ def get_user_by_id(user_id: str) -> User:
             return user_instance
     raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
 
+def get_user_by_id_unsafe(user_id: str) -> User:
+    """Get a user object by user_id, including hashed_password"""
+    users = load_all()
+    for user in users:
+        if str(user.get("id")) == user_id:
+            user_instance = User(**user)
+            return user_instance
+    raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
+
 def update_user(user_id: str, payload: UserUpdate) -> User:
     """Update a user's username or password by user_id"""
     users = load_all()

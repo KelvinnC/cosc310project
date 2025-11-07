@@ -8,30 +8,39 @@ def client():
         yield client
 
 def test_list_movies(mocker, client):
-    mocker.patch("app.services.movie_service.load_all",
-    return_value=[{
-        "id": "1234",
-        "title": "Test",
-        "genre": "Horror",
-        "release": "2022-01-01",
-        "description": "Testing Description",
-        "duration": 90
-    }])
-    response = client.get("/")
+    mocker.patch(
+        "app.services.movie_service.load_all",
+        return_value=[
+            {
+                "id": "1234",
+                "title": "Test",
+                "genre": "Horror",
+                "release": "2022-01-01",
+                "description": "Testing Description",
+                "duration": 90,
+            }
+        ],
+    )
+    response = client.get("/movies")
     assert response.status_code == 200
     data = response.json()
+    assert isinstance(data, list)
     assert len(data) == 1
 
 def test_get_movie_by_id_valid_id(client):
-    response = client.get('/movies/6bca4027-ad52-414e-810c-b830571cc07d')
+    response = client.get("/movies/6bca4027-ad52-414e-810c-b830571cc07d")
     assert response.status_code == 200
     data = response.json()
-    assert data["id"] == "6bca4027-ad52-414e-810c-b830571cc07d"
-    assert data["title"] == "Joker"
+    assert isinstance(data, list)
+    assert len(data) == 1
+    assert data[0]["id"] == "6bca4027-ad52-414e-810c-b830571cc07d"
+    assert data[0]["title"] == "Joker"
 
 def test_get_movie_by_id_invalid_id(client):
-    response = client.get('/movies/NotAValidID')
-    assert response.status_code == 404
+    response = client.get("/movies/NotAValidID")
+    # Endpoint now mirrors /movies/search shape: returns empty list when not found
+    assert response.status_code == 200
+    assert response.json() == []
 
 def test_post_movie_valid_movie(mocker, client):
     mocker.patch("app.services.movie_service.load_all", return_value=[])
