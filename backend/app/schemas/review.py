@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Union
 from datetime import date
 try:
     from pydantic import field_validator as _field_validator  # v2
