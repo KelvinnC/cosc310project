@@ -189,3 +189,50 @@ Went over our user stories and assigned tasks based on dependencies/blockers. We
 - Duncan - US-03, 04, 05 (managing reviews)
 - Kelvin - US-11 (sorting and filtering reviews)
 - Will - US-13 (review battles)
+
+---
+
+## Meeting Date: 2025-10-27
+**Type of Meeting:** In-person Scrum
+**Meeting Length:** 14:00-15:30
+**Attendees:** Everyone
+
+### Action Items
+- Discussed individual progress
+- Found solution for loading reviews as this was an issue
+- Discussed next steps
+- Met with TA
+
+### Meeting Notes
+- All members showed what they were working on. Discussed with TA how to handle load issues with large reviews.json dataset. Planned next meeting.
+
+### Responsibilities
+- Brad - US-01, 02 (user registration/verification)
+- Duncan - US-03, 04, 05 (managing reviews)
+- Kelvin - US-11 (sorting and filtering reviews)
+- Will - US-13 (review battles)
+
+---
+
+## Meeting Date: 2025-10-29
+**Type of Meeting:** In-person Scrum
+**Meeting Length:** 11:00-11:40
+**Attendees:** Everyone
+
+### Action Items
+- Discussed progress of current tasks, review of completed tasks
+- Assigned next tasks
+- Reviewed and revised style guide
+- M3 expectations
+
+### Meeting Notes
+- Review battles completed, pull request waiting for review
+- Login, auth, and admin penalties completed, waiting for review
+- Reviews basic CRUD endpoints still in progress, should be complete by 2025-10-31
+- Reviewed searching for movies, pending completion by tomorrow, sorting in progress next
+
+### Responsibilities
+- Brad - US-16 (admin dashboard)
+- Duncan - US-03, 04, 05 (managing reviews)
+- Kelvin - US-11 (sorting and filtering reviews)
+- Will - US-13, US-07 (review voting & flagging)

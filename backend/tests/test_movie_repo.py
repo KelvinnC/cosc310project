@@ -20,7 +20,7 @@ def test_load_all_with_data(mocker):
     mock_open = mocker.patch.object(Path, "open", mocker.mock_open(read_data=json.dumps(payload)))
     result = load_all()
     assert result == payload
-    mock_open.assert_called_once_with("r", encoding="utf-8")
+    mock_open.assert_called_once_with("r", encoding="utf-8-sig")
 
 def test_save_all_saves_data(mocker):
     movies = [{
