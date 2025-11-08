@@ -11,3 +11,8 @@ def get_warned_users() -> List[User]:
     users = list_users()
     warned_users = [user for user in users if user.warnings > 0]
     return warned_users
+
+def get_banned_users() -> List[User]:
+    users = list_users()
+    banned_users = [user for user in users if user.active == False]
+    return banned_users

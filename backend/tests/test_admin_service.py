@@ -1,5 +1,5 @@
 import pytest
-from app.services.admin_service import load_all, get_user_count, get_warned_users
+from app.services.admin_service import load_all, get_user_count, get_warned_users, get_banned_users
 from app.schemas.user import User
 
 @pytest.fixture
@@ -48,3 +48,17 @@ def test_get_warned_users_no_warned_users(mocker, warned_users):
     mocker.patch("app.services.admin_service.list_users", return_value=user_objects)
     total_warned_users = get_warned_users()
     assert len(total_warned_users) == 0
+
+def test_get_banned_users(mocker, warned_users):
+    user_objects = [User(**usr) for usr in warned_users]
+    mocker.patch("app.services.admin_service.list_users", return_value=user_objects)
+    total_banned_users = get_banned_users()
+    assert len(total_banned_users) == 1
+    assert total_banned_users[0].active == False
+
+def test_get_banned_users_no_banned_users(mocker, warned_users):
+    user_objects = [User(**usr) for usr in warned_users]
+    user_objects[1].active = True
+    mocker.patch("app.services.admin_service.list_users", return_value=user_objects)
+    total_banned_users = get_banned_users()
+    assert len(total_banned_users) == 0
