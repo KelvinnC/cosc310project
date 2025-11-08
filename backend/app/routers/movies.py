@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status, Query, HTTPException
-from typing import List
+from typing import List, Literal
 from app.schemas.movie import Movie, MovieCreate, MovieUpdate, MovieWithReviews, MovieSummary
 from app.services.movie_service import (
     list_movies,
@@ -10,6 +10,7 @@ from app.services.movie_service import (
     search_movies_titles,
     movie_summary_by_id,
 )
+from app.repositories.movie_repo import get_all_movies
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
@@ -28,6 +29,11 @@ def search_movies(title: str = Query(..., min_length=1)):
 @router.get("/search/", include_in_schema=False, response_model=List[MovieSummary])
 def search_movies_slash(title: str = Query(..., min_length=1)):
     return search_movies_titles(title)
+
+@router.get("/sort", response_model=List[Movie])
+def sort_movies(order: Literal["asc", "desc"] = "asc"):
+    movies = get_all_movies(sort_by="rating", order=order)
+    return movies
 
 @router.get("/{movie_id}", response_model=List[MovieWithReviews])
 def get_movie(movie_id: str):
