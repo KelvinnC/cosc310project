@@ -68,8 +68,7 @@ def test_sort_by_movie_id_supports_uuid_and_index(mocker):
     assert [r["id"] for r in asc] == [4, 1, 3, 2]
 
     desc = get_all_reviews(sort_by="movieId", order="desc")
-    # unknown maps last in desc
-    assert [r["id"] for r in desc] == [1, 3, 2, 4]
+    assert [r["id"] for r in desc] == [2, 3, 1, 4]
 
 
 def test_sort_by_movie_title_ascending_descending(mocker):
@@ -92,4 +91,3 @@ def test_sort_by_movie_title_ascending_descending(mocker):
 
     desc = get_all_reviews(sort_by="movieTitle", order="desc")
     assert [r["id"] for r in desc] == [1, 3, 2, 4]
-
