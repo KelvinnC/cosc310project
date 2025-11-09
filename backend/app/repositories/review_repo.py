@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional
 from app.repositories.movie_repo import load_all as load_movies
 import json, os
-
+from app.repositories import movie_repo
 
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "reviews.json"
 
@@ -71,7 +71,7 @@ def get_all_reviews(
         return sorted(result, key=_rating_key, reverse=reverse)
 
     if key in ("movieid", "movietitle"):
-        movies = load_movies()
+        movies = movie_repo.load_all()
         idx_to_uuid: Dict[int, str] = {
             idx + 1: mv.get("id") for idx, mv in enumerate(movies) if isinstance(mv.get("id"), str)
         }
@@ -79,7 +79,7 @@ def get_all_reviews(
         if key == "movieid":
             def _movie_id_key(rv: Dict[str, Any]):
                 norm = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
-                return ("" if not reverse else chr(0x10FFFF)) if norm is None else norm
+                return (0, "") if norm is None else (1, norm)
 
             return sorted(result, key=_movie_id_key, reverse=reverse)
 
@@ -93,8 +93,8 @@ def get_all_reviews(
         def _movie_title_key(rv: Dict[str, Any]):
             mid = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
             if mid is None:
-                return "" if not reverse else chr(0x10FFFF)
-            return id_to_title.get(mid, "")
+                return (0, "")
+            return (1, id_to_title.get(mid, ""))
 
         return sorted(result, key=_movie_title_key, reverse=reverse)
 
