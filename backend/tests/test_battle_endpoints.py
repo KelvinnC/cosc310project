@@ -5,7 +5,7 @@ from fastapi import HTTPException, status, Response
 from datetime import datetime, date
 from uuid import uuid4
 
-from app.routers.battles import create_battle, submit_vote
+from app.routers.battles import create_battle, submit_vote, get_battle
 from app.schemas.battle import Battle, VoteRequest
 from app.schemas.user import User
 from app.schemas.review import Review
@@ -201,3 +201,31 @@ def test_submit_vote_duplicate_vote(mocker, mock_user, mock_battle):
         submit_vote(battle_id=mock_battle.id, user_id=mock_user.id, payload=vote_request)
     
     assert exc_info.value.status_code == 409
+
+
+# GET /battles/{battle_id} tests
+def test_get_battle_success(mocker, mock_battle):
+    """Test successful retrieval of a battle by ID."""
+    mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)
+    
+    result = get_battle(battle_id=mock_battle.id)
+    
+    assert result == mock_battle
+    assert result.id == mock_battle.id
+    assert result.review1Id == mock_battle.review1Id
+    assert result.review2Id == mock_battle.review2Id
+
+
+def test_get_battle_not_found(mocker):
+    """Test retrieval when battle doesn't exist."""
+    mocker.patch(
+        "app.routers.battles.battle_service.get_battle_by_id",
+        side_effect=ValueError("Battle nonexistent-battle not found")
+    )
+    
+    with pytest.raises(HTTPException) as exc_info:
+        get_battle(battle_id="nonexistent-battle")
+    
+    assert exc_info.value.status_code == status.HTTP_404_NOT_FOUND
+    assert "Battle" in exc_info.value.detail
+    assert "not found" in exc_info.value.detail

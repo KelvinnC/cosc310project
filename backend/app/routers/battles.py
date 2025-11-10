@@ -55,6 +55,22 @@ def create_battle(user_id: str, response: Response) -> Battle:
         )
 
 
+@router.get("/battles/{battle_id}", response_model=Battle)
+def get_battle(battle_id: str) -> Battle:
+    """
+    Retrieve a battle by ID.
+    
+    Returns the battle object with its current state (voted or unvoted).
+    """
+    try:
+        return battle_service.get_battle_by_id(battle_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+
+
 @router.post("/battles/{battle_id}/votes", status_code=204)
 def submit_vote(battle_id: str, user_id: str, payload: VoteRequest) -> None:
     """
