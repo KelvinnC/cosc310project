@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Query
+from fastapi import APIRouter, status, Query, HTTPException
 from typing import List
 
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
@@ -27,15 +27,33 @@ def search_reviews(title: str = Query(..., min_length=1)):
 @router.get("/{review_id}", response_model=Review)
 def get_review(review_id: int):
     """Retrieve a review by ID."""
-    return get_review_by_id(review_id)
+    try:
+        return get_review_by_id(review_id)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Review {review_id} not found"
+        )
 
 @router.put("/{review_id}", response_model=Review)
 def put_review(review_id: int, review_update: ReviewUpdate):
     """Update a review by ID."""
-    return update_review(review_id, review_update)
+    try:
+        return update_review(review_id, review_update)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Review {review_id} not found"
+        )
 
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
 def remove_review(review_id: int):
-    """Delete a review by its ID."""
-    delete_review(review_id)
+    """Delete a review by its ID. Returns 204 on success, 404 if not found."""
+    try:
+        delete_review(review_id)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Review {review_id} not found"
+        )
     return None
