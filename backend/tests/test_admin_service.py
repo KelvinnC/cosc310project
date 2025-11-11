@@ -1,5 +1,5 @@
 import pytest
-from app.services.admin_service import load_all, get_user_count, get_warned_users, get_banned_users
+from app.services.admin_service import get_user_count, get_warned_users, get_banned_users
 from app.schemas.user import User
 
 @pytest.fixture
