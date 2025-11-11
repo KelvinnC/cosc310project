@@ -74,13 +74,13 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
 def delete_review(review_id: int):
     """Delete a review by ID."""
     reviews = load_all()
- 
-    updated_reviews = [r for r in reviews if r.get("id") != review_id]
+    index = _find_review_index(review_id, reviews)
     
-    if len(updated_reviews) == len(reviews):
+    if index == -1:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     
-    save_all(updated_reviews)
+    reviews.pop(index)
+    save_all(reviews)
 
 def sample_reviews_for_battle(user_id: str, sample_size: int = 200) -> List[Review]:
     """Sample reviews for battle, excluding those authored by the given user_id."""
