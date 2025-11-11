@@ -9,6 +9,13 @@ from app.schemas.review import Review
 from app.schemas.battle import Battle
 from app.repositories import battle_repo
 
+def _find_battle_index(battle_id: str, battles: List[dict]) -> int:
+    """Find battle index by id. Returns index or -1 if not found."""
+    for i, battle in enumerate(battles):
+        if battle.get("id") == battle_id:
+            return i
+    return -1
+
 def _get_user_voted_pairs(user_id: str) -> set:
     """
     Return set of unordered pairs the user has already voted on.
@@ -138,13 +145,12 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
     try:
         all_battles = list(battle_repo.load_all())
         # Find and update the existing battle
-        for i, b in enumerate(all_battles):
-            if b.get("id") == battle.id:
-                all_battles[i] = battle_dict
-                break
-        else:
+        index = _find_battle_index(battle.id, all_battles)
+        if index == -1:
             # If battle not found (shouldn't happen), append it
             all_battles.append(battle_dict)
+        else:
+            all_battles[index] = battle_dict
         battle_repo.save_all(all_battles)
     except Exception as e:
         raise ValueError(f"Failed to record vote: {str(e)}")
@@ -170,9 +176,9 @@ def get_battle_by_id(battle_id: str) -> Battle:
         ValueError: If battle not found
     """
     battles = battle_repo.load_all()
-    for battle in battles:
-        if battle.get("id") == battle_id:
-            return Battle(**battle)
-    raise ValueError(f"Battle {battle_id} not found")
+    index = _find_battle_index(battle_id, battles)
+    if index == -1:
+        raise ValueError(f"Battle {battle_id} not found")
+    return Battle(**battles[index])
 
 
