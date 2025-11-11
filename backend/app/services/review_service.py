@@ -4,6 +4,8 @@ from fastapi import HTTPException
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.repositories.review_repo import load_all, save_all
 
+REVIEW_NOT_FOUND = "Review not found"
+
 def _find_review_index(review_id: int, reviews: List[dict]) -> int:
     """Find review index by id. returns index or -1 if not found."""
     for i, review in enumerate(reviews):
@@ -20,7 +22,7 @@ def get_review_by_id(review_id: int) -> Review:
     reviews = load_all()
     index = _find_review_index(review_id, reviews)
     if index == -1:
-        raise HTTPException(status_code=404, detail="Review not found")
+        raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     return Review(**reviews[index])
 
 def create_review(payload: ReviewCreate) -> Review:
@@ -46,7 +48,7 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
     index = _find_review_index(review_id, reviews)
 
     if index == -1:
-        raise HTTPException(status_code=404, detail="Review not found")
+        raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     
     old_review = reviews[index]
     updated_review = Review(
@@ -71,7 +73,7 @@ def delete_review(review_id: int):
     updated_reviews = [r for r in reviews if r.get("id") != review_id]
     
     if len(updated_reviews) == len(reviews):
-        raise HTTPException(status_code=404, detail="Review not found")
+        raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     
     save_all(updated_reviews)
 
@@ -99,7 +101,7 @@ def increment_vote(review_id: int) -> None:
     index = _find_review_index(review_id, reviews)
     
     if index == -1:
-        raise HTTPException(status_code=404, detail="Review not found")
+        raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     
     reviews[index]["votes"] = reviews[index].get("votes", 0) + 1
     save_all(reviews)
