@@ -15,10 +15,12 @@ def _find_review_index(review_id: int, reviews: List[dict]) -> int:
 
 
 def list_reviews() -> List[Review]:
+    """List all reviews."""
     reviews = load_all()
     return [Review(**review) for review in reviews]
 
 def get_review_by_id(review_id: int) -> Review:
+    """Get a review by ID."""
     reviews = load_all()
     index = _find_review_index(review_id, reviews)
     if index == -1:
@@ -26,6 +28,7 @@ def get_review_by_id(review_id: int) -> Review:
     return Review(**reviews[index])
 
 def create_review(payload: ReviewCreate) -> Review:
+    """Create a new review."""
     reviews = load_all()
     new_review_id = max((rev.get("id", 0) for rev in reviews), default=0) + 1
     
@@ -44,6 +47,7 @@ def create_review(payload: ReviewCreate) -> Review:
     return new_review
 
 def update_review(review_id: int, payload: ReviewUpdate) -> Review:
+    """Update an existing review."""
     reviews = load_all()
     index = _find_review_index(review_id, reviews)
 
@@ -68,6 +72,7 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
     return updated_review
 
 def delete_review(review_id: int):
+    """Delete a review by ID."""
     reviews = load_all()
  
     updated_reviews = [r for r in reviews if r.get("id") != review_id]
@@ -78,6 +83,7 @@ def delete_review(review_id: int):
     save_all(updated_reviews)
 
 def sample_reviews_for_battle(user_id: str, sample_size: int = 200) -> List[Review]:
+    """Sample reviews for battle, excluding those authored by the given user_id."""
     reviews = load_all()
 
     filtered_reviews = [Review(**review) for review in reviews if review["authorId"] != user_id]
@@ -88,15 +94,7 @@ def sample_reviews_for_battle(user_id: str, sample_size: int = 200) -> List[Revi
     return filtered_reviews
 
 def increment_vote(review_id: int) -> None:
-    """
-    Increment the vote count for a review.
-    
-    Args:
-        review_id: The ID of the review to increment votes for
-        
-    Raises:
-        HTTPException: If review not found (404)
-    """
+    """Increment the vote count for a review."""
     reviews = load_all()
     index = _find_review_index(review_id, reviews)
     
