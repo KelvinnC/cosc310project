@@ -17,12 +17,7 @@ def _find_battle_index(battle_id: str, battles: List[dict]) -> int:
     return -1
 
 def _get_user_voted_pairs(user_id: str) -> set:
-    """
-    Return set of unordered pairs the user has already voted on.
-
-    Uses battles persisted with userId == user_id and a winner set, validating the vote is complete.
-    Each pair is represented as frozenset({review1Id, review2Id}).
-    """
+    """Retrieve all review ID pairs that the user has voted on."""
     voted_pairs = set()
     for b in battle_repo.load_all() or []:
         if b.get("userId") == user_id and b.get("winnerId") is not None:
@@ -34,25 +29,7 @@ def _is_own_review(user: User, review: Review) -> bool:
     return str(review.authorId) == user.id
 
 def createBattle(user: User, reviews: List[Review]) -> Battle:
-    """
-    Generate a battle between two reviews for a user to vote on.
-    
-    Creates a battle by selecting two reviews the user hasn't voted on before,
-    excluding their own reviews. Already-voted pairs are derived from persisted
-    battle records so previously-decided pairs are not shown. Returns a Battle
-    object and persists it.
-
-    Args:
-        user: User requesting the battle
-        reviews: Available review pool
-    
-    Returns:
-        New Battle object ready for voting (and persisted to storage)
-    
-    Raises:
-        ValueError: If no eligible pairs exist (all voted or only own reviews)
-        Exception: If persisting the created battle fails
-    """
+    """Create a new battle. Persists the battle to storage."""
     voted_pairs = _get_user_voted_pairs(user.id)
     eligible_reviews = [r for r in reviews if not _is_own_review(user, r)]
 
@@ -94,27 +71,14 @@ def createBattle(user: User, reviews: List[Review]) -> Battle:
         all_battles.append(battle_dict)
         battle_repo.save_all(all_battles)
     except Exception as e:
-        # Persist failure - propagate as generic exception so the caller (router)
+        # Persist failure, propagate as generic exception so the caller (router)
         # returns an HTTP 500.
         raise Exception(f"Failed to persist created battle: {str(e)}")
 
     return battle
 
 def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
-    """
-    Record a user's vote by persisting the battle with its winner.
-
-    Persisting the finished battle is sufficient to record the
-    vote; no additional user-side fields are required.
-
-    Args:
-        battle: The battle to persist with the vote result
-        winner_id: The ID of the winning review
-        user_id: ID of the user submitting this vote
-        
-    Raises:
-        ValueError: if winner_id is not one of the battle's reviews.
-    """
+    """Submit a battle result. Persists the result to storage."""
     if winner_id not in (battle.review1Id, battle.review2Id):
         raise ValueError(f"Winner {winner_id} not in battle {battle.id}")
     
@@ -151,6 +115,7 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
         raise ValueError(f"Failed to increment review vote count: {str(e)}")
 
 def get_battle_by_id(battle_id: str) -> Battle:
+    """Retrieve a battle by its ID."""
     battles = battle_repo.load_all()
     index = _find_battle_index(battle_id, battles)
     if index == -1:
