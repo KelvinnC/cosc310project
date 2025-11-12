@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Union
 from datetime import date
 try:
     from pydantic import field_validator as _field_validator  # v2
@@ -11,7 +11,7 @@ except Exception:
 class Review(BaseModel):
     id: int
     movieId: str
-    authorId: int
+    authorId: Union[int, str]  # Accept both int (-1 for system) and str (UUID for users)
     rating: float
     reviewTitle: str
     reviewBody: str
@@ -31,7 +31,7 @@ class Review(BaseModel):
 
 class ReviewCreate(BaseModel):
     movieId: str
-    authorId: int
+    authorId: str
     rating: float
     reviewTitle: str
     reviewBody: str
