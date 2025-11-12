@@ -18,7 +18,7 @@ def test_sort_movies_ascending(mocker, client):
             {"id": "3", "title": "C", "rating": 5.0, "genre": "G", "release": "2022-01-01", "description": "d", "duration": 90},
         ],
     )
-    res = client.get("/movies/sort?order=asc")
+    res = client.get("/movies?sort_by=rating&order=asc")
     assert res.status_code == 200
     data = res.json()
     assert [m["id"] for m in data] == ["3", "1", "2"]
@@ -33,7 +33,7 @@ def test_sort_movies_descending(mocker, client):
             {"id": "3", "title": "C", "rating": 5.0, "genre": "G", "release": "2022-01-01", "description": "d", "duration": 90},
         ],
     )
-    res = client.get("/movies/sort?order=desc")
+    res = client.get("/movies?sort_by=rating&order=desc")
     assert res.status_code == 200
     data = res.json()
     assert [m["id"] for m in data] == ["2", "1", "3"]
@@ -48,7 +48,7 @@ def test_sort_movies_default_order_is_asc(mocker, client):
             {"id": "3", "title": "C", "rating": 5.0, "genre": "G", "release": "2022-01-01", "description": "d", "duration": 90},
         ],
     )
-    res = client.get("/movies/sort")
+    res = client.get("/movies?sort_by=rating")
     assert res.status_code == 200
     data = res.json()
     assert [m["id"] for m in data] == ["3", "1", "2"]
