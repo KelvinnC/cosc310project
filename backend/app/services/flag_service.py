@@ -1,7 +1,6 @@
 from datetime import datetime
 from app.repositories import flag_repo
-from app.services.review_service import get_review_by_id, update_review
-from app.schemas.review import ReviewUpdate
+from app.services.review_service import get_review_by_id, mark_review_as_flagged
 
 def flag_review(user_id: str, review_id: int) -> dict:
     """Flag a review as inappropriate"""
@@ -21,21 +20,9 @@ def flag_review(user_id: str, review_id: int) -> dict:
     flags.append(flag_record)
     flag_repo.save_all(flags)
     
-    _mark_review_as_flagged(review_id, review)
+    mark_review_as_flagged(review)
     
     return flag_record
-
-def _mark_review_as_flagged(review_id: int, review) -> None:
-    """Mark a review as flagged in storage"""
-    review_update = ReviewUpdate(
-        rating=review.rating,
-        reviewTitle=review.reviewTitle,
-        reviewBody=review.reviewBody,
-        flagged=True,
-        votes=review.votes,
-        date=review.date
-    )
-    update_review(review_id, review_update)
 
 def get_flagged_reviews_count(review_id: int) -> int:
     """Get the number of users who have flagged a specific review"""
