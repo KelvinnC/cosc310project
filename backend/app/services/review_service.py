@@ -1,8 +1,10 @@
 import random
 from typing import List
+from datetime import datetime
 from fastapi import HTTPException
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.repositories.review_repo import load_all, save_all
+from app.repositories import movie_repo
 
 REVIEW_NOT_FOUND = "Review not found"
 NOT_FOUND = -1
@@ -27,19 +29,23 @@ def get_review_by_id(review_id: int) -> Review:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     return Review(**reviews[index])
 
-def create_review(payload: ReviewCreate) -> Review:
-    """Create a new review."""
+def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
+    """Create a new review. Validates movie existence and assigns author/date."""
     reviews = load_all()
     new_review_id = max((rev.get("id", 0) for rev in reviews), default=0) + 1
+    # Validate referenced movie exists
+    movies = movie_repo.load_all()
+    if not any(m.get("id") == payload.movieId for m in movies):
+        raise HTTPException(status_code=400, detail="Invalid movieId: movie does not exist")
     
     new_review = Review(
         id=new_review_id,
         movieId=payload.movieId.strip(),
-        authorId=payload.authorId,
+        authorId=author_id,
         rating=payload.rating,
         reviewTitle=payload.reviewTitle.strip(),
         reviewBody=payload.reviewBody.strip(),
-        date=payload.date
+        date=datetime.now().date()
     )
 
     reviews.append(new_review.model_dump(mode="json"))
