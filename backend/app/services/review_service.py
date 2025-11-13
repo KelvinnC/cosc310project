@@ -33,7 +33,7 @@ def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
     """Create a new review. Validates movie existence and assigns author/date."""
     reviews = load_all()
     new_review_id = max((rev.get("id", 0) for rev in reviews), default=0) + 1
-    # Normalize and validate referenced movie exists
+
     movie_id = payload.movieId.strip()
     movies = movie_repo.load_all()
     if not any(m.get("id") == movie_id for m in movies):
