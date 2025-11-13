@@ -33,6 +33,7 @@ def test_admin_summary_authorized_user(mocker, client, mock_admin_user, penalize
     assert res["total_users"] == 1
     assert all(user["active"] == False for user in res["banned_users"])
     assert all(user["warnings"] > 0 for user in res["warned_users"])
+    assert all(review["flagged"] for review in res["flagged_reviews"])
 
 def test_admin_summary_unauthorized_user(mocker, client, mock_unauthorized_user, penalized_user):
     app.dependency_overrides[jwt_auth_dependency] = lambda: mock_unauthorized_user
