@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.services.admin_service import get_banned_users, get_user_count, get_warned_users
+from app.services.admin_user_service import get_banned_users, get_user_count, get_warned_users
 from app.middleware.auth_middleware import jwt_auth_dependency
 from typing import Dict, Any
 
