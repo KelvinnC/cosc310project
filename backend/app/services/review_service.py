@@ -103,3 +103,15 @@ def increment_vote(review_id: int) -> None:
     
     reviews[index]["votes"] = reviews[index].get("votes", 0) + 1
     save_all(reviews)
+
+def mark_review_as_flagged(review: Review) -> None:
+    """Mark a review as flagged"""
+    review_update = ReviewUpdate(
+        rating=review.rating,
+        reviewTitle=review.reviewTitle,
+        reviewBody=review.reviewBody,
+        flagged=True,
+        votes=review.votes,
+        date=review.date
+    )
+    update_review(review.id, review_update)
