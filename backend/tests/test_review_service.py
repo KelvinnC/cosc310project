@@ -37,21 +37,22 @@ def test_list_review_has_reviews(mocker):
 def test_create_review_adds_review(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[])
     mock_save = mocker.patch("app.services.review_service.save_all")
+    mocker.patch("app.repositories.movie_repo.load_all", return_value=[{"id": "UUID-movie-5678"}])
     # Empty store -> next integer ID should be 1
     payload = ReviewCreate(
-        movieId="UUID-movie-5678", authorId="UUID-author-5678", rating=5.5, reviewTitle="good movie", reviewBody="loved the movie", date="2022-01-01"
+        movieId="UUID-movie-5678", rating=5.5, reviewTitle="good movie", reviewBody="loved the movie"
     )
 
-    review = create_review(payload)
+    review = create_review(payload, author_id="UUID-author-5678")
 
     assert review.id == 1
     assert review.movieId == "UUID-movie-5678"
     assert review.authorId == "UUID-author-5678"
-    assert review.rating == 5.5
+    assert review.rating == 5.0
     assert review.reviewTitle == "good movie"
     assert review.reviewBody == "loved the movie"
     assert review.flagged == False
-    assert review.date == datetime.date(2022, 1, 1)
+    assert isinstance(review.date, datetime.date)
     assert mock_save.called
 
 def test_create_review_collides_id(mocker):
@@ -69,9 +70,10 @@ def test_create_review_collides_id(mocker):
         "date": "2022-01-01"
     }])
     mock_save = mocker.patch("app.services.review_service.save_all")
-    payload = ReviewCreate(movieId="1234", authorId="UUID-author-1234", rating=5.5, reviewTitle="good movie", reviewBody="loved the movie", date="2022-01-01")
+    mocker.patch("app.repositories.movie_repo.load_all", return_value=[{"id": "1234"}])
+    payload = ReviewCreate(movieId="1234", rating=5.5, reviewTitle="good movie", reviewBody="loved the movie")
 
-    review = create_review(payload)
+    review = create_review(payload, author_id="UUID-author-1234")
     assert review.id == 1235
     assert mock_save.called
 
@@ -79,10 +81,11 @@ def test_create_review_strips_whitespace(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[])
     mock_save = mocker.patch("app.services.review_service.save_all")
     mocker.patch("uuid.uuid4", return_value="1234")
+    mocker.patch("app.repositories.movie_repo.load_all", return_value=[{"id": "1234"}])
     payload = ReviewCreate(
-        movieId="    1234       ", authorId="UUID-author-5678", rating=5.5, reviewTitle="      good movie    ", reviewBody="loved the movie", flagged=False, votes=5, date="2022-01-01"
+        movieId="    1234       ", rating=5.5, reviewTitle="      good movie    ", reviewBody="loved the movie"
     )
-    review = create_review(payload)
+    review = create_review(payload, author_id="UUID-author-5678")
     assert review.movieId == "1234"
     assert review.authorId == "UUID-author-5678"
     assert review.reviewTitle == "good movie"

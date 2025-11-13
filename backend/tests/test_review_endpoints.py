@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+from app.middleware.auth_middleware import jwt_auth_dependency
 
 @pytest.fixture
 def client():
@@ -51,12 +52,12 @@ def test_get_review_by_id_invalid_id(mocker, client):
     assert response.status_code == 404
 
 def test_post_review_valid_review(mocker, client):
+    app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": "UUID-author-1234", "role": "user"}
     mocker.patch("app.services.review_service.load_all", return_value=[{"id": 5, "movieId": 'UUID-movie-1234', "authorId": 'UUID-author-1234', "rating": 3.0, "reviewTitle": "old", "reviewBody": "old", "flagged": False, "votes": 0, "date": "2020-01-01"}])
+    mocker.patch("app.repositories.movie_repo.load_all", return_value=[{"id": "UUID-movie-1234", "title": "t", "description": "d", "duration": 100, "genre": "g", "release": "2020-01-01"}])
     mock_save = mocker.patch("app.services.review_service.save_all")
     payload = {
         "movieId": 'UUID-movie-1234',
-        "date": "2022-01-01",
-        "authorId": 'UUID-author-1234',
         "reviewTitle": "good movie",
         "reviewBody": "loved the movie",
         "rating": 5.5,
@@ -64,6 +65,7 @@ def test_post_review_valid_review(mocker, client):
         "flagged": False
     }
     response = client.post("/reviews", json=payload)
+    app.dependency_overrides.clear()
     assert response.status_code == 201
     data = response.json()
     assert data["id"] == 6  # Should be max(5) + 1
@@ -72,9 +74,11 @@ def test_post_review_valid_review(mocker, client):
     assert mock_save.called
 
 def test_post_review_missing_json(mocker, client):
+    app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": "UUID-author-1234", "role": "user"}
     mocker.patch("app.services.review_service.load_all", return_value=[])
     mocker.patch("app.services.review_service.save_all")
     response = client.post("/reviews", json={})
+    app.dependency_overrides.clear()
     assert response.status_code == 422
 
 def test_put_review_valid_put(mocker, client):
