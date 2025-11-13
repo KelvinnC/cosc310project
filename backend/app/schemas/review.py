@@ -33,7 +33,7 @@ class ReviewCreate(BaseModel):
     movieId: str
     rating: float
     reviewTitle: str = Field(..., min_length=3, max_length=100)
-    reviewBody: str = Field(..., min_length=10, max_length=5000)
+    reviewBody: str = Field(..., min_length=50, max_length=1000)
 
     if _P2:
         @_field_validator("movieId", mode="before")

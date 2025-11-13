@@ -59,7 +59,7 @@ def test_post_review_valid_review(mocker, client):
     payload = {
         "movieId": 'UUID-movie-1234',
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "rating": 5.5,
         "votes": 0,
         "flagged": False
