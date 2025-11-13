@@ -95,3 +95,15 @@ def increment_vote(review_id: int) -> None:
             return
     
     raise HTTPException(status_code=404, detail="Review not found")
+
+def mark_review_as_flagged(review: Review) -> None:
+    """Mark a review as flagged"""
+    review_update = ReviewUpdate(
+        rating=review.rating,
+        reviewTitle=review.reviewTitle,
+        reviewBody=review.reviewBody,
+        flagged=True,
+        votes=review.votes,
+        date=review.date
+    )
+    update_review(review.id, review_update)
