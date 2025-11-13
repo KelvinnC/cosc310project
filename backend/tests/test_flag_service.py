@@ -142,3 +142,33 @@ def test_get_flagged_reviews_count_different_reviews(mocker):
     count = flag_service.get_flagged_reviews_count(review_id=2)
     
     assert count == 1
+
+
+def test_flag_review_verifies_collaborator_calls(mocker):
+    """Test internal collaborator invocation sequence (white-box)"""
+    dummy_review = {"id": 42, "flagged": False}
+    mock_get = mocker.patch("app.services.flag_service.get_review_by_id", return_value=dummy_review)
+    mock_load = mocker.patch("app.repositories.flag_repo.load_all", return_value=[])
+    mock_save = mocker.patch("app.repositories.flag_repo.save_all")
+    mock_mark = mocker.patch("app.services.flag_service.mark_review_as_flagged")
+
+    result = flag_service.flag_review(user_id="u-1", review_id=42)
+
+    mock_get.assert_called_once_with(42)
+    mock_load.assert_called_once()
+    mock_save.assert_called_once()
+    mock_mark.assert_called_once_with(dummy_review)
+    assert result["review_id"] == 42
+    assert result["user_id"] == "u-1"
+
+
+def test_get_flagged_reviews_count_cross_review_isolation(mocker):
+    """Test count aggregation across distinct review IDs"""
+    mocker.patch("app.repositories.flag_repo.load_all", return_value=[
+        {"user_id": "u-1", "review_id": 7},
+        {"user_id": "u-2", "review_id": 7},
+        {"user_id": "u-3", "review_id": 8},
+    ])
+    assert flag_service.get_flagged_reviews_count(7) == 2
+    assert flag_service.get_flagged_reviews_count(8) == 1
+    assert flag_service.get_flagged_reviews_count(99) == 0
