@@ -116,3 +116,15 @@ def test_flag_review_extracts_user_id_from_jwt(mocker, client, mock_user):
     # Verify flag_service was called with correct user_id from JWT
     mock_flag_service.assert_called_once_with("user-123", 1)
     assert response.status_code == 201
+
+
+def test_flag_review_invalid_path_param_returns_422(client):
+    """Non-integer review_id should trigger FastAPI validation (422)"""
+    from app.middleware.auth_middleware import jwt_auth_dependency
+    from app.main import app
+    app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": "u-x", "username": "x", "role": "user"}
+    try:
+        resp = client.post("/reviews/abc/flag")
+        assert resp.status_code == 422
+    finally:
+        app.dependency_overrides.clear()
