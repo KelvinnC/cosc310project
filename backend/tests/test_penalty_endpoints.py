@@ -20,23 +20,6 @@ def user_object():
     )
 
 
-@pytest.fixture
-def mock_admin_user():
-    import datetime
-    return {"user_id": "5678",
-                "username": "admin",
-                "exp": datetime.datetime.now() + datetime.timedelta(1),
-                "role": "admin"}
-
-@pytest.fixture
-def mock_unauthorized_user():
-    import datetime
-    return {"user_id": "1234",
-                "username": "user",
-                "exp": datetime.datetime.now() + datetime.timedelta(1),
-                "role": "user"}
-
-
 def test_remove_user_warning_success(mocker, mock_admin_user, user_object):
     app.dependency_overrides[user_endpoints.jwt_auth_dependency] = lambda: mock_admin_user
     warned_user = user_object.model_copy(update={"warnings": 1})
