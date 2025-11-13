@@ -5,14 +5,14 @@ from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.repositories.review_repo import load_all, save_all
 
 REVIEW_NOT_FOUND = "Review not found"
+NOT_FOUND = -1
 
 def _find_review_index(review_id: int, reviews: List[dict]) -> int:
-    """Find review index by id. returns index or -1 if not found."""
+    """Find review index by id. returns index or NOT_FOUND if not found."""
     for i, review in enumerate(reviews):
         if review.get("id") == review_id:
             return i
-    return -1
-
+    return NOT_FOUND
 
 def list_reviews() -> List[Review]:
     """List all reviews."""
@@ -23,7 +23,7 @@ def get_review_by_id(review_id: int) -> Review:
     """Get a review by ID."""
     reviews = load_all()
     index = _find_review_index(review_id, reviews)
-    if index == -1:
+    if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     return Review(**reviews[index])
 
@@ -51,7 +51,7 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
     reviews = load_all()
     index = _find_review_index(review_id, reviews)
 
-    if index == -1:
+    if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     
     old_review = reviews[index]
@@ -76,7 +76,7 @@ def delete_review(review_id: int):
     reviews = load_all()
     index = _find_review_index(review_id, reviews)
     
-    if index == -1:
+    if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     
     reviews.pop(index)
@@ -98,7 +98,7 @@ def increment_vote(review_id: int) -> None:
     reviews = load_all()
     index = _find_review_index(review_id, reviews)
     
-    if index == -1:
+    if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     
     reviews[index]["votes"] = reviews[index].get("votes", 0) + 1
