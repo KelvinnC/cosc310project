@@ -1,12 +1,10 @@
-try:
-    from dotenv import load_dotenv  # type: ignore
-    load_dotenv()
-except Exception:
-    pass
+from dotenv import load_dotenv
+load_dotenv()
 
 from fastapi import FastAPI
 from app.routers.movies import router as movies_router
 from app.routers.user_endpoints import router as users_router
+from app.routers.battles import router as battles_router
 from app.routers.reviews import router as reviews_router
 try:
     from app.routers.login import router as login_router
@@ -24,3 +22,4 @@ app.include_router(users_router)
 app.include_router(reviews_router)
 if login_router is not None:
     app.include_router(login_router)
+app.include_router(battles_router)
