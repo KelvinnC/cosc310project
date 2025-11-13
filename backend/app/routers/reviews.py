@@ -61,7 +61,7 @@ def remove_review(review_id: int):
     return None
 
 
-@router.post("/{review_id}/flag", status_code=200)
+@router.post("/{review_id}/flag", status_code=status.HTTP_201_CREATED)
 def flag_review(review_id: int, current_user: dict = Depends(jwt_auth_dependency)):
     """Flag a review as inappropriate."""
     user_id = current_user.get("user_id")

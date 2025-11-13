@@ -28,9 +28,3 @@ def get_flagged_reviews_count(review_id: int) -> int:
     """Get the number of users who have flagged a specific review"""
     flags = flag_repo.load_all()
     return sum(1 for flag in flags if flag.get("review_id") == review_id)
-
-def get_all_flagged_reviews() -> list:
-    """Get all reviews that have been flagged"""
-    from app.services.review_service import list_reviews
-    all_reviews = list_reviews()
-    return [r for r in all_reviews if r.flagged]
