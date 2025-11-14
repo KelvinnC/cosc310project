@@ -1,9 +1,11 @@
 import random
 from typing import List
+from datetime import datetime
 from fastapi import HTTPException
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.repositories.review_repo import load_all, save_all
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
+from app.repositories import movie_repo
 
 REVIEW_NOT_FOUND = "Review not found"
 
@@ -20,19 +22,24 @@ def get_review_by_id(review_id: int) -> Review:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     return Review(**reviews[index])
 
-def create_review(payload: ReviewCreate) -> Review:
-    """Create a new review."""
+def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
+    """Create a new review. Validates movie existence and assigns author/date."""
     reviews = load_all()
     new_review_id = max((rev.get("id", 0) for rev in reviews), default=0) + 1
+
+    movie_id = payload.movieId.strip()
+    movies = movie_repo.load_all()
+    if not any(m.get("id") == movie_id for m in movies):
+        raise HTTPException(status_code=400, detail="Invalid movieId: movie does not exist")
     
     new_review = Review(
         id=new_review_id,
-        movieId=payload.movieId.strip(),
-        authorId=payload.authorId,
+        movieId=movie_id,
+        authorId=author_id,
         rating=payload.rating,
-        reviewTitle=payload.reviewTitle.strip(),
-        reviewBody=payload.reviewBody.strip(),
-        date=payload.date
+        reviewTitle=payload.reviewTitle,
+        reviewBody=payload.reviewBody,
+        date=datetime.now().date()
     )
 
     reviews.append(new_review.model_dump(mode="json"))
@@ -53,8 +60,8 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
         movieId=old_review["movieId"],
         authorId=old_review["authorId"],
         rating=payload.rating,
-        reviewTitle=payload.reviewTitle.strip(),
-        reviewBody=payload.reviewBody.strip(),
+        reviewTitle=payload.reviewTitle,
+        reviewBody=payload.reviewBody,
         flagged=payload.flagged,
         votes=payload.votes,
         date=payload.date
