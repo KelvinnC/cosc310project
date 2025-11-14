@@ -3,16 +3,9 @@ from typing import List
 from fastapi import HTTPException
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.repositories.review_repo import load_all, save_all
+from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 
 REVIEW_NOT_FOUND = "Review not found"
-NOT_FOUND = -1
-
-def _find_review_index(review_id: int, reviews: List[dict]) -> int:
-    """Find review index by id. returns index or NOT_FOUND if not found."""
-    for i, review in enumerate(reviews):
-        if review.get("id") == review_id:
-            return i
-    return NOT_FOUND
 
 def list_reviews() -> List[Review]:
     """List all reviews."""
@@ -22,7 +15,7 @@ def list_reviews() -> List[Review]:
 def get_review_by_id(review_id: int) -> Review:
     """Get a review by ID."""
     reviews = load_all()
-    index = _find_review_index(review_id, reviews)
+    index = find_dict_by_id(reviews, "id", review_id)
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     return Review(**reviews[index])
@@ -49,7 +42,7 @@ def create_review(payload: ReviewCreate) -> Review:
 def update_review(review_id: int, payload: ReviewUpdate) -> Review:
     """Update an existing review."""
     reviews = load_all()
-    index = _find_review_index(review_id, reviews)
+    index = find_dict_by_id(reviews, "id", review_id)
 
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
@@ -74,7 +67,7 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
 def delete_review(review_id: int):
     """Delete a review by ID."""
     reviews = load_all()
-    index = _find_review_index(review_id, reviews)
+    index = find_dict_by_id(reviews, "id", review_id)
     
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
@@ -96,7 +89,7 @@ def sample_reviews_for_battle(user_id: str, sample_size: int = 200) -> List[Revi
 def increment_vote(review_id: int) -> None:
     """Increment the vote count for a review."""
     reviews = load_all()
-    index = _find_review_index(review_id, reviews)
+    index = find_dict_by_id(reviews, "id", review_id)
     
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)

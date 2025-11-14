@@ -3,6 +3,7 @@ from typing import List, Dict, Any
 from fastapi import HTTPException
 from app.schemas.user import User, UserCreate, UserUpdate
 from app.repositories.user_repo import load_all, save_all
+from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 import datetime
 import bcrypt
 
@@ -36,43 +37,43 @@ def create_user(payload: UserCreate) -> User:
 def get_user_by_id(user_id: str) -> User:
     """Get a user object by user_id"""
     users = load_all()
-    for user in users:
-        if str(user.get("id")) == user_id:
-            user_instance = User(**user)
-            user_instance.hashed_password = None #prevent exposing user passwords
-            return user_instance
-    raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
+    index = find_dict_by_id(users, "id", user_id)
+    if index == NOT_FOUND:
+        raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
+    user_instance = User(**users[index])
+    user_instance.hashed_password = None  # prevent exposing user passwords
+    return user_instance
 
 def get_user_by_id_unsafe(user_id: str) -> User:
     """Get a user object by user_id, including hashed_password"""
     users = load_all()
-    for user in users:
-        if str(user.get("id")) == user_id:
-            user_instance = User(**user)
-            return user_instance
-    raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
+    index = find_dict_by_id(users, "id", user_id)
+    if index == NOT_FOUND:
+        raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
+    return User(**users[index])
 
 def update_user(user_id: str, payload: UserUpdate) -> User:
     """Update a user's username or password by user_id"""
     users = load_all()
-    for idx, user in enumerate(users):
-        if user.get("id") == user_id:
-            username_update = payload.username if payload.username != None else user["username"]
-            #Check if the proposed username is already taken
-            if (payload.username != None):
-                if any(usr.get("username") == payload.username for usr in users):
-                    raise HTTPException(status_code=409, detail="Username collision; select another username")
-            password_update = user["hashed_password"]
-            if (payload.password != None):
-                salt = bcrypt.gensalt(12)
-                hashed_password = bcrypt.hashpw(payload.password.encode('utf-8'), salt)
-                password_update = hashed_password.decode('utf-8')
+    index = find_dict_by_id(users, "id", user_id)
+    if index != NOT_FOUND:
+        user = users[index]
+        username_update = payload.username if payload.username != None else user["username"]
+        #Check if the proposed username is already taken
+        if (payload.username != None):
+            if any(usr.get("username") == payload.username for usr in users):
+                raise HTTPException(status_code=409, detail="Username collision; select another username")
+        password_update = user["hashed_password"]
+        if (payload.password != None):
+            salt = bcrypt.gensalt(12)
+            hashed_password = bcrypt.hashpw(payload.password.encode('utf-8'), salt)
+            password_update = hashed_password.decode('utf-8')
 
-            updated = User(id=user_id, username=username_update.strip(), hashed_password=password_update, 
-                           role=user["role"], created_at=user["created_at"], active=user["active"])
-            users[idx] = updated.model_dump(mode="json")
-            save_all(users)
-            return updated
+        updated = User(id=user_id, username=username_update.strip(), hashed_password=password_update, 
+                       role=user["role"], created_at=user["created_at"], active=user["active"])
+        users[index] = updated.model_dump(mode="json")
+        save_all(users)
+        return updated
     raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
 
 def delete_user(user_id: str) -> None:
