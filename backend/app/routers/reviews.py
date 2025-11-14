@@ -1,11 +1,7 @@
 from typing import List, Optional, Literal
-from fastapi import APIRouter, Query
 from fastapi import APIRouter, status, Query, HTTPException, Depends
-from typing import List
-
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.schemas.search import MovieSearch, MovieWithReviews
-from app.schemas.review import Review
 from app.services.review_service import list_reviews, create_review, delete_review, update_review, get_review_by_id
 from app.services.search_service import search_movies_with_reviews
 from app.repositories.review_repo import get_all_reviews
@@ -14,11 +10,6 @@ from app.services import flag_service
 from app.middleware.auth_middleware import jwt_auth_dependency
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
-
-@router.get("", response_model=List[Review])
-def get_reviews():
-    """Retrieve all reviews."""
-    return list_reviews()
 
 @router.post("", response_model=Review, status_code=201)
 def post_review(review: ReviewCreate):
@@ -43,11 +34,17 @@ def list_or_filter_reviews(
     sort_by: Optional[Literal["rating", "movie"]] = Query(None),
     order: Literal["asc", "desc"] = Query("asc"),
 ):
+    # If no filtering or sorting is requested, return the standard list via service
+    if rating is None and sort_by is None:
+        return list_reviews()
+
+    # Otherwise, map accepted sort options to repository keys
     repo_sort = None
     if sort_by == "rating":
         repo_sort = "rating"
     elif sort_by == "movie":
         repo_sort = "movieTitle"
+
     return get_all_reviews(rating=rating, sort_by=repo_sort, order=order)
 
 
