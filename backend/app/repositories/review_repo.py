@@ -1,11 +1,10 @@
 from pathlib import Path
-import json
+import json, os
 from typing import Dict, Any, List, Optional
 
 from app.repositories import movie_repo
 
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "reviews.json"
-
 
 def load_all() -> List[Dict[str, Any]]:
     if not DATA_PATH.exists():
@@ -13,6 +12,11 @@ def load_all() -> List[Dict[str, Any]]:
     with DATA_PATH.open("r", encoding="utf-8-sig") as f:
         return json.load(f)
 
+def save_all(reviews: List[Dict[str, Any]]) -> None:
+    tmp = DATA_PATH.with_suffix(".tmp")
+    with tmp.open("w", encoding="utf-8-sig") as f:
+        json.dump(reviews, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, DATA_PATH)
 
 def _to_float(val: Any) -> Optional[float]:
     try:
