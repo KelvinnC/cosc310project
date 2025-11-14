@@ -18,6 +18,7 @@ class Review(BaseModel):
     flagged: bool = False
     votes: int = 0
     date: date
+    visible: bool = True
 
     if _P2:
         @_field_validator("movieId", mode="before")
