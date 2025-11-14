@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.schemas.user import User
-from app.routers.admin_endpoints import jwt_auth_dependency
+from app.middleware.auth_middleware import jwt_auth_dependency
 
 @pytest.fixture
 def client():
