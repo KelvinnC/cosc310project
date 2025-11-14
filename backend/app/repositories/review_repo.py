@@ -1,11 +1,9 @@
 from pathlib import Path
-import json
+import json, os
 from typing import Dict, Any, List, Optional
-
 from app.repositories import movie_repo
 
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "reviews.json"
-
 
 def load_all() -> List[Dict[str, Any]]:
     if not DATA_PATH.exists():
@@ -61,10 +59,10 @@ def get_all_reviews(
         def _rating_key(rv: Dict[str, Any]):
             val = _to_float(rv.get("rating"))
             if val is None:
-                return float("-inf") if not reverse else float("inf")
-            return val
+                return (0, 0.0)
+            return (1, val if not reverse else -val)
 
-        return sorted(result, key=_rating_key, reverse=reverse)
+        return sorted(result, key=_rating_key)
 
     if key in ("movieid", "movietitle"):
         movies = movie_repo.load_all()
@@ -95,3 +93,10 @@ def get_all_reviews(
         return sorted(result, key=_movie_title_key, reverse=reverse)
 
     return result
+
+def save_all(reviews: List[Dict[str, Any]]) -> None:
+    tmp = DATA_PATH.with_suffix(".tmp")
+    with tmp.open("w", encoding="utf-8-sig") as f:
+        json.dump(reviews, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, DATA_PATH)
+
