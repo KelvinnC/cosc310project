@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.repositories.review_repo import load_all, save_all
 from app.repositories import movie_repo
+from app.services.tmdb_service import is_tmdb_movie_id, extract_tmdb_id, get_tmdb_movie_details
 
 REVIEW_NOT_FOUND = "Review not found"
 NOT_FOUND = -1
@@ -29,15 +30,28 @@ def get_review_by_id(review_id: int) -> Review:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     return Review(**reviews[index])
 
-def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
-    """Create a new review. Validates movie existence and assigns author/date."""
+async def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
+    """Create a new review. Validates movie existence (local or TMDb) and assigns author/date."""
     reviews = load_all()
     new_review_id = max((rev.get("id", 0) for rev in reviews), default=0) + 1
 
     movie_id = payload.movieId.strip()
-    movies = movie_repo.load_all()
-    if not any(m.get("id") == movie_id for m in movies):
-        raise HTTPException(status_code=400, detail="Invalid movieId: movie does not exist")
+    
+    # Check if it's a TMDb movie or local movie
+    if is_tmdb_movie_id(movie_id):
+        # Validate TMDb movie exists
+        tmdb_id = extract_tmdb_id(movie_id)
+        if tmdb_id is None:
+            raise HTTPException(status_code=400, detail="Invalid TMDb movie ID format")
+        try:
+            await get_tmdb_movie_details(tmdb_id)
+        except HTTPException:
+            raise HTTPException(status_code=400, detail="Invalid movieId: TMDb movie does not exist")
+    else:
+        # Validate local movie exists
+        movies = movie_repo.load_all()
+        if not any(m.get("id") == movie_id for m in movies):
+            raise HTTPException(status_code=400, detail="Invalid movieId: movie does not exist")
     
     new_review = Review(
         id=new_review_id,

@@ -1,9 +1,15 @@
 import uuid
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from fastapi import HTTPException
+from datetime import date as date_type
 from app.schemas.movie import Movie, MovieCreate, MovieUpdate, MovieSummary, MovieWithReviews
 from app.repositories.movie_repo import load_all, save_all
 from app.repositories.review_repo import load_all as load_reviews
+from app.services.tmdb_service import (
+    get_tmdb_movie_details, 
+    is_tmdb_movie_id, 
+    extract_tmdb_id
+)
 
 def list_movies() -> List[Movie]:
     return [Movie(**mv) for mv in load_all()]
@@ -19,7 +25,44 @@ def create_movie(payload: MovieCreate) -> Movie:
     save_all(movies)
     return new_movie
 
-def get_movie_by_id(movie_id: str) -> MovieWithReviews:
+async def get_movie_by_id(movie_id: str) -> MovieWithReviews:
+    """
+    Get movie by ID - supports both local movies and TMDb movies
+    If movie_id starts with 'tmdb_', fetch from TMDb API
+    """
+    # Check if this is a TMDb movie
+    if is_tmdb_movie_id(movie_id):
+        tmdb_id = extract_tmdb_id(movie_id)
+        if tmdb_id is None:
+            raise HTTPException(status_code=400, detail="Invalid TMDb movie ID format")
+        
+        # Fetch from TMDb API
+        tmdb_data = await get_tmdb_movie_details(tmdb_id)
+        if not tmdb_data:
+            raise HTTPException(status_code=404, detail=f"TMDb movie '{movie_id}' not found")
+        
+        # Parse release date
+        try:
+            release_date = date_type.fromisoformat(tmdb_data["release"])
+        except (ValueError, KeyError):
+            release_date = date_type(1900, 1, 1)
+        
+        target = {
+            "id": movie_id,
+            "title": tmdb_data["title"],
+            "description": tmdb_data["description"],
+            "duration": tmdb_data["duration"],
+            "genre": tmdb_data["genre"],
+            "release": release_date,
+        }
+        
+        # Get reviews for this TMDb movie (stored locally)
+        reviews_data = load_reviews()
+        reviews_list = [rv for rv in reviews_data if rv.get("movieId") == movie_id]
+        
+        return MovieWithReviews(**target, reviews=reviews_list)
+    
+    # Local movie lookup
     movies = load_all()
     target = None
     target_index = None
