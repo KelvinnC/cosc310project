@@ -1,4 +1,6 @@
 import pytest
+from app.repositories.review_repo import get_all_reviews
+
 import json
 from pathlib import Path
 from app.repositories.review_repo import get_all_reviews, load_all, save_all, DATA_PATH
