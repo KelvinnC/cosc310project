@@ -16,9 +16,10 @@ def get_reviews():
     return list_reviews()
 
 @router.post("", response_model=Review, status_code=201)
-def post_review(review: ReviewCreate):
+def post_review(review: ReviewCreate, current_user: dict = Depends(jwt_auth_dependency)):
     """Create a new review."""
-    return create_review(review)
+    author_id = current_user.get("user_id")
+    return create_review(review, author_id=author_id)
 
 @router.get("/search", response_model=List[MovieWithReviews])
 def search_reviews(title: str = Query(..., min_length=1)):
