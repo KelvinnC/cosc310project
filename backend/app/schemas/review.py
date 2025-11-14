@@ -30,8 +30,9 @@ class Review(BaseModel):
             return None if v is None else str(v)
 
 class ReviewCreate(BaseModel):
+    """Create a new review. Note: authorId and date are assigned by the server."""
     movieId: str
-    rating: float
+    rating: float = Field(..., ge=1, le=5, description="Rating must be between 1 and 5")
     reviewTitle: str = Field(..., min_length=3, max_length=100)
     reviewBody: str = Field(..., min_length=50, max_length=1000)
 
@@ -40,18 +41,6 @@ class ReviewCreate(BaseModel):
         @classmethod
         def _coerce_movie_id(cls, v):
             return None if v is None else str(v)
-        @_field_validator("rating", mode="before")
-        @classmethod
-        def _cap_rating(cls, v):
-            try:
-                val = float(v)
-            except Exception:
-                return v
-            if val < 1:
-                return 1.0
-            if val > 5:
-                return 5.0
-            return val
         @_field_validator("reviewTitle", "reviewBody", mode="before")
         @classmethod
         def _strip_text(cls, v):
@@ -60,26 +49,26 @@ class ReviewCreate(BaseModel):
         @_validator("movieId", pre=True)
         def _coerce_movie_id_v1(cls, v):
             return None if v is None else str(v)
-        @_validator("rating", pre=True)
-        def _cap_rating_v1(cls, v):
-            try:
-                val = float(v)
-            except Exception:
-                return v
-            if val < 1:
-                return 1.0
-            if val > 5:
-                return 5.0
-            return val
         @_validator("reviewTitle", "reviewBody", pre=True)
         def _strip_text_v1(cls, v):
             return v.strip() if isinstance(v, str) else v
 
 class ReviewUpdate(BaseModel):
-    rating: float
-    reviewTitle: str
-    reviewBody: str
+    """Update a review. Note: authorId and date cannot be modified."""
+    rating: float = Field(..., ge=1, le=5, description="Rating must be between 1 and 5")
+    reviewTitle: str = Field(..., min_length=3, max_length=100)
+    reviewBody: str = Field(..., min_length=50, max_length=1000)
     flagged: bool = False
     votes: int = 0
     date: date
+
+    if _P2:
+        @_field_validator("reviewTitle", "reviewBody", mode="before")
+        @classmethod
+        def _strip_text(cls, v):
+            return v.strip() if isinstance(v, str) else v
+    else:
+        @_validator("reviewTitle", "reviewBody", pre=True)
+        def _strip_text_v1(cls, v):
+            return v.strip() if isinstance(v, str) else v
 

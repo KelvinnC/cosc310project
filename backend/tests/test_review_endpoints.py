@@ -14,7 +14,7 @@ def test_list_reviews(mocker, client):
         "id": 1234,
         "movieId": 'UUID-movie-1234',
         "authorId": 'UUID-author-1234',
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
         "reviewBody": "loved the movie",
         "flagged": False,
@@ -60,7 +60,7 @@ def test_post_review_valid_review(mocker, client):
         "movieId": 'UUID-movie-1234',
         "reviewTitle": "good movie",
         "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
-        "rating": 5.5,
+        "rating": 5.0,
         "votes": 0,
         "flagged": False
     }
@@ -87,9 +87,9 @@ def test_put_review_valid_put(mocker, client):
         "id": 1234,
         "movieId": 'UUID-movie-1234',
         "authorId": 'UUID-author-5678',
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
@@ -98,7 +98,7 @@ def test_put_review_valid_put(mocker, client):
     response = client.put("/reviews/1234", json={
         "rating": 4.5,
         "reviewTitle": "updated movie",
-        "reviewBody": "updated review body",
+        "reviewBody": "I absolutely loved this updated movie! The new cinematography was even more stunning than before.",
         "flagged": False,
         "votes": 10,
         "date": "2022-01-01"
@@ -116,18 +116,18 @@ def test_put_review_invalid_put(mocker, client):
         "id": 1234,
         "movieId": 1234,
         "authorId": 1234,
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
     }])
     mocker.patch("app.services.review_service.save_all")
     response = client.put("/reviewss/5678", json={
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
@@ -140,9 +140,9 @@ def test_delete_review_valid_review(mocker, client):
         "id": 1234,
         "movieId": 1234,
         "authorId": 1234,
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "flagged": False,
         "votes": 5,
         "date": "2022-01-01"

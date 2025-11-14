@@ -15,9 +15,9 @@ def test_list_review_has_reviews(mocker):
         "id": 1,
         "movieId": "1234",
         "authorId": -1,
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
@@ -26,9 +26,9 @@ def test_list_review_has_reviews(mocker):
     assert reviews[0].id == 1
     assert reviews[0].movieId == "1234"
     assert reviews[0].authorId == -1
-    assert reviews[0].rating == 5.5
+    assert reviews[0].rating == 5.0
     assert reviews[0].reviewTitle == "good movie"
-    assert reviews[0].reviewBody == "loved the movie"
+    assert reviews[0].reviewBody == "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout."
     assert reviews[0].flagged == False
     assert reviews[0].votes == 5
     assert reviews[0].date == datetime.date(2022, 1, 1)
@@ -40,7 +40,7 @@ def test_create_review_adds_review(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[{"id": "UUID-movie-5678"}])
     # Empty store -> next integer ID should be 1
     payload = ReviewCreate(
-        movieId="UUID-movie-5678", rating=5.5, reviewTitle="good movie", reviewBody="I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout."
+        movieId="UUID-movie-5678", rating=5.0, reviewTitle="good movie", reviewBody="I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout."
     )
 
     review = create_review(payload, author_id="UUID-author-5678")
@@ -62,16 +62,16 @@ def test_create_review_collides_id(mocker):
         "id": 1234,
         "movieId": "UUID-movie-1234",
         "authorId": "UUID-author-1234",
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
     }])
     mock_save = mocker.patch("app.services.review_service.save_all")
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[{"id": "1234"}])
-    payload = ReviewCreate(movieId="1234", rating=5.5, reviewTitle="good movie", reviewBody="I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.")
+    payload = ReviewCreate(movieId="1234", rating=5.0, reviewTitle="good movie", reviewBody="I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.")
 
     review = create_review(payload, author_id="UUID-author-1234")
     assert review.id == 1235
@@ -83,7 +83,7 @@ def test_create_review_strips_whitespace(mocker):
     mocker.patch("uuid.uuid4", return_value="1234")
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[{"id": "1234"}])
     payload = ReviewCreate(
-        movieId="    1234       ", rating=5.5, reviewTitle="      good movie    ", reviewBody="I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout."
+        movieId="    1234       ", rating=5.0, reviewTitle="      good movie    ", reviewBody="   I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.   "
     )
     review = create_review(payload, author_id="UUID-author-5678")
     assert review.movieId == "1234"
@@ -97,9 +97,9 @@ def test_get_review_by_id_valid_id(mocker):
         "id": 1234,
         "movieId": "1234",
         "authorId": 1234,
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
@@ -122,27 +122,27 @@ def test_update_review_valid_update(mocker):
         "id": 1234,
         "movieId": "1234",
         "authorId": 1234,
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
     }])
     mock_save = mocker.patch("app.services.review_service.save_all")
     from app.schemas.review import ReviewUpdate
-    payload = ReviewUpdate(rating=7.7, reviewTitle="Updated Test", reviewBody="hated the movie", flagged=False, votes=5, date="2022-01-01")
+    payload = ReviewUpdate(rating=5.0, reviewTitle="Updated Test", reviewBody="I absolutely hated this movie! The cinematography was terrible and the plot kept me confused throughout.", flagged=False, votes=5, date="2022-01-01")
     review = update_review(1234, payload)
-    assert review.rating == 7.7
+    assert review.rating == 5.0
     assert review.reviewTitle == "Updated Test"
-    assert review.reviewBody == "hated the movie"
+    assert review.reviewBody == "I absolutely hated this movie! The cinematography was terrible and the plot kept me confused throughout."
     assert mock_save.called
 
 def test_update_review_invalid_id(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[])
     mock_save = mocker.patch("app.services.review_service.save_all")
     from app.schemas.review import ReviewUpdate
-    payload = ReviewUpdate(rating=5.5, reviewTitle="good movie", reviewBody="loved the movie", flagged=False, votes=5, date="2022-01-01")
+    payload = ReviewUpdate(rating=5.0, reviewTitle="good movie", reviewBody="I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.", flagged=False, votes=5, date="2022-01-01")
     with pytest.raises(HTTPException) as ex:
         update_review(1234, payload)
     assert ex.value.status_code == 404
@@ -154,7 +154,7 @@ def test_delete_review_valid_review(mocker):
         "id": 1234,
         "movieId": "1234",
         "authorId": 1234,
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
         "reviewBody": "loved the movie",
         "flagged": False,

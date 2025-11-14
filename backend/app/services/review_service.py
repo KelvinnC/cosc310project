@@ -67,8 +67,8 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
         movieId=old_review["movieId"],
         authorId=old_review["authorId"],
         rating=payload.rating,
-        reviewTitle=payload.reviewTitle.strip(),
-        reviewBody=payload.reviewBody.strip(),
+        reviewTitle=payload.reviewTitle,
+        reviewBody=payload.reviewBody,
         flagged=payload.flagged,
         votes=payload.votes,
         date=payload.date
