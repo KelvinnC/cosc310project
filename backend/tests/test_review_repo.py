@@ -25,9 +25,11 @@ def test_filter_by_rating_exact_match(mocker):
     only_fives = get_all_reviews(rating=5)
     assert [r["id"] for r in only_fives] == [1, 2]
 
+
 def test_load_all_file_missing(mocker):
     mocker.patch.object(Path, "exists", return_value=False)
     assert load_all() == []
+
 
 def test_load_all_with_data(mocker):
     mocker.patch.object(Path, "exists", return_value=True)
@@ -47,6 +49,7 @@ def test_load_all_with_data(mocker):
     assert result == payload
     mock_open.assert_called_once_with("r", encoding="utf-8-sig")
 
+
 def test_save_all_saves_data(mocker):
     reviews = [{
         "id": "1234",
@@ -59,6 +62,7 @@ def test_save_all_saves_data(mocker):
         "votes": 5,
         "date": "2022-01-01"
     }]
+
     mock_file = mocker.mock_open()
     mocker.patch.object(Path, "open", mock_file)
 
@@ -73,6 +77,8 @@ def test_save_all_saves_data(mocker):
     handle.write.assert_called()
 
     mock_replace.assert_called_once_with(tmp_path, DATA_PATH)
+
+
 def test_sort_by_rating_ascending_descending(mocker):
     data = [
         {"id": 1, "movieId": "A", "rating": 3.0},
@@ -93,6 +99,7 @@ def test_sort_by_rating_ascending_descending(mocker):
         {"id": 3, "movieId": "C"},
         {"id": 4, "movieId": "D", "rating": 5.0},
     ]
+
 
 def test_sort_by_movie_id_supports_uuid_and_index(mocker):
     reviews = [

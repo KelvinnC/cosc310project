@@ -1,6 +1,6 @@
 from pathlib import Path
-from typing import Dict, Any, List, Optional
 import json, os
+from typing import Dict, Any, List, Optional
 from app.repositories import movie_repo
 
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "reviews.json"
@@ -104,3 +104,4 @@ def save_all(reviews: List[Dict[str, Any]]) -> None:
     with tmp.open("w", encoding="utf-8-sig") as f:
         json.dump(reviews, f, ensure_ascii=False, indent=2)
     os.replace(tmp, DATA_PATH)
+
