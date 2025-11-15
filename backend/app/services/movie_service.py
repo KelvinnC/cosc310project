@@ -5,8 +5,23 @@ from app.schemas.movie import Movie, MovieCreate, MovieUpdate, MovieSummary, Mov
 from app.repositories.movie_repo import load_all, save_all
 from app.repositories.review_repo import load_all as load_reviews
 
-def list_movies() -> List[Movie]:
-    return [Movie(**mv) for mv in load_all()]
+def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
+    movies: List[Dict[str, Any]] = load_all()
+
+    if sort_by == "rating":
+        direction = (order or "asc").lower()
+        reverse = (direction == "desc")
+
+        def _rating_key(m: Dict[str, Any]):
+            val = m.get("rating")
+            try:
+                return float(val)
+            except (TypeError, ValueError):
+                return float("-inf") if not reverse else float("inf")
+
+        movies = sorted(movies, key=_rating_key, reverse=reverse)
+
+    return [Movie(**mv) for mv in movies]
 
 def create_movie(payload: MovieCreate) -> Movie:
     movies = load_all()
