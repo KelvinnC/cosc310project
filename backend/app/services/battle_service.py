@@ -44,14 +44,7 @@ def _persist_battle(battle_dict: dict) -> None:
 
 def createBattle(user: User, reviews: List[Review]) -> Battle:
     """Create a new battle. Persists the battle to storage."""
-    voted_pairs = _get_user_voted_pairs(user.id)
-    eligible_reviews = _filter_eligible_reviews(user, reviews)
-    eligible_pairs = _generate_eligible_pairs(eligible_reviews, voted_pairs)
-
-    if not eligible_pairs:
-        raise ValueError("No eligible review pairs available for this user.")
-
-    review1_id, review2_id = random.choice(eligible_pairs)
+    review1_id, review2_id = battle_pair_selector.select_eligible_pair(user, reviews)
     battle = _create_battle_object(review1_id, review2_id)
     battle_dict = _battle_to_dict(battle, user.id)
     _persist_battle(battle_dict)
@@ -66,7 +59,7 @@ def _validate_winner(battle: Battle, winner_id: int) -> None:
 def _validate_no_duplicate_vote(battle: Battle, user_id: str) -> None:
     """Validate that the user hasn't already voted on this review pair."""
     pair = frozenset((battle.review1Id, battle.review2Id))
-    if pair in _get_user_voted_pairs(user_id):
+    if pair in battle_pair_selector.get_user_voted_pairs(user_id):
         raise ValueError("User has already voted on this review pair")
 
 def _update_battle_with_result(battle: Battle, winner_id: int, user_id: str) -> None:

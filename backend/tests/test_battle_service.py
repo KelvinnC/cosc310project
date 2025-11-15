@@ -75,7 +75,7 @@ def test_create_battle_excludes_own_reviews(mocker):
     mocker.patch("random.choice", return_value=(3, 5))
 
     # Simulate that reviews with ids 1 and 2 are owned by the user
-    mocker.patch("app.services.battle_service._is_own_review", side_effect=lambda u, r: r.id in {1,2})
+    mocker.patch("app.services.battle_pair_selector.is_own_review", side_effect=lambda u, r: r.id in {1,2})
 
     # --- Run the function ---
     battle = battle_service.createBattle(user, reviews)
@@ -101,7 +101,7 @@ def test_create_battle_no_eligible_pairs(user, reviews, mocker):
         {"id": "battle3", "userId": user.id, "review1Id": 4, "review2Id": 5, "winnerId": 4},
     ]
     # Mark reviews 1 and 2 as owned to leave only 3,4,5 eligible
-    mocker.patch("app.services.battle_service._is_own_review", side_effect=lambda u, r: r.id in {1,2})
+    mocker.patch("app.services.battle_pair_selector.is_own_review", side_effect=lambda u, r: r.id in {1,2})
     
     mocker.patch("app.repositories.battle_repo.load_all", return_value=previous_battles)
 
@@ -116,7 +116,7 @@ def test_create_battle_single_eligible_pair(user, reviews, mocker):
         {"id": "battle1", "userId": user.id, "review1Id": 3, "review2Id": 4, "winnerId": 3},
         {"id": "battle2", "userId": user.id, "review1Id": 4, "review2Id": 5, "winnerId": 5},
     ]
-    mocker.patch("app.services.battle_service._is_own_review", side_effect=lambda u, r: r.id in {1,2})
+    mocker.patch("app.services.battle_pair_selector.is_own_review", side_effect=lambda u, r: r.id in {1,2})
     mocker.patch("app.repositories.battle_repo.load_all", return_value=previous_battles)
     mock_save = mocker.patch("app.repositories.battle_repo.save_all")
     
@@ -129,7 +129,7 @@ def test_create_battle_single_eligible_pair(user, reviews, mocker):
 
 def test_create_battle_all_reviews_owned(user, reviews, mocker):
     """Test when all available reviews are owned by the user."""
-    mocker.patch("app.services.battle_service._is_own_review", return_value=True)
+    mocker.patch("app.services.battle_pair_selector.is_own_review", return_value=True)
     mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
     
     with pytest.raises(ValueError, match="No eligible review pairs available"):
