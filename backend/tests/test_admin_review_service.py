@@ -1,4 +1,4 @@
-from app.services.admin_review_service import get_flagged_reviews
+from app.services.admin_review_service import get_flagged_reviews, hide_review
 from app.schemas.review import Review
 
 def test_get_flagged_reviews_no_reviews(mocker):
@@ -50,3 +50,21 @@ def test_get_flagged_reviews_has_flagged_and_unflagged(mocker):
     result = get_flagged_reviews()
     assert len(result) == 1
     assert all([review.flagged for review in result])
+
+def test_hide_review_hides_review(mocker):
+    mocker.patch("app.services.admin_review_service.load_all", return_value=[
+    {
+        "id": 1,
+        "movieId": "1234",
+        "authorId": -1,
+        "rating": 5.0,
+        "reviewTitle": "good movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
+        "flagged": False,
+        "votes": 5,
+        "date": "2022-01-01",
+        "visible": True
+    }])
+    mocker.patch("app.services.admin_review_service.save_all")
+    result = hide_review(1)
+    assert not result["visible"]
