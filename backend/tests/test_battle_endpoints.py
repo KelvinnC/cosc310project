@@ -148,11 +148,13 @@ def test_submit_vote_success(mocker, mock_user, mock_jwt_payload, mock_battle):
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
     mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)
     mocker.patch("app.routers.battles.battle_service.submitBattleResult", return_value=None)
+    mock_increment = mocker.patch("app.routers.battles.review_service.increment_vote")
     
     vote_request = VoteRequest(winnerId=1)
     result = submit_vote(battle_id=mock_battle.id, payload=vote_request, current_user=mock_jwt_payload)
     
     assert result is None
+    mock_increment.assert_called_once_with(1)
 
 
 def test_submit_vote_user_not_found(mocker, mock_battle):

@@ -99,6 +99,8 @@ def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depen
             winner_id=payload.winnerId,
             user_id=user_id
         )
+        # Increment the vote count for the winning review
+        review_service.increment_vote(payload.winnerId)
     except ValueError as e:
         if "already voted" in str(e).lower():
             raise HTTPException(status_code=409, detail=str(e))

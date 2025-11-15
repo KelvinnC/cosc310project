@@ -156,7 +156,6 @@ def test_submit_battle_result_success(user, reviews, mocker):
     )
     mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.battle_repo.save_all")
-    mocker.patch("app.services.review_service.increment_vote")
 
     # Submit the vote
     battle_service.submitBattleResult(battle, winner_id=3, user_id=user.id)
@@ -195,7 +194,6 @@ def test_submit_battle_result_marks_end_time(user, mocker):
     )
     mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.battle_repo.save_all")
-    mocker.patch("app.services.review_service.increment_vote")
 
     battle_service.submitBattleResult(battle, winner_id=3, user_id=user.id)
 
@@ -252,41 +250,4 @@ def test_submit_battle_result_prevents_duplicate_vote_unordered(user, mocker):
     mock_save.assert_not_called()
 
 
-def test_submit_battle_result_increments_review_votes(user, mocker):
-    """Test that the winning review's vote count is incremented."""
-    battle = Battle(
-        id=str(uuid4()),
-        review1Id=3,
-        review2Id=4,
-        startedAt=datetime.now(),
-        winnerId=None,
-        endedAt=None,
-    )
-    mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
-    mocker.patch("app.repositories.battle_repo.save_all")
-    mock_increment = mocker.patch("app.services.review_service.increment_vote")
 
-    battle_service.submitBattleResult(battle, winner_id=3, user_id=user.id)
-
-    mock_increment.assert_called_once_with(3)
-
-
-def test_submit_battle_result_handles_increment_failure(user, mocker):
-    """Test that errors in vote increment are handled appropriately."""
-    battle = Battle(
-        id=str(uuid4()),
-        review1Id=3,
-        review2Id=4,
-        startedAt=datetime.now(),
-        winnerId=None,
-        endedAt=None,
-    )
-    mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
-    mocker.patch("app.repositories.battle_repo.save_all")
-    mock_increment = mocker.patch(
-        "app.services.review_service.increment_vote",
-        side_effect=HTTPException(status_code=404, detail="Review not found")
-    )
-
-    with pytest.raises(ValueError, match="Failed to increment review vote count"):
-        battle_service.submitBattleResult(battle, winner_id=3, user_id=user.id)

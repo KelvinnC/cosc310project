@@ -85,20 +85,11 @@ def _update_battle_with_result(battle: Battle, winner_id: int, user_id: str) -> 
     except Exception as e:
         raise ValueError(f"Failed to record vote: {str(e)}")
 
-def _increment_winner_vote_count(winner_id: int) -> None:
-    """Increment the vote count for the winning review."""
-    try:
-        from app.services import review_service
-        review_service.increment_vote(winner_id)
-    except Exception as e:
-        raise ValueError(f"Failed to increment review vote count: {str(e)}")
-
 def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
     """Submit a battle result. Persists the result to storage."""
     _validate_winner(battle, winner_id)
     _validate_no_duplicate_vote(battle, user_id)
     _update_battle_with_result(battle, winner_id, user_id)
-    _increment_winner_vote_count(winner_id)
 
 def get_battle_by_id(battle_id: str) -> Battle:
     """Retrieve a battle by its ID."""
