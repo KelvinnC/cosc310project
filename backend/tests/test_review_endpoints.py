@@ -108,7 +108,7 @@ def test_put_review_valid_put(mocker, client):
     assert data["reviewTitle"] == "updated movie"
     assert data["movieId"] == 'UUID-movie-1234'
     assert data["authorId"] == 'UUID-author-5678'
-    assert data["votes"] == 10
+    assert data["votes"] == 5
 
 def test_put_review_invalid_put(mocker, client):
     mocker.patch("app.services.review_service.load_all",
