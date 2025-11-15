@@ -1,5 +1,3 @@
-# test_battle_endpoints.py
-"""Tests for RESTful battles router endpoints."""
 import pytest
 from fastapi import HTTPException, status, Response
 from datetime import datetime, date
@@ -68,7 +66,6 @@ def mock_response():
     return Response()
 
 
-# POST /battles tests
 def test_create_battle_success(mocker, mock_user, mock_jwt_payload, sample_reviews, mock_battle, mock_response):
     """Test successful battle creation with Location header."""
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
@@ -141,7 +138,6 @@ def test_create_battle_file_error(mocker, mock_user, mock_jwt_payload, mock_resp
     assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
-# POST /battles/{battle_id}/votes tests
 def test_submit_vote_success(mocker, mock_user, mock_jwt_payload, mock_battle):
     """Test successful vote submission."""
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
@@ -246,7 +242,6 @@ def test_submit_vote_increment_failure(mocker, mock_user, mock_jwt_payload, mock
     assert "Vote recorded" in exc_info.value.detail
 
 
-# GET /battles/{battle_id} tests
 def test_get_battle_success(mocker, mock_battle):
     """Test successful retrieval of a battle by ID."""
     mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)

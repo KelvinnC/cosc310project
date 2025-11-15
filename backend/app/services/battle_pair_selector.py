@@ -1,8 +1,3 @@
-# battle_pair_selector.py
-"""
-Service module for selecting eligible battle pairs.
-Handles filtering reviews and generating valid battle pairs based on user voting history.
-"""
 from typing import List, Tuple
 
 from app.schemas.user import User
@@ -49,10 +44,9 @@ def generate_eligible_pairs(reviews: List[Review], voted_pairs: set) -> List[Tup
 
 def select_eligible_pair(user: User, reviews: List[Review]) -> Tuple[int, int]:
     """
-    Select an eligible review pair for a battle.
+    Select an eligible review pair for a battle. 
     
     Returns a tuple of (review1_id, review2_id).
-    Raises ValueError if no eligible pairs are available.
     """
     import random
     
