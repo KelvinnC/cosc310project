@@ -55,13 +55,10 @@ class ReviewCreate(BaseModel):
             return v.strip() if isinstance(v, str) else v
 
 class ReviewUpdate(BaseModel):
-    """Update a review. Note: authorId and date cannot be modified."""
+    """Update a review. Only rating, title, and body are editable. Server manages authorId, date, votes, and flagged."""
     rating: float = Field(..., ge=1, le=5, description="Rating must be between 1 and 5")
     reviewTitle: str = Field(..., min_length=3, max_length=100)
     reviewBody: str = Field(..., min_length=50, max_length=1000)
-    flagged: bool = False
-    votes: int = 0
-    date: date
 
     if _P2:
         @_field_validator("reviewTitle", "reviewBody", mode="before")

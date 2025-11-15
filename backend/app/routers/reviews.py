@@ -6,7 +6,7 @@ from app.schemas.search import MovieSearch, MovieWithReviews
 from app.services.review_service import list_reviews, create_review, delete_review, update_review, get_review_by_id
 from app.services.search_service import search_movies_with_reviews
 from app.services import flag_service
-from app.middleware.auth_middleware import jwt_auth_dependency
+from app.middleware.auth_middleware import jwt_auth_dependency, user_is_author
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
@@ -39,8 +39,8 @@ def get_review(review_id: int):
         )
 
 @router.put("/{review_id}", response_model=Review)
-def put_review(review_id: int, review_update: ReviewUpdate):
-    """Update a review by ID."""
+def put_review(review_id: int, review_update: ReviewUpdate, current_user: dict = Depends(user_is_author)):
+    """Update a review by ID. Only the author can update their own review."""
     try:
         return update_review(review_id, review_update)
     except Exception as e:
@@ -50,8 +50,8 @@ def put_review(review_id: int, review_update: ReviewUpdate):
         )
 
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove_review(review_id: int):
-    """Delete a review by its ID. Returns 204 on success, 404 if not found."""
+def remove_review(review_id: int, current_user: dict = Depends(user_is_author)):
+    """Delete a review by its ID. Only the author can delete their own review. Returns 204 on success, 404 if not found."""
     try:
         delete_review(review_id)
     except Exception as e:
