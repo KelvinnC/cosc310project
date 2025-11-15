@@ -26,6 +26,7 @@ def test_list_movies(mocker, client):
     data = response.json()
     assert isinstance(data, list)
     assert len(data) == 1
+    assert "id" in data[0] and "title" in data[0]
 
 def test_get_movie_by_id_valid_id(client):
     response = client.get("/movies/6bca4027-ad52-414e-810c-b830571cc07d")
@@ -38,7 +39,6 @@ def test_get_movie_by_id_valid_id(client):
 
 def test_get_movie_by_id_invalid_id(client):
     response = client.get("/movies/NotAValidID")
-    # Endpoint now mirrors /movies/search shape: returns empty list when not found
     assert response.status_code == 200
     assert response.json() == []
 

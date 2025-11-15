@@ -2,11 +2,75 @@ import uuid
 from typing import List, Dict, Any
 from fastapi import HTTPException
 from app.schemas.movie import Movie, MovieCreate, MovieUpdate, MovieSummary, MovieWithReviews
-from app.repositories.movie_repo import load_all, save_all
+import app.repositories.movie_repo as movie_repo
 from app.repositories.review_repo import load_all as load_reviews
 
-def list_movies() -> List[Movie]:
-    return [Movie(**mv) for mv in load_all()]
+def load_all() -> List[Dict[str, Any]]:
+    return movie_repo.load_all()
+
+def save_all(movies: List[Dict[str, Any]]) -> None:
+    return movie_repo.save_all(movies)
+
+def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
+    movies: List[Dict[str, Any]] = load_all()
+
+    def _coerce_float(v: Any) -> float | None:
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return None
+
+    needs_rating = any(_coerce_float(m.get("rating")) is None for m in movies)
+    derived: Dict[str, float] = {}
+    if needs_rating:
+        reviews = load_reviews()
+        index_to_id = {idx + 1: mv.get("id") for idx, mv in enumerate(movies)}
+        totals: Dict[str, float] = {}
+        counts: Dict[str, int] = {}
+        for rv in reviews:
+            mv_id = rv.get("movieId")
+            rating = _coerce_float(rv.get("rating"))
+            if rating is None:
+                continue
+            if isinstance(mv_id, int):
+                movie_id = index_to_id.get(mv_id)
+            else:
+                movie_id = str(mv_id) if mv_id is not None else None
+            if not movie_id:
+                continue
+            totals[movie_id] = totals.get(movie_id, 0.0) + rating
+            counts[movie_id] = counts.get(movie_id, 0) + 1
+        for mid, total in totals.items():
+            cnt = counts.get(mid) or 0
+            if cnt > 0:
+                derived[mid] = total / cnt
+
+    enriched: List[Dict[str, Any]] = []
+    for m in movies:
+        base = dict(m)
+        current = _coerce_float(base.get("rating"))
+        if current is None:
+            comp = derived.get(base.get("id"))
+            if comp is not None:
+                base["rating"] = comp
+        else:
+            base["rating"] = current
+        enriched.append(base)
+
+    result = enriched
+    if sort_by == "rating":
+        direction = (order or "asc").lower()
+        reverse = (direction == "desc")
+
+        def _rating_key(m: Dict[str, Any]):
+            val = _coerce_float(m.get("rating"))
+            if val is None:
+                return float("-inf") if not reverse else float("inf")
+            return val
+
+        result = sorted(enriched, key=_rating_key, reverse=reverse)
+
+    return [Movie(**mv) for mv in result]
 
 def create_movie(payload: MovieCreate) -> Movie:
     movies = load_all()
