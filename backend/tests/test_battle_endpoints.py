@@ -226,6 +226,26 @@ def test_submit_vote_duplicate_vote(mocker, mock_user, mock_jwt_payload, mock_ba
     assert exc_info.value.status_code == 409
 
 
+def test_submit_vote_increment_failure(mocker, mock_user, mock_jwt_payload, mock_battle):
+    """Test when vote is recorded but review vote increment fails."""
+    mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
+    mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
+    mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)
+    mocker.patch("app.routers.battles.battle_service.submitBattleResult", return_value=None)
+    mocker.patch(
+        "app.routers.battles.review_service.increment_vote",
+        side_effect=Exception("Review not found")
+    )
+    
+    vote_request = VoteRequest(winnerId=1)
+    
+    with pytest.raises(HTTPException) as exc_info:
+        submit_vote(battle_id=mock_battle.id, payload=vote_request, current_user=mock_jwt_payload)
+    
+    assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert "Vote recorded" in exc_info.value.detail
+
+
 # GET /battles/{battle_id} tests
 def test_get_battle_success(mocker, mock_battle):
     """Test successful retrieval of a battle by ID."""

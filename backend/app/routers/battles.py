@@ -99,9 +99,16 @@ def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depen
             winner_id=payload.winnerId,
             user_id=user_id
         )
-        # Increment the vote count for the winning review
-        review_service.increment_vote(payload.winnerId)
     except ValueError as e:
         if "already voted" in str(e).lower():
             raise HTTPException(status_code=409, detail=str(e))
         raise HTTPException(status_code=400, detail=str(e))
+    
+    # Increment the vote count for the winning review
+    try:
+        review_service.increment_vote(payload.winnerId)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Vote recorded but failed to update review count: {str(e)}"
+        )
