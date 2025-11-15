@@ -15,7 +15,6 @@ def battle_data():
     }
     return payload
 
-# -------------------- Battle Tests --------------------
 def test_missing_required_fields():
     with pytest.raises(ValidationError):
         Battle()
@@ -42,29 +41,3 @@ def test_battle_same_review_ids_raises_error(battle_data):
         Battle(**battle_data)
     
     assert "Battle must have two different reviews" in str(exc_info.value)
-
-# -------------------- BattleCreate Tests --------------------
-
-# def test_valid_battle_create():
-#     valid_data = {
-#         "review1Id": 201,
-#         "review2Id": 202
-#     }
-#     battle_create = BattleCreate(**valid_data)
-#     assert battle_create.review1Id == valid_data["review1Id"]
-#     assert battle_create.review1Id != battle_create.review2Id
-
-# def test_invalid_battle_create():
-#     invalid_data = {
-#         "review1Id": 201,
-#         "review2Id": 201
-#     }
-#     with pytest.raises(ValidationError):
-#         BattleCreate(**invalid_data)
-
-# def test_missing_required_fields_battle_create():
-#     with pytest.raises(ValidationError):
-#         BattleCreate()
-
-# BattleResult and BattleCreate schemas were removed; validation is handled in service layer.
-

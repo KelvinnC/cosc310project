@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Response, Depends
 
 from app.schemas.battle import Battle, VoteRequest
-from app.schemas.review import Review
 from app.services import battle_service
 from app.services.user_service import get_user_by_id
 from app.services import review_service
@@ -103,3 +102,12 @@ def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depen
         if "already voted" in str(e).lower():
             raise HTTPException(status_code=409, detail=str(e))
         raise HTTPException(status_code=400, detail=str(e))
+    
+    # Increment the vote count for the winning review
+    try:
+        review_service.increment_vote(payload.winnerId)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Vote recorded but failed to update review count: {str(e)}"
+        )
