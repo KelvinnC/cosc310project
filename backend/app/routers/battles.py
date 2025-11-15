@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Response, Depends
 
 from app.schemas.battle import Battle, VoteRequest
-from app.schemas.review import Review
 from app.services import battle_service
 from app.services.user_service import get_user_by_id
 from app.services import review_service
