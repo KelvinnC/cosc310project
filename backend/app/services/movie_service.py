@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from app.schemas.movie import Movie, MovieCreate, MovieUpdate, MovieSummary, MovieWithReviews
 from app.repositories.movie_repo import load_all, save_all
 from app.repositories.review_repo import load_all as load_reviews
+from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 
 def list_movies() -> List[Movie]:
     return [Movie(**mv) for mv in load_all()]
@@ -21,17 +22,12 @@ def create_movie(payload: MovieCreate) -> Movie:
 
 def get_movie_by_id(movie_id: str) -> MovieWithReviews:
     movies = load_all()
-    target = None
-    target_index = None
-    for idx, movie in enumerate(movies):
-        if str(movie.get("id")) == movie_id:
-            target = movie
-            target_index = idx
-            break
-    if target is None:
+    target_index = find_dict_by_id(movies, "id", movie_id)
+    if target_index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
-
-    index_1_based = (target_index or 0) + 1
+    
+    target = movies[target_index]
+    index_1_based = target_index + 1
     reviews_data = load_reviews()
     reviews_list = []
     for rv in reviews_data:
@@ -70,21 +66,22 @@ def search_movies_titles(query: str) -> List[MovieSummary]:
 
 def movie_summary_by_id(movie_id: str) -> List[MovieSummary]:
     movies = load_all()
-    for mv in movies:
-        if str(mv.get("id")) == str(movie_id):
-            return [MovieSummary(id=mv.get("id"), title=mv.get("title"))]
-    return []
+    index = find_dict_by_id(movies, "id", movie_id)
+    if index == NOT_FOUND:
+        return []
+    mv = movies[index]
+    return [MovieSummary(id=mv.get("id"), title=mv.get("title"))]
 
 def update_movie(movie_id: str, payload: MovieUpdate) -> Movie:
     movies = load_all()
-    for idx, movie in enumerate(movies):
-        if movie.get("id") == movie_id:
-            updated = Movie(id=movie_id, title=payload.title.strip(), genre=payload.genre.strip(), release=payload.release, 
-                      description=payload.description.strip(), duration=payload.duration)
-            movies[idx] = updated.model_dump(mode="json")
-            save_all(movies)
-            return updated
-    raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
+    index = find_dict_by_id(movies, "id", movie_id)
+    if index == NOT_FOUND:
+        raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
+    updated = Movie(id=movie_id, title=payload.title.strip(), genre=payload.genre.strip(), release=payload.release, 
+                    description=payload.description.strip(), duration=payload.duration)
+    movies[index] = updated.model_dump(mode="json")
+    save_all(movies)
+    return updated
 
 def delete_movie(movie_id: str) -> None:
     movies = load_all()
