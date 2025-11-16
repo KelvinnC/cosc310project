@@ -38,7 +38,7 @@ def get_review(review_id: int):
             detail=f"Review {review_id} not found"
         )
 
-@router.get("/score/{author_id}", response_model=List[Review])
+@router.get("/author/{author_id}", response_model=List[Review])
 def get_score(author_id: str):
     try:
         return get_reviews_by_author(author_id)

@@ -175,7 +175,7 @@ def test_get_score(mocker, client):
         "votes":  6,
         "flagged":  False
     }])
-    response = client.get("/reviews/score/test_id")
+    response = client.get("/reviews/author/test_id")
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
