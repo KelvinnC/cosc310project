@@ -9,7 +9,7 @@ def get_flagged_reviews() -> List[Review]:
     reviews = list_reviews()
     return [review for review in reviews if review.flagged]
 
-def hide_review(review_id: int) -> Dict[str, Any]:
+def hide_review(review_id: int) -> Review:
     """Marks a review's visible field as False"""
     reviews = load_all()
     index = _find_review_index(review_id, reviews)
@@ -19,4 +19,4 @@ def hide_review(review_id: int) -> Dict[str, Any]:
     
     reviews[index]["visible"] = False
     save_all(reviews)
-    return reviews[index]
+    return Review(**reviews[index])

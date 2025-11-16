@@ -67,4 +67,4 @@ def test_hide_review_hides_review(mocker):
     }])
     mocker.patch("app.services.admin_review_service.save_all")
     result = hide_review(1)
-    assert not result["visible"]
+    assert not result.visible
