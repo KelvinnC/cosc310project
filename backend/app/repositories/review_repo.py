@@ -4,11 +4,14 @@ from typing import List, Dict, Any
 
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "reviews.json"
 
-def load_all() -> List[Dict[str, Any]]:
+def load_all(load_invisible=False) -> List[Dict[str, Any]]:
     if not DATA_PATH.exists():
         return []
     with DATA_PATH.open("r", encoding="utf-8-sig") as f:
-        return json.load(f)
+        result = json.load(f)
+        if load_invisible:
+            return result
+        return [review for review in result if review.get("visible", True)]
 
 def save_all(reviews: List[Dict[str, Any]]) -> None:
     tmp = DATA_PATH.with_suffix(".tmp")
