@@ -269,7 +269,7 @@ def test_increment_vote_multiple_reviews(mocker):
     assert saved_reviews[1]["votes"] == 4  # incremented
     assert saved_reviews[2]["votes"] == 15  # unchanged
 
-def test_get_score_by_author_id(mocker):
+def test_get_review_by_author_id(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[
     {
         "id":  7777,

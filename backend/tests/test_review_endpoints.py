@@ -161,7 +161,7 @@ def test_delete_review_invalid_review(mocker, client):
     response = client.delete("/reviews/99999")
     assert response.status_code == 404
 
-def test_get_score(mocker, client):
+def test_get_review_by_author_id(mocker, client):
     mocker.patch("app.services.review_service.load_all", 
     return_value=
     [{

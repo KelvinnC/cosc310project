@@ -39,7 +39,7 @@ def get_review(review_id: int):
         )
 
 @router.get("/author/{author_id}", response_model=List[Review])
-def get_score(author_id: str):
+def get_author_reviews(author_id: str):
     try:
         return get_reviews_by_author(author_id)
     except HTTPException as exc:
