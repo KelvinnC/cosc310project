@@ -10,12 +10,13 @@ from app.services.movie_service import (
     search_movies_titles,
     movie_summary_by_id,
 )
+ 
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
 @router.get("", response_model=List[Movie])
-def get_movies():
-    return list_movies()
+def get_movies(sort_by: str | None = Query(None), order: str = Query("asc")):
+    return list_movies(sort_by=sort_by, order=order)
 
 @router.post("", response_model=Movie, status_code=201)
 def post_movie(payload: MovieCreate):

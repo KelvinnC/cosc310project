@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from datetime import date
 from .review import Review
 
@@ -10,6 +10,7 @@ class Movie(BaseModel):
     duration: int
     genre: str
     release: date
+    rating: Optional[float] = None
 
 class MovieCreate(BaseModel):
     title: str
