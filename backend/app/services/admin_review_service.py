@@ -12,7 +12,7 @@ def get_flagged_reviews() -> List[Review]:
 
 def hide_review(review_id: int) -> Review:
     """Marks a review's visible field as False"""
-    reviews = load_all()
+    reviews = load_all(load_invisible=True)
     index = find_dict_by_id(reviews, "id", review_id)
     
     if index == NOT_FOUND:
