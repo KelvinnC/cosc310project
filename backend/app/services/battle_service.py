@@ -8,13 +8,7 @@ from app.schemas.user import User
 from app.schemas.review import Review
 from app.schemas.battle import Battle
 from app.repositories import battle_repo
-
-def _find_battle_index(battle_id: str, battles: List[dict]) -> int:
-    """Find battle index by id. Returns index or -1 if not found."""
-    for i, battle in enumerate(battles):
-        if battle.get("id") == battle_id:
-            return i
-    return -1
+from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 
 def _get_user_voted_pairs(user_id: str) -> set:
     """Retrieve all review ID pairs that the user has voted on."""
@@ -99,8 +93,8 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
     # Update existing battle instead of appending
     try:
         all_battles = list(battle_repo.load_all())
-        index = _find_battle_index(battle.id, all_battles)
-        if index == -1:
+        index = find_dict_by_id(all_battles, "id", battle.id)
+        if index == NOT_FOUND:
             all_battles.append(battle_dict)
         else:
             all_battles[index] = battle_dict
@@ -117,8 +111,8 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
 def get_battle_by_id(battle_id: str) -> Battle:
     """Retrieve a battle by its ID."""
     battles = battle_repo.load_all()
-    index = _find_battle_index(battle_id, battles)
-    if index == -1:
+    index = find_dict_by_id(battles, "id", battle_id)
+    if index == NOT_FOUND:
         raise ValueError(f"Battle {battle_id} not found")
     return Battle(**battles[index])
 
