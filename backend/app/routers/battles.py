@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, status, Response, Depends
 from app.schemas.battle import Battle, VoteRequest
 from app.services import battle_service
 from app.services.user_service import get_user_by_id
+from app.services import battle_pair_selector
 from app.services import review_service
 from app.middleware.auth_middleware import jwt_auth_dependency
 
@@ -19,7 +20,7 @@ def create_battle(response: Response, current_user: dict = Depends(jwt_auth_depe
     user = get_user_by_id(user_id)
 
     try:
-        reviews = review_service.sample_reviews_for_battle(user_id, sample_size=200)
+        reviews = battle_pair_selector.sample_reviews_for_battle(user_id, sample_size=200)
     except FileNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -70,7 +70,7 @@ def test_create_battle_success(mocker, mock_user, mock_jwt_payload, sample_revie
     """Test successful battle creation with Location header."""
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.services.review_service.sample_reviews_for_battle", return_value=sample_reviews)
+    mocker.patch("app.services.battle_pair_selector.sample_reviews_for_battle", return_value=sample_reviews)
     mocker.patch("app.routers.battles.battle_service.createBattle", return_value=mock_battle)
     
     result = create_battle(response=mock_response, current_user=mock_jwt_payload)
@@ -99,7 +99,7 @@ def test_create_battle_no_reviews(mocker, mock_user, mock_jwt_payload, mock_resp
     """Test when reviews are not available."""
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.services.review_service.sample_reviews_for_battle", return_value=[])
+    mocker.patch("app.services.battle_pair_selector.sample_reviews_for_battle", return_value=[])
     
     with pytest.raises(HTTPException) as exc_info:
         create_battle(response=mock_response, current_user=mock_jwt_payload)
@@ -111,7 +111,7 @@ def test_create_battle_no_eligible_pairs(mocker, mock_user, mock_jwt_payload, sa
     """Test when user has voted on all available pairs."""
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.services.review_service.sample_reviews_for_battle", return_value=sample_reviews)
+    mocker.patch("app.services.battle_pair_selector.sample_reviews_for_battle", return_value=sample_reviews)
     mocker.patch(
         "app.routers.battles.battle_service.createBattle",
         side_effect=ValueError("No eligible review pairs available for this user.")
@@ -128,7 +128,7 @@ def test_create_battle_file_error(mocker, mock_user, mock_jwt_payload, mock_resp
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
     mocker.patch(
-        "app.services.review_service.sample_reviews_for_battle",
+        "app.services.battle_pair_selector.sample_reviews_for_battle",
         side_effect=OSError("File error")
     )
     
