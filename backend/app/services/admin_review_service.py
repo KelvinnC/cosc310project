@@ -1,6 +1,7 @@
 from app.schemas.review import Review
 from typing import List
-from app.services.review_service import list_reviews, _find_review_index, save_all, NOT_FOUND, REVIEW_NOT_FOUND
+from app.services.review_service import list_reviews, save_all, NOT_FOUND, REVIEW_NOT_FOUND
+from app.utils.list_helpers import find_dict_by_id
 from app.repositories.review_repo import load_all
 from fastapi import HTTPException
 from typing import Dict, Any
@@ -12,7 +13,7 @@ def get_flagged_reviews() -> List[Review]:
 def hide_review(review_id: int) -> Review:
     """Marks a review's visible field as False"""
     reviews = load_all()
-    index = _find_review_index(review_id, reviews)
+    index = find_dict_by_id(reviews, "id", review_id)
     
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
