@@ -42,7 +42,7 @@ def _persist_battle(battle_dict: dict) -> None:
     except Exception as e:
         raise Exception(f"Failed to persist created battle: {str(e)}")
 
-def createBattle(user: User, reviews: List[Review]) -> Battle:
+def create_battle(user: User, reviews: List[Review]) -> Battle:
     """Create a new battle. Persists the battle to storage."""
     review1_id, review2_id = battle_pair_selector.select_eligible_pair(user, reviews)
     battle = _create_battle_object(review1_id, review2_id)
@@ -85,7 +85,7 @@ def _update_battle_with_result(battle: Battle, winner_id: int, user_id: str) -> 
     except Exception as e:
         raise ValueError(f"Failed to record vote: {str(e)}")
 
-def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
+def submit_battle_result(battle: Battle, winner_id: int, user_id: str) -> None:
     """Submit a battle result. Persists the result to storage."""
     _validate_winner(battle, winner_id)
     _validate_no_duplicate_vote(battle, user_id)

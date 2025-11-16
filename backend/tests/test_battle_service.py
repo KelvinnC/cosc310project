@@ -40,7 +40,7 @@ def reviews():
 
 
 def test_create_battle_excludes_own_reviews(mocker):
-    """Test that createBattle excludes reviews owned by the user."""
+    """Test that create_battle excludes reviews owned by the user."""
     user = User(
         id="123e4567-e89b-12d3-a456-426614174000",
         username="testuser",
@@ -70,7 +70,7 @@ def test_create_battle_excludes_own_reviews(mocker):
 
     mocker.patch("app.services.battle_pair_selector.is_own_review", side_effect=lambda u, r: r.id in {1,2})
 
-    battle = battle_service.createBattle(user, reviews)
+    battle = battle_service.create_battle(user, reviews)
 
     assert battle.review1Id not in {1,2}
     assert battle.review2Id not in {1,2}
@@ -93,7 +93,7 @@ def test_create_battle_no_eligible_pairs(user, reviews, mocker):
     mocker.patch("app.repositories.battle_repo.load_all", return_value=previous_battles)
 
     with pytest.raises(ValueError, match="No eligible review pairs available"):
-        battle_service.createBattle(user, reviews)
+        battle_service.create_battle(user, reviews)
 
 
 def test_create_battle_single_eligible_pair(user, reviews, mocker):
@@ -106,7 +106,7 @@ def test_create_battle_single_eligible_pair(user, reviews, mocker):
     mocker.patch("app.repositories.battle_repo.load_all", return_value=previous_battles)
     mock_save = mocker.patch("app.repositories.battle_repo.save_all")
     
-    battle = battle_service.createBattle(user, reviews)
+    battle = battle_service.create_battle(user, reviews)
     
     assert frozenset((battle.review1Id, battle.review2Id)) == frozenset((3, 5))
     mock_save.assert_called_once()
@@ -118,14 +118,14 @@ def test_create_battle_all_reviews_owned(user, reviews, mocker):
     mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
     
     with pytest.raises(ValueError, match="No eligible review pairs available"):
-        battle_service.createBattle(user, reviews)
+        battle_service.create_battle(user, reviews)
 
 def test_create_battle_empty_reviews(user, mocker):
     """Test battle creation with empty review pool."""
     mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
     
     with pytest.raises(ValueError, match="No eligible review pairs available"):
-        battle_service.createBattle(user, [])
+        battle_service.create_battle(user, [])
 
 
 def test_submit_battle_result_success(user, reviews, mocker):
@@ -141,7 +141,7 @@ def test_submit_battle_result_success(user, reviews, mocker):
     mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.battle_repo.save_all")
 
-    battle_service.submitBattleResult(battle, winner_id=3, user_id=user.id)
+    battle_service.submit_battle_result(battle, winner_id=3, user_id=user.id)
 
     mock_save.assert_called_once()
     saved = mock_save.call_args[0][0][0]
@@ -162,7 +162,7 @@ def test_submit_battle_result_invalid_winner(user, mocker):
     )
 
     with pytest.raises(ValueError, match="Winner .* not in battle"):
-        battle_service.submitBattleResult(battle, winner_id=99, user_id=user.id)
+        battle_service.submit_battle_result(battle, winner_id=99, user_id=user.id)
 
 def test_submit_battle_result_marks_end_time(user, mocker):
     """Test that submitting result properly sets endedAt timestamp."""
@@ -177,7 +177,7 @@ def test_submit_battle_result_marks_end_time(user, mocker):
     mocker.patch("app.repositories.battle_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.battle_repo.save_all")
 
-    battle_service.submitBattleResult(battle, winner_id=3, user_id=user.id)
+    battle_service.submit_battle_result(battle, winner_id=3, user_id=user.id)
 
     updated_battle = mock_save.call_args[0][0][0]
     assert updated_battle["endedAt"] is not None
@@ -203,7 +203,7 @@ def test_submit_battle_result_prevents_duplicate_vote(user, mocker):
     mock_save = mocker.patch("app.repositories.battle_repo.save_all")
 
     with pytest.raises(ValueError, match="already voted on this review pair"):
-        battle_service.submitBattleResult(battle, winner_id=4, user_id=user.id)
+        battle_service.submit_battle_result(battle, winner_id=4, user_id=user.id)
     
     mock_save.assert_not_called()
 
@@ -226,7 +226,7 @@ def test_submit_battle_result_prevents_duplicate_vote_unordered(user, mocker):
     mock_save = mocker.patch("app.repositories.battle_repo.save_all")
 
     with pytest.raises(ValueError, match="already voted on this review pair"):
-        battle_service.submitBattleResult(battle, winner_id=3, user_id=user.id)
+        battle_service.submit_battle_result(battle, winner_id=3, user_id=user.id)
     
     mock_save.assert_not_called()
 

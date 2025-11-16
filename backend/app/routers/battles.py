@@ -40,7 +40,7 @@ def create_battle(response: Response, current_user: dict = Depends(jwt_auth_depe
     
     try:
         # Create the battle
-        battle = battle_service.createBattle(user, reviews)
+        battle = battle_service.create_battle(user, reviews)
         
         response.headers["Location"] = f"/battles/{battle.id}"
         return battle
@@ -94,7 +94,7 @@ def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depen
     
     # Submit the vote
     try:
-        battle_service.submitBattleResult(
+        battle_service.submit_battle_result(
             battle=battle,
             winner_id=payload.winnerId,
             user_id=user_id
