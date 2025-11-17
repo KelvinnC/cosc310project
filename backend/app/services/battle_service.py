@@ -1,5 +1,4 @@
 # battle_service.py
-import random
 from uuid import uuid4
 from datetime import datetime
 from typing import List
@@ -9,77 +8,62 @@ from app.schemas.review import Review
 from app.schemas.battle import Battle
 from app.repositories import battle_repo
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
+from app.services import battle_pair_selector
 
-def _get_user_voted_pairs(user_id: str) -> set:
-    """Retrieve all review ID pairs that the user has voted on."""
-    voted_pairs = set()
-    for b in battle_repo.load_all() or []:
-        if b.get("userId") == user_id and b.get("winnerId") is not None:
-            voted_pairs.add(frozenset((b["review1Id"], b["review2Id"])) )
-    return voted_pairs
-
-def _is_own_review(user: User, review: Review) -> bool:
-    """Check if the review was authored by the given user."""
-    return str(review.authorId) == user.id
-
-def createBattle(user: User, reviews: List[Review]) -> Battle:
-    """Create a new battle. Persists the battle to storage."""
-    voted_pairs = _get_user_voted_pairs(user.id)
-    eligible_reviews = [r for r in reviews if not _is_own_review(user, r)]
-
-    # Generate all unique unordered pairs and filter out already-voted pairs
-    eligible_pairs = []
-    for i, r1 in enumerate(eligible_reviews):
-        for r2 in eligible_reviews[i + 1 :]:
-            pair = frozenset((r1.id, r2.id))
-            if pair in voted_pairs:
-                continue
-            eligible_pairs.append((r1.id, r2.id))
-
-    if not eligible_pairs:
-        raise ValueError("No eligible review pairs available for this user.")
-
-    # Persist battle immediately so callers can reference the created resource
-    review1Id, review2Id = random.choice(eligible_pairs)
-    battle = Battle(
+def _create_battle_object(review1_id: int, review2_id: int) -> Battle:
+    """Create a new Battle object with the given review IDs."""
+    return Battle(
         id=str(uuid4()),
-        review1Id=review1Id,
-        review2Id=review2Id,
+        review1Id=review1_id,
+        review2Id=review2_id,
         startedAt=datetime.now(),
         endedAt=None,
         winnerId=None,
     )
 
-    battle_dict = {
+def _battle_to_dict(battle: Battle, user_id: str) -> dict:
+    """Convert a Battle object to a dictionary for persistence."""
+    return {
         "id": battle.id,
         "review1Id": battle.review1Id,
         "review2Id": battle.review2Id,
-        "winnerId": None,
-        "userId": user.id,
+        "winnerId": battle.winnerId,
+        "userId": user_id,
         "startedAt": battle.startedAt.isoformat(),
-        "endedAt": None,
+        "endedAt": battle.endedAt.isoformat() if battle.endedAt else None,
     }
 
+def _persist_battle(battle_dict: dict) -> None:
+    """Persist a battle to storage."""
     try:
         all_battles = list(battle_repo.load_all())
         all_battles.append(battle_dict)
         battle_repo.save_all(all_battles)
     except Exception as e:
-        # Persist failure, propagate as generic exception so the caller (router)
-        # returns an HTTP 500.
         raise Exception(f"Failed to persist created battle: {str(e)}")
+
+def create_battle(user: User, reviews: List[Review]) -> Battle:
+    """Create a new battle. Persists the battle to storage."""
+    review1_id, review2_id = battle_pair_selector.select_eligible_pair(user, reviews)
+    battle = _create_battle_object(review1_id, review2_id)
+    battle_dict = _battle_to_dict(battle, user.id)
+    _persist_battle(battle_dict)
 
     return battle
 
-def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
-    """Submit a battle result. Persists the result to storage."""
+def _validate_winner(battle: Battle, winner_id: int) -> None:
+    """Validate that the winner ID is one of the reviews in the battle."""
     if winner_id not in (battle.review1Id, battle.review2Id):
         raise ValueError(f"Winner {winner_id} not in battle {battle.id}")
-    
+
+def _validate_no_duplicate_vote(battle: Battle, user_id: str) -> None:
+    """Validate that the user hasn't already voted on this review pair."""
     pair = frozenset((battle.review1Id, battle.review2Id))
-    if pair in _get_user_voted_pairs(user_id):
+    if pair in battle_pair_selector.get_user_voted_pairs(user_id):
         raise ValueError("User has already voted on this review pair")
-        
+
+def _update_battle_with_result(battle: Battle, winner_id: int, user_id: str) -> None:
+    """Update the battle with the vote result and persist to storage."""
     battle_dict = {
         "id": battle.id,
         "review1Id": battle.review1Id,
@@ -90,7 +74,6 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
         "endedAt": datetime.now().isoformat()
     }
     
-    # Update existing battle instead of appending
     try:
         all_battles = list(battle_repo.load_all())
         index = find_dict_by_id(all_battles, "id", battle.id)
@@ -101,12 +84,12 @@ def submitBattleResult(battle: Battle, winner_id: int, user_id: str) -> None:
         battle_repo.save_all(all_battles)
     except Exception as e:
         raise ValueError(f"Failed to record vote: {str(e)}")
-    
-    try:
-        from app.services import review_service
-        review_service.increment_vote(winner_id)
-    except Exception as e:
-        raise ValueError(f"Failed to increment review vote count: {str(e)}")
+
+def submit_battle_result(battle: Battle, winner_id: int, user_id: str) -> None:
+    """Submit a battle result. Persists the result to storage."""
+    _validate_winner(battle, winner_id)
+    _validate_no_duplicate_vote(battle, user_id)
+    _update_battle_with_result(battle, winner_id, user_id)
 
 def get_battle_by_id(battle_id: str) -> Battle:
     """Retrieve a battle by its ID."""

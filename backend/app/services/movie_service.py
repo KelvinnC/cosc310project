@@ -6,8 +6,64 @@ from app.repositories.movie_repo import load_all, save_all
 from app.repositories.review_repo import load_all as load_reviews
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 
-def list_movies() -> List[Movie]:
-    return [Movie(**mv) for mv in load_all()]
+def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
+    movies: List[Dict[str, Any]] = load_all()
+
+    if sort_by == "rating":
+        direction = (order or "asc").lower()
+        reverse = direction == "desc"
+
+        reviews_data = load_reviews()
+        if reviews_data:
+            movie_ids = {mv.get("id") for mv in movies}
+            index_to_id: Dict[int, Any] = {
+                idx + 1: mv.get("id") for idx, mv in enumerate(movies)
+            }
+
+            rating_sums: Dict[str, float] = {}
+            rating_counts: Dict[str, int] = {}
+
+            for rv in reviews_data:
+                mv_id = rv.get("movieId")
+                resolved_id = None
+
+                if isinstance(mv_id, str) and mv_id in movie_ids:
+                    resolved_id = mv_id
+                elif isinstance(mv_id, int):
+                    resolved_id = index_to_id.get(mv_id)
+
+                if not resolved_id:
+                    continue
+
+                try:
+                    rating_val = float(rv.get("rating"))
+                except (TypeError, ValueError):
+                    continue
+
+                rating_sums[resolved_id] = rating_sums.get(resolved_id, 0.0) + rating_val
+                rating_counts[resolved_id] = rating_counts.get(resolved_id, 0) + 1
+
+            avg_ratings: Dict[str, float] = {
+                movie_id: rating_sums[movie_id] / rating_counts[movie_id]
+                for movie_id in rating_sums
+                if rating_counts.get(movie_id)
+            }
+
+            for mv in movies:
+                mv_id = mv.get("id")
+                if mv_id in avg_ratings and mv.get("rating") is None:
+                    mv["rating"] = avg_ratings[mv_id]
+
+        def _rating_key(m: Dict[str, Any]):
+            val = m.get("rating")
+            try:
+                return float(val)
+            except (TypeError, ValueError):
+                return float("-inf") if not reverse else float("inf")
+
+        movies = sorted(movies, key=_rating_key, reverse=reverse)
+
+    return [Movie(**mv) for mv in movies]
 
 def create_movie(payload: MovieCreate) -> Movie:
     movies = load_all()
