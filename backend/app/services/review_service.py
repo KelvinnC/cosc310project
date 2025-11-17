@@ -83,7 +83,7 @@ def delete_review(review_id: int):
 
 def increment_vote(review_id: int) -> None:
     """Increment the vote count for a review."""
-    reviews = load_all()
+    reviews = load_all(load_invisible=True)
     index = find_dict_by_id(reviews, "id", review_id)
     
     if index == NOT_FOUND:
