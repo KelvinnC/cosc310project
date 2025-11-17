@@ -16,5 +16,14 @@
     "userId": "77d60efe-0870-4323-b164-3d76474f251f",
     "startedAt": "2025-11-03T22:57:37.999822",
     "endedAt": "2025-11-03T23:00:01.389470"
+  },
+  {
+    "id": "ddc7dbea-c671-4d7f-b315-be63dcaf4f2a",
+    "review1Id": 15517,
+    "review2Id": 29328,
+    "winnerId": 29328,
+    "userId": "add2f3d4-a885-4aee-b463-b5cf6d5e209c",
+    "startedAt": "2025-11-17T20:58:48.274135",
+    "endedAt": "2025-11-17T20:59:45.145536"
   }
 ]
