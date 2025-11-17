@@ -26,7 +26,7 @@ def test_penalty_service_valid_warn(mocker, user_object):
 
 def test_penalty_service_warn_invalid_user(mocker, user_object):
     mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
-                 return_value=None)
+                 side_effect=HTTPException(status_code=404, detail="User not found"))
     save = mocker.patch("app.services.penalty_service.save_all")
     with pytest.raises(HTTPException) as ex:
         warn_user("invalidid")
@@ -44,7 +44,7 @@ def test_penalty_service_valid_unwarn(mocker, user_object):
 
 def test_penalty_service_unwarn_invalid_user(mocker, user_object):
     mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
-                 return_value=None)
+                 side_effect=HTTPException(status_code=404, detail="User not found"))
     save = mocker.patch("app.services.penalty_service.save_all")
     with pytest.raises(HTTPException) as ex:
         unwarn_user("invalidid")
@@ -62,7 +62,7 @@ def test_penalty_service_valid_ban(mocker, user_object):
 
 def test_penalty_service_warn_invalid_ban(mocker, user_object):
     mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
-                 return_value=None)
+                 side_effect=HTTPException(status_code=404, detail="User not found"))
     save = mocker.patch("app.services.penalty_service.save_all")
     with pytest.raises(HTTPException) as ex:
         ban_user("invalidid")
@@ -79,7 +79,7 @@ def test_penalty_service_valid_unban(mocker, user_object):
 
 def test_penalty_service_warn_invalid_unban(mocker, user_object):
     mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
-                 return_value=None)
+                 side_effect=HTTPException(status_code=404, detail="User not found"))
     save = mocker.patch("app.services.penalty_service.save_all")
     with pytest.raises(HTTPException) as ex:
         unban_user("invalidid")

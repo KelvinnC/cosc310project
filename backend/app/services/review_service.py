@@ -1,18 +1,13 @@
 import random
 from typing import List
+from datetime import datetime
 from fastapi import HTTPException
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.repositories.review_repo import load_all, save_all
+from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
+from app.repositories import movie_repo
 
 REVIEW_NOT_FOUND = "Review not found"
-NOT_FOUND = -1
-
-def _find_review_index(review_id: int, reviews: List[dict]) -> int:
-    """Find review index by id. returns index or NOT_FOUND if not found."""
-    for i, review in enumerate(reviews):
-        if review.get("id") == review_id:
-            return i
-    return NOT_FOUND
 
 def list_reviews() -> List[Review]:
     """List all reviews."""
@@ -22,24 +17,29 @@ def list_reviews() -> List[Review]:
 def get_review_by_id(review_id: int) -> Review:
     """Get a review by ID."""
     reviews = load_all()
-    index = _find_review_index(review_id, reviews)
+    index = find_dict_by_id(reviews, "id", review_id)
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     return Review(**reviews[index])
 
-def create_review(payload: ReviewCreate) -> Review:
-    """Create a new review."""
-    reviews = load_all()
+def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
+    """Create a new review. Validates movie existence and assigns author/date."""
+    reviews = load_all(load_invisible=True)
     new_review_id = max((rev.get("id", 0) for rev in reviews), default=0) + 1
+
+    movie_id = payload.movieId.strip()
+    movies = movie_repo.load_all()
+    if not any(m.get("id") == movie_id for m in movies):
+        raise HTTPException(status_code=400, detail="Invalid movieId: movie does not exist")
     
     new_review = Review(
         id=new_review_id,
-        movieId=payload.movieId.strip(),
-        authorId=payload.authorId,
+        movieId=movie_id,
+        authorId=author_id,
         rating=payload.rating,
-        reviewTitle=payload.reviewTitle.strip(),
-        reviewBody=payload.reviewBody.strip(),
-        date=payload.date
+        reviewTitle=payload.reviewTitle,
+        reviewBody=payload.reviewBody,
+        date=datetime.now().date()
     )
 
     reviews.append(new_review.model_dump(mode="json"))
@@ -48,8 +48,8 @@ def create_review(payload: ReviewCreate) -> Review:
 
 def update_review(review_id: int, payload: ReviewUpdate) -> Review:
     """Update an existing review."""
-    reviews = load_all()
-    index = _find_review_index(review_id, reviews)
+    reviews = load_all(load_invisible=True)
+    index = find_dict_by_id(reviews, "id", review_id)
 
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
@@ -60,8 +60,8 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
         movieId=old_review["movieId"],
         authorId=old_review["authorId"],
         rating=payload.rating,
-        reviewTitle=payload.reviewTitle.strip(),
-        reviewBody=payload.reviewBody.strip(),
+        reviewTitle=payload.reviewTitle,
+        reviewBody=payload.reviewBody,
         flagged=payload.flagged,
         votes=payload.votes,
         date=payload.date
@@ -73,8 +73,8 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
 
 def delete_review(review_id: int):
     """Delete a review by ID."""
-    reviews = load_all()
-    index = _find_review_index(review_id, reviews)
+    reviews = load_all(load_invisible=True)
+    index = find_dict_by_id(reviews, "id", review_id)
     
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
@@ -95,8 +95,8 @@ def sample_reviews_for_battle(user_id: str, sample_size: int = 200) -> List[Revi
 
 def increment_vote(review_id: int) -> None:
     """Increment the vote count for a review."""
-    reviews = load_all()
-    index = _find_review_index(review_id, reviews)
+    reviews = load_all(load_invisible=True)
+    index = find_dict_by_id(reviews, "id", review_id)
     
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)

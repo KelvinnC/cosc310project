@@ -4,73 +4,72 @@ from fastapi import HTTPException
 from app.schemas.movie import Movie, MovieCreate, MovieUpdate, MovieSummary, MovieWithReviews
 import app.repositories.movie_repo as movie_repo
 from app.repositories.review_repo import load_all as load_reviews
+from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 
 def load_all() -> List[Dict[str, Any]]:
     return movie_repo.load_all()
 
 def save_all(movies: List[Dict[str, Any]]) -> None:
-    return movie_repo.save_all(movies)
+    movie_repo.save_all(movies)
 
 def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
     movies: List[Dict[str, Any]] = load_all()
 
-    def _coerce_float(v: Any) -> float | None:
-        try:
-            return float(v)
-        except (TypeError, ValueError):
-            return None
-
-    needs_rating = any(_coerce_float(m.get("rating")) is None for m in movies)
-    derived: Dict[str, float] = {}
-    if needs_rating:
-        reviews = load_reviews()
-        index_to_id = {idx + 1: mv.get("id") for idx, mv in enumerate(movies)}
-        totals: Dict[str, float] = {}
-        counts: Dict[str, int] = {}
-        for rv in reviews:
-            mv_id = rv.get("movieId")
-            rating = _coerce_float(rv.get("rating"))
-            if rating is None:
-                continue
-            if isinstance(mv_id, int):
-                movie_id = index_to_id.get(mv_id)
-            else:
-                movie_id = str(mv_id) if mv_id is not None else None
-            if not movie_id:
-                continue
-            totals[movie_id] = totals.get(movie_id, 0.0) + rating
-            counts[movie_id] = counts.get(movie_id, 0) + 1
-        for mid, total in totals.items():
-            cnt = counts.get(mid) or 0
-            if cnt > 0:
-                derived[mid] = total / cnt
-
-    enriched: List[Dict[str, Any]] = []
-    for m in movies:
-        base = dict(m)
-        current = _coerce_float(base.get("rating"))
-        if current is None:
-            comp = derived.get(base.get("id"))
-            if comp is not None:
-                base["rating"] = comp
-        else:
-            base["rating"] = current
-        enriched.append(base)
-
-    result = enriched
     if sort_by == "rating":
         direction = (order or "asc").lower()
-        reverse = (direction == "desc")
+        reverse = direction == "desc"
+
+        reviews_data = load_reviews()
+        if reviews_data:
+            movie_ids = {mv.get("id") for mv in movies}
+            index_to_id: Dict[int, Any] = {
+                idx + 1: mv.get("id") for idx, mv in enumerate(movies)
+            }
+
+            rating_sums: Dict[str, float] = {}
+            rating_counts: Dict[str, int] = {}
+
+            for rv in reviews_data:
+                mv_id = rv.get("movieId")
+                resolved_id = None
+
+                if isinstance(mv_id, str) and mv_id in movie_ids:
+                    resolved_id = mv_id
+                elif isinstance(mv_id, int):
+                    resolved_id = index_to_id.get(mv_id)
+
+                if not resolved_id:
+                    continue
+
+                try:
+                    rating_val = float(rv.get("rating"))
+                except (TypeError, ValueError):
+                    continue
+
+                rating_sums[resolved_id] = rating_sums.get(resolved_id, 0.0) + rating_val
+                rating_counts[resolved_id] = rating_counts.get(resolved_id, 0) + 1
+
+            avg_ratings: Dict[str, float] = {
+                movie_id: rating_sums[movie_id] / rating_counts[movie_id]
+                for movie_id in rating_sums
+                if rating_counts.get(movie_id)
+            }
+
+            for mv in movies:
+                mv_id = mv.get("id")
+                if mv_id in avg_ratings and mv.get("rating") is None:
+                    mv["rating"] = avg_ratings[mv_id]
 
         def _rating_key(m: Dict[str, Any]):
-            val = _coerce_float(m.get("rating"))
-            if val is None:
+            val = m.get("rating")
+            try:
+                return float(val)
+            except (TypeError, ValueError):
                 return float("-inf") if not reverse else float("inf")
-            return val
 
-        result = sorted(enriched, key=_rating_key, reverse=reverse)
+        movies = sorted(movies, key=_rating_key, reverse=reverse)
 
-    return [Movie(**mv) for mv in result]
+    return [Movie(**mv) for mv in movies]
 
 def create_movie(payload: MovieCreate) -> Movie:
     movies = load_all()
@@ -85,17 +84,12 @@ def create_movie(payload: MovieCreate) -> Movie:
 
 def get_movie_by_id(movie_id: str) -> MovieWithReviews:
     movies = load_all()
-    target = None
-    target_index = None
-    for idx, movie in enumerate(movies):
-        if str(movie.get("id")) == movie_id:
-            target = movie
-            target_index = idx
-            break
-    if target is None:
+    target_index = find_dict_by_id(movies, "id", movie_id)
+    if target_index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
-
-    index_1_based = (target_index or 0) + 1
+    
+    target = movies[target_index]
+    index_1_based = target_index + 1
     reviews_data = load_reviews()
     reviews_list = []
     for rv in reviews_data:
@@ -134,21 +128,22 @@ def search_movies_titles(query: str) -> List[MovieSummary]:
 
 def movie_summary_by_id(movie_id: str) -> List[MovieSummary]:
     movies = load_all()
-    for mv in movies:
-        if str(mv.get("id")) == str(movie_id):
-            return [MovieSummary(id=mv.get("id"), title=mv.get("title"))]
-    return []
+    index = find_dict_by_id(movies, "id", movie_id)
+    if index == NOT_FOUND:
+        return []
+    mv = movies[index]
+    return [MovieSummary(id=mv.get("id"), title=mv.get("title"))]
 
 def update_movie(movie_id: str, payload: MovieUpdate) -> Movie:
     movies = load_all()
-    for idx, movie in enumerate(movies):
-        if movie.get("id") == movie_id:
-            updated = Movie(id=movie_id, title=payload.title.strip(), genre=payload.genre.strip(), release=payload.release, 
-                      description=payload.description.strip(), duration=payload.duration)
-            movies[idx] = updated.model_dump(mode="json")
-            save_all(movies)
-            return updated
-    raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
+    index = find_dict_by_id(movies, "id", movie_id)
+    if index == NOT_FOUND:
+        raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
+    updated = Movie(id=movie_id, title=payload.title.strip(), genre=payload.genre.strip(), release=payload.release, 
+                    description=payload.description.strip(), duration=payload.duration)
+    movies[index] = updated.model_dump(mode="json")
+    save_all(movies)
+    return updated
 
 def delete_movie(movie_id: str) -> None:
     movies = load_all()
