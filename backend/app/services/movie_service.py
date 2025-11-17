@@ -6,6 +6,12 @@ import app.repositories.movie_repo as movie_repo
 from app.repositories.review_repo import load_all as load_reviews
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 
+def load_all() -> List[Dict[str, Any]]:
+    return movie_repo.load_all()
+
+def save_all(movies: List[Dict[str, Any]]) -> None:
+    movie_repo.save_all(movies)
+
 def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
     movies: List[Dict[str, Any]] = load_all()
 
