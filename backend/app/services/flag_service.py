@@ -31,7 +31,7 @@ def unflag_review(review_id: int) -> None:
     flags = flag_repo.load_all()
 
     updated_flags = [f for f in flags if f.get("review_id") != review_id]
-    flag_repo.save_all(flags)
+    flag_repo.save_all(updated_flags)
 
     mark_review_as_unflagged(review)
 
