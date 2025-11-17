@@ -103,7 +103,3 @@ def flag_review(review_id: int, current_user: dict = Depends(jwt_auth_dependency
 def flag_review(review_id: int, current_user: dict = Depends(admin_required)):
     """Unflag a review. Admin only endpoint"""
     flag_service.unflag_review(review_id)
-    return {
-        "message": "Review unflagged successfully",
-        "review_id": review_id
-    }

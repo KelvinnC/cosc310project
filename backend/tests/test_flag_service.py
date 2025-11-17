@@ -200,7 +200,7 @@ def test_unflag_review_success(mocker, mock_flagged_review):
     mock_mark.assert_called_once_with(mock_flagged_review)
 
 def test_unflag_review_not_found(mocker, mock_flagged_review):
-    """Test successfully unflagging a review"""
+    """Test unflagging a review that is not found"""
     mocker.patch("app.services.flag_service.get_review_by_id", side_effect=HTTPException(status_code=404, detail="Review Not Found"))
     mocker.patch("app.repositories.flag_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.flag_repo.save_all")
