@@ -24,7 +24,7 @@ def get_review_by_id(review_id: int) -> Review:
 
 def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
     """Create a new review. Validates movie existence and assigns author/date."""
-    reviews = load_all()
+    reviews = load_all(load_invisible=True)
     new_review_id = max((rev.get("id", 0) for rev in reviews), default=0) + 1
 
     movie_id = payload.movieId.strip()
@@ -48,7 +48,7 @@ def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
 
 def update_review(review_id: int, payload: ReviewUpdate) -> Review:
     """Update an existing review. Only rating, title, and body can be modified."""
-    reviews = load_all()
+    reviews = load_all(load_invisible=True)
     index = find_dict_by_id(reviews, "id", review_id)
 
     if index == NOT_FOUND:
@@ -73,7 +73,7 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
 
 def delete_review(review_id: int):
     """Delete a review by ID."""
-    reviews = load_all()
+    reviews = load_all(load_invisible=True)
     index = find_dict_by_id(reviews, "id", review_id)
     
     if index == NOT_FOUND:
@@ -95,7 +95,7 @@ def sample_reviews_for_battle(user_id: str, sample_size: int = 200) -> List[Revi
 
 def increment_vote(review_id: int) -> None:
     """Increment the vote count for a review."""
-    reviews = load_all()
+    reviews = load_all(load_invisible=True)
     index = find_dict_by_id(reviews, "id", review_id)
     
     if index == NOT_FOUND:

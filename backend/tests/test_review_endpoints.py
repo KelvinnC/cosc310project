@@ -171,6 +171,15 @@ def test_put_review_unauthorized_user(mocker, client):
         "id": 1234,
         "movieId": 'UUID-movie-1234',
         "authorId": 'UUID-author-5678',
+    assert response.status_code == 404
+
+def test_hide_review_success(mocker, client, mock_admin_user):
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
+    mocker.patch("app.services.admin_review_service.load_all", return_value=[
+    {
+        "id": 1,
+        "movieId": "1234",
+        "authorId": -1,
         "rating": 5.0,
         "reviewTitle": "good movie",
         "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
@@ -195,6 +204,22 @@ def test_delete_review_unauthorized_user(mocker, client):
         "id": 1234,
         "movieId": 'UUID-movie-1234',
         "authorId": 'UUID-author-5678',
+        "date": "2022-01-01",
+        "visible": True
+    }])
+    mocker.patch("app.services.admin_review_service.save_all")
+    response = client.patch("/reviews/1/hide")
+    app.dependency_overrides.clear()
+    assert response.status_code == 200
+    assert response.json()["visible"] == False
+
+def test_hide_review_unauthorized(mocker, client, mock_unauthorized_user):
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_unauthorized_user
+    mocker.patch("app.services.admin_review_service.load_all", return_value=[
+    {
+        "id": 1,
+        "movieId": "1234",
+        "authorId": -1,
         "rating": 5.0,
         "reviewTitle": "good movie",
         "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
@@ -208,3 +233,18 @@ def test_delete_review_unauthorized_user(mocker, client):
     assert response.status_code == 403
     assert not mock_save.called
     assert "only modify your own reviews" in response.json()["detail"]
+        "date": "2022-01-01",
+        "visible": True
+    }])
+    mocker.patch("app.services.admin_review_service.save_all")
+    response = client.patch("/reviews/1/hide")
+    app.dependency_overrides.clear()
+    assert response.status_code == 403
+
+def test_hide_review_not_found(mocker, client, mock_admin_user):
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
+    mocker.patch("app.services.admin_review_service.load_all", return_value=[])
+    mocker.patch("app.services.admin_review_service.save_all")
+    response = client.patch("/reviews/1/hide")
+    app.dependency_overrides.clear()
+    assert response.status_code == 404
