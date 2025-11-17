@@ -103,3 +103,10 @@ def mark_review_as_flagged(review: Review) -> None:
         date=review.date
     )
     update_review(review.id, review_update)
+
+def get_reviews_by_author(user_id: str) -> List[Review]:
+    results = []
+    for rv in load_all():
+        if rv.get("authorId") == user_id:
+            results.append(Review(**rv))
+    return results

@@ -161,6 +161,33 @@ def test_delete_review_invalid_review(mocker, client):
     response = client.delete("/reviews/99999")
     assert response.status_code == 404
 
+def test_get_review_by_author_id(mocker, client):
+    mocker.patch("app.services.review_service.load_all", 
+    return_value=
+    [{
+        "id":  7777,
+        "movieId":  "asdfsesfsesfe",
+        "date":  "2010-08-31",
+        "authorId":  "test_id",
+        "reviewTitle":  "Good Movie",
+        "reviewBody":  "this is a review body",
+        "rating":  4.5,
+        "votes":  6,
+        "flagged":  False
+    }])
+    response = client.get("/reviews/author/test_id")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 1
+    assert data[0]["id"] == 7777
+    assert data[0]["movieId"] == "asdfsesfsesfe"
+    assert data[0]["reviewTitle"] == "Good Movie"
+    assert data[0]["reviewBody"] == "this is a review body"
+    assert data[0]["rating"] == 4.5
+    assert data[0]["votes"] == 6
+    assert data[0]["flagged"] == False
+    
 def test_hide_review_success(mocker, client, mock_admin_user):
     app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
     mocker.patch("app.services.admin_review_service.load_all", return_value=[
