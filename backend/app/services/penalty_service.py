@@ -3,42 +3,32 @@ from fastapi import HTTPException
 from app.services.user_service import get_user_by_id_unsafe
 from app.schemas.user import User
 
-def warn_user(user_id: str) -> User:
-    user = get_user_by_id_unsafe(user_id)
-    if user == None:
-        raise HTTPException(404, detail=f"User {user_id} not found")
-    user.warnings += 1
+def _save_updated_user(user, user_id):
+    """Replace the old user with the updated one and save all users"""
     users = [usr for usr in load_all() if usr.get("id") != user_id]
     users.append(user.model_dump(mode="json"))
     save_all(users)
+
+def warn_user(user_id: str) -> User:
+    user = get_user_by_id_unsafe(user_id)
+    user.warnings += 1
+    _save_updated_user(user, user_id)
     return user
 
 def unwarn_user(user_id: str) -> User:
     user = get_user_by_id_unsafe(user_id)
-    if user == None:
-        raise HTTPException(404, detail=f"User {user_id} not found")
     user.warnings = max(0, user.warnings - 1)
-    users = [usr for usr in load_all() if usr.get("id") != user_id]
-    users.append(user.model_dump(mode="json"))
-    save_all(users)
+    _save_updated_user(user, user_id)
     return user
 
 def ban_user(user_id: str) -> User:
     user = get_user_by_id_unsafe(user_id)
-    if user == None:
-        raise HTTPException(404, detail=f"User {user_id} not found")
     user.active = False
-    users = [usr for usr in load_all() if usr.get("id") != user_id]
-    users.append(user.model_dump(mode="json"))
-    save_all(users)
+    _save_updated_user(user, user_id)
     return user
 
 def unban_user(user_id: str) -> User:
     user = get_user_by_id_unsafe(user_id)
-    if user == None:
-        raise HTTPException(404, detail=f"User {user_id} not found")
     user.active = True
-    users = [usr for usr in load_all() if usr.get("id") != user_id]
-    users.append(user.model_dump(mode="json"))
-    save_all(users)
+    _save_updated_user(user, user_id)
     return user

@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app
+from app.middleware.auth_middleware import jwt_auth_dependency
 
 @pytest.fixture
 def client():
@@ -13,7 +14,7 @@ def test_list_reviews(mocker, client):
         "id": 1234,
         "movieId": 'UUID-movie-1234',
         "authorId": 'UUID-author-1234',
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
         "reviewBody": "loved the movie",
         "flagged": False,
@@ -51,19 +52,20 @@ def test_get_review_by_id_invalid_id(mocker, client):
     assert response.status_code == 404
 
 def test_post_review_valid_review(mocker, client):
+    app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": "UUID-author-1234", "role": "user"}
     mocker.patch("app.services.review_service.load_all", return_value=[{"id": 5, "movieId": 'UUID-movie-1234', "authorId": 'UUID-author-1234', "rating": 3.0, "reviewTitle": "old", "reviewBody": "old", "flagged": False, "votes": 0, "date": "2020-01-01"}])
+    mocker.patch("app.repositories.movie_repo.load_all", return_value=[{"id": "UUID-movie-1234", "title": "t", "description": "d", "duration": 100, "genre": "g", "release": "2020-01-01"}])
     mock_save = mocker.patch("app.services.review_service.save_all")
     payload = {
         "movieId": 'UUID-movie-1234',
-        "date": "2022-01-01",
-        "authorId": 'UUID-author-1234',
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
-        "rating": 5.5,
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
+        "rating": 5.0,
         "votes": 0,
         "flagged": False
     }
     response = client.post("/reviews", json=payload)
+    app.dependency_overrides.clear()
     assert response.status_code == 201
     data = response.json()
     assert data["id"] == 6  # Should be max(5) + 1
@@ -72,9 +74,11 @@ def test_post_review_valid_review(mocker, client):
     assert mock_save.called
 
 def test_post_review_missing_json(mocker, client):
+    app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": "UUID-author-1234", "role": "user"}
     mocker.patch("app.services.review_service.load_all", return_value=[])
     mocker.patch("app.services.review_service.save_all")
     response = client.post("/reviews", json={})
+    app.dependency_overrides.clear()
     assert response.status_code == 422
 
 def test_put_review_valid_put(mocker, client):
@@ -83,9 +87,9 @@ def test_put_review_valid_put(mocker, client):
         "id": 1234,
         "movieId": 'UUID-movie-1234',
         "authorId": 'UUID-author-5678',
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
@@ -94,7 +98,7 @@ def test_put_review_valid_put(mocker, client):
     response = client.put("/reviews/1234", json={
         "rating": 4.5,
         "reviewTitle": "updated movie",
-        "reviewBody": "updated review body",
+        "reviewBody": "I absolutely loved this updated movie! The new cinematography was even more stunning than before.",
         "flagged": False,
         "votes": 10,
         "date": "2022-01-01"
@@ -112,18 +116,18 @@ def test_put_review_invalid_put(mocker, client):
         "id": 1234,
         "movieId": 1234,
         "authorId": 1234,
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
     }])
     mocker.patch("app.services.review_service.save_all")
     response = client.put("/reviewss/5678", json={
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
@@ -136,9 +140,9 @@ def test_delete_review_valid_review(mocker, client):
         "id": 1234,
         "movieId": 1234,
         "authorId": 1234,
-        "rating": 5.5,
+        "rating": 5.0,
         "reviewTitle": "good movie",
-        "reviewBody": "loved the movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
         "flagged": False,
         "votes": 5,
         "date": "2022-01-01"
@@ -155,4 +159,53 @@ def test_delete_review_invalid_review(mocker, client):
     mocker.patch("app.services.review_service.save_all")
     # Path param must be integer; use an integer ID that won't exist
     response = client.delete("/reviews/99999")
+    assert response.status_code == 404
+
+def test_hide_review_success(mocker, client, mock_admin_user):
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
+    mocker.patch("app.services.admin_review_service.load_all", return_value=[
+    {
+        "id": 1,
+        "movieId": "1234",
+        "authorId": -1,
+        "rating": 5.0,
+        "reviewTitle": "good movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
+        "flagged": False,
+        "votes": 5,
+        "date": "2022-01-01",
+        "visible": True
+    }])
+    mocker.patch("app.services.admin_review_service.save_all")
+    response = client.patch("/reviews/1/hide")
+    app.dependency_overrides.clear()
+    assert response.status_code == 200
+    assert response.json()["visible"] == False
+
+def test_hide_review_unauthorized(mocker, client, mock_unauthorized_user):
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_unauthorized_user
+    mocker.patch("app.services.admin_review_service.load_all", return_value=[
+    {
+        "id": 1,
+        "movieId": "1234",
+        "authorId": -1,
+        "rating": 5.0,
+        "reviewTitle": "good movie",
+        "reviewBody": "I absolutely loved this movie! The cinematography was stunning and the plot kept me engaged throughout.",
+        "flagged": False,
+        "votes": 5,
+        "date": "2022-01-01",
+        "visible": True
+    }])
+    mocker.patch("app.services.admin_review_service.save_all")
+    response = client.patch("/reviews/1/hide")
+    app.dependency_overrides.clear()
+    assert response.status_code == 403
+
+def test_hide_review_not_found(mocker, client, mock_admin_user):
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
+    mocker.patch("app.services.admin_review_service.load_all", return_value=[])
+    mocker.patch("app.services.admin_review_service.save_all")
+    response = client.patch("/reviews/1/hide")
+    app.dependency_overrides.clear()
     assert response.status_code == 404

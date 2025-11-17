@@ -7,6 +7,8 @@ from app.services.review_service import list_reviews, create_review, delete_revi
 from app.services.search_service import search_movies_with_reviews
 from app.services import flag_service
 from app.middleware.auth_middleware import jwt_auth_dependency
+from app.middleware.admin_dependency import admin_required
+from app.services.admin_review_service import hide_review
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
@@ -16,9 +18,10 @@ def get_reviews():
     return list_reviews()
 
 @router.post("", response_model=Review, status_code=201)
-def post_review(review: ReviewCreate):
+def post_review(review: ReviewCreate, current_user: dict = Depends(jwt_auth_dependency)):
     """Create a new review."""
-    return create_review(review)
+    author_id = current_user.get("user_id")
+    return create_review(review, author_id=author_id)
 
 @router.get("/search", response_model=List[MovieWithReviews])
 def search_reviews(title: str = Query(..., min_length=1)):
@@ -47,6 +50,10 @@ def put_review(review_id: int, review_update: ReviewUpdate):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Review {review_id} not found"
         )
+    
+@router.patch("/{review_id}/hide", response_model=Review)
+def hide_inappropriate_review(review_id: int, current_user=Depends(admin_required)):
+    return hide_review(review_id)
 
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
 def remove_review(review_id: int):
