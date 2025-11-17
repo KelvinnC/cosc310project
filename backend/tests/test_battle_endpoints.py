@@ -138,7 +138,7 @@ def test_create_battle_file_error(mocker, mock_user, mock_jwt_payload, mock_resp
     assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
-def test_submit_vote_success(mocker, mock_user, mock_jwt_payload, mock_battle):
+def test_submit_vote_success(mocker, mock_user, mock_jwt_payload, mock_battle, sample_reviews):
     """Test successful vote submission."""
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
@@ -146,10 +146,15 @@ def test_submit_vote_success(mocker, mock_user, mock_jwt_payload, mock_battle):
     mocker.patch("app.routers.battles.battle_service.submit_battle_result", return_value=None)
     mock_increment = mocker.patch("app.routers.battles.review_service.increment_vote")
     
+    # Mock get_review_by_id to return the winning review
+    winning_review = sample_reviews[0]  # Review with id=1
+    mocker.patch("app.routers.battles.review_service.get_review_by_id", return_value=winning_review)
+    
     vote_request = VoteRequest(winnerId=1)
     result = submit_vote(battle_id=mock_battle.id, payload=vote_request, current_user=mock_jwt_payload)
     
-    assert result is None
+    assert result == winning_review
+    assert result.id == 1
     mock_increment.assert_called_once_with(1)
 
 
