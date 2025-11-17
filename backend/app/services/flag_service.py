@@ -1,6 +1,6 @@
 from datetime import datetime
 from app.repositories import flag_repo
-from app.services.review_service import get_review_by_id, mark_review_as_flagged
+from app.services.review_service import get_review_by_id, mark_review_as_flagged, mark_review_as_unflagged
 
 def flag_review(user_id: str, review_id: int) -> dict:
     """Flag a review as inappropriate"""
@@ -23,6 +23,17 @@ def flag_review(user_id: str, review_id: int) -> dict:
     mark_review_as_flagged(review)
     
     return flag_record
+
+def unflag_review(review_id: int) -> None:
+    """Unflag a review"""
+    review = get_review_by_id(review_id)
+
+    flags = flag_repo.load_all()
+
+    updated_flags = [f for f in flags if f.get("review_id") != review_id]
+    flag_repo.save_all(flags)
+
+    mark_review_as_unflagged(review)
 
 def get_flagged_reviews_count(review_id: int) -> int:
     """Get the number of users who have flagged a specific review"""
