@@ -165,17 +165,6 @@ def delete_review(review_id: int):
     reviews.pop(index)
     save_all(reviews)
 
-def sample_reviews_for_battle(user_id: str, sample_size: int = 200) -> List[Review]:
-    """Sample reviews for battle, excluding those authored by the given user_id."""
-    reviews = load_all()
-
-    filtered_reviews = [Review(**review) for review in reviews if review["authorId"] != user_id]
-
-    if len(filtered_reviews) > sample_size:
-        return random.sample(filtered_reviews, sample_size)
-    
-    return filtered_reviews
-
 def increment_vote(review_id: int) -> None:
     """Increment the vote count for a review."""
     reviews = load_all(load_invisible=True)
