@@ -44,11 +44,9 @@ def test_save_all_saves_data(mocker):
         }
     ]
 
-    # Patch open
     mock_file = mocker.mock_open()
     mocker.patch.object(Path, "open", mock_file)
 
-    # Patch os.replace
     mock_replace = mocker.patch("app.repositories.battle_repo.os.replace")
 
     save_all(battles)
