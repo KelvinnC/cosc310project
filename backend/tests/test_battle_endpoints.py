@@ -142,17 +142,23 @@ def test_create_battle_file_error(mocker, mock_user, mock_jwt_payload, mock_resp
 
 
 # POST /battles/{battle_id}/votes tests
-def test_submit_vote_success(mocker, mock_user, mock_jwt_payload, mock_battle):
+def test_submit_vote_success(mocker, mock_user, mock_jwt_payload, mock_battle, sample_reviews):
     """Test successful vote submission."""
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
     mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)
-    mocker.patch("app.routers.battles.battle_service.submitBattleResult", return_value=None)
+    mocker.patch("app.routers.battles.battle_service.submit_battle_result", return_value=None)
+    mocker.patch("app.routers.battles.review_service.increment_vote", return_value=None)
+    
+    # Mock get_review_by_id to return the winning review
+    winning_review = sample_reviews[0]  # Review with id=1
+    mocker.patch("app.routers.battles.review_service.get_review_by_id", return_value=winning_review)
     
     vote_request = VoteRequest(winnerId=1)
     result = submit_vote(battle_id=mock_battle.id, payload=vote_request, current_user=mock_jwt_payload)
     
-    assert result is None
+    assert result == winning_review
+    assert result.id == 1
 
 
 def test_submit_vote_user_not_found(mocker, mock_battle):
