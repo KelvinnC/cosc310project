@@ -31,7 +31,7 @@ def test_load_all_file_missing(mocker):
 
 def test_load_all_with_data(mocker):
     mocker.patch.object(Path, "exists", return_value=True)
-    payload = {
+    payload = [{
         "id": "1234",
         "movieId": "1234",
         "authorId": "1234",
@@ -41,7 +41,7 @@ def test_load_all_with_data(mocker):
         "flagged": "False",
         "votes": 5,
         "date": "2022-01-01"
-    }
+    }]
     mock_open = mocker.patch.object(Path, "open", mocker.mock_open(read_data=json.dumps(payload)))
     result = load_all()
     assert result == payload

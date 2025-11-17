@@ -1,19 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.services.admin_user_service import get_banned_users, get_user_count, get_warned_users
-from app.services.admin_review_service import get_flagged_reviews
-from app.middleware.auth_middleware import jwt_auth_dependency
+from app.services.admin_summary_service import get_admin_summary_data
+from app.middleware.admin_dependency import admin_required
+from app.schemas.admin import AdminSummaryResponse
+
 from typing import Dict, Any
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
-@router.get("/", response_model=Dict[str, Any], status_code=status.HTTP_200_OK)
-def get_admin_summary(current_user: dict = Depends(jwt_auth_dependency)):
-    if current_user.get("role") != "admin":
-        raise HTTPException(403, detail="Unauthorized action")
-    admin_summary = {
-        "total_users": get_user_count(),
-        "warned_users": get_warned_users(),
-        "banned_users": get_banned_users(),
-        "flagged_reviews": get_flagged_reviews()
-    }
-    return admin_summary
+@router.get("/", response_model=AdminSummaryResponse, status_code=status.HTTP_200_OK)
+def get_admin_summary(current_user: dict = Depends(admin_required)):
+    return get_admin_summary_data()

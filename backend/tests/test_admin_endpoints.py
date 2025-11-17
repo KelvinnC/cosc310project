@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.schemas.user import User
-from app.routers.admin_endpoints import jwt_auth_dependency
+from app.middleware.auth_middleware import jwt_auth_dependency
 
 @pytest.fixture
 def client():
@@ -23,9 +23,9 @@ def penalized_user():
 
 def test_admin_summary_authorized_user(mocker, client, mock_admin_user, penalized_user):
     app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
-    mocker.patch("app.routers.admin_endpoints.get_user_count", return_value=1)
-    mocker.patch("app.routers.admin_endpoints.get_banned_users", return_value=[penalized_user])
-    mocker.patch("app.routers.admin_endpoints.get_warned_users", return_value=[penalized_user])
+    mocker.patch("app.services.admin_summary_service.get_user_count", return_value=1)
+    mocker.patch("app.services.admin_summary_service.get_banned_users", return_value=[penalized_user])
+    mocker.patch("app.services.admin_summary_service.get_warned_users", return_value=[penalized_user])
     response = client.get("/admin")
     app.dependency_overrides.clear()
     assert response.status_code == 200
@@ -37,9 +37,9 @@ def test_admin_summary_authorized_user(mocker, client, mock_admin_user, penalize
 
 def test_admin_summary_unauthorized_user(mocker, client, mock_unauthorized_user, penalized_user):
     app.dependency_overrides[jwt_auth_dependency] = lambda: mock_unauthorized_user
-    mocker.patch("app.routers.admin_endpoints.get_user_count", return_value=1)
-    mocker.patch("app.routers.admin_endpoints.get_banned_users", return_value=[penalized_user])
-    mocker.patch("app.routers.admin_endpoints.get_warned_users", return_value=[penalized_user])
+    mocker.patch("app.services.admin_summary_service.get_user_count", return_value=1)
+    mocker.patch("app.services.admin_summary_service.get_banned_users", return_value=[penalized_user])
+    mocker.patch("app.services.admin_summary_service.get_warned_users", return_value=[penalized_user])
     response = client.get("/admin")
     app.dependency_overrides.clear()
     assert response.status_code == 403
