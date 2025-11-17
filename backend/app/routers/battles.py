@@ -19,7 +19,14 @@ def create_battle(response: Response, current_user: dict = Depends(jwt_auth_depe
     user_id = current_user.get("user_id")
     user = get_user_by_id(user_id)
     
-    reviews = battle_pair_selector.sample_reviews_for_battle(user_id, sample_size=200)
+    try:
+        reviews = battle_pair_selector.sample_reviews_for_battle(user_id, sample_size=200)
+    except OSError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to load reviews: {str(e)}"
+        )
+    
     if not reviews:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -83,4 +90,10 @@ def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depen
         status_code = 409 if "already voted" in error_msg.lower() else 400
         raise HTTPException(status_code=status_code, detail=error_msg)
     
-    review_service.increment_vote(payload.winnerId)
+    try:
+        review_service.increment_vote(payload.winnerId)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Vote recorded but failed to update review count: {str(e)}"
+        )
