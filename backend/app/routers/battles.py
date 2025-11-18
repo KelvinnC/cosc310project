@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Response, Depends
 
 from app.schemas.battle import Battle, VoteRequest
+from app.schemas.review import Review
 from app.services import battle_service
 from app.services.user_service import get_user_by_id
 from app.services import battle_pair_selector
@@ -60,12 +61,12 @@ def get_battle(battle_id: str) -> Battle:
         )
 
 
-@router.post("/battles/{battle_id}/votes", status_code=204)
-def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depends(jwt_auth_dependency)) -> None:
+@router.post("/battles/{battle_id}/votes", response_model=Review, status_code=200)
+def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depends(jwt_auth_dependency)) -> Review:
     """
     Submit a vote for a battle.
     
-    Returns 204 No Content on success.
+    Returns the winning review (the one that won this battle) with updated vote count.
     """
     user_id = current_user.get("user_id")
     user = get_user_by_id(user_id)
@@ -85,7 +86,6 @@ def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depen
             user_id=user_id
         )
     except ValueError as e:
-        # ValueError from service layer indicates invalid input or duplicate vote
         error_msg = str(e)
         status_code = 409 if "already voted" in error_msg.lower() else 400
         raise HTTPException(status_code=status_code, detail=error_msg)
@@ -97,3 +97,7 @@ def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depen
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Vote recorded but failed to update review count: {str(e)}"
         )
+    
+    winning_review = review_service.get_review_by_id(payload.winnerId)
+    
+    return winning_review
