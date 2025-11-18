@@ -29,5 +29,5 @@ class UserUpdate(BaseModel):
 class UserSummaryResponse(BaseModel):
     """Schema for user dashboard"""
     battles: List[Any]
-    reviews: List[Any]
-    user: List[Any]
+    reviews: List[Review]
+    user: User
