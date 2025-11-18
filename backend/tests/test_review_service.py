@@ -1,7 +1,7 @@
 import pytest
 import datetime
 from fastapi import HTTPException
-from app.services.review_service import create_review, update_review, get_review_by_id, list_reviews, delete_review, increment_vote
+from app.services.review_service import create_review, update_review, get_review_by_id, list_reviews, delete_review, increment_vote, get_reviews_by_author
 from app.schemas.review import ReviewCreate, Review
 
 def test_list_review_empty_list(mocker):
@@ -268,3 +268,26 @@ def test_increment_vote_multiple_reviews(mocker):
     assert saved_reviews[0]["votes"] == 5  # unchanged
     assert saved_reviews[1]["votes"] == 4  # incremented
     assert saved_reviews[2]["votes"] == 15  # unchanged
+
+def test_get_review_by_author_id(mocker):
+    mocker.patch("app.services.review_service.load_all", return_value=[
+    {
+        "id":  7777,
+        "movieId":  "asdfsesfsesfe",
+        "date":  "2010-08-31",
+        "authorId":  "test_id",
+        "reviewTitle":  "Good Movie",
+        "reviewBody":  "this is a review body",
+        "rating":  4.5,
+        "votes":  6,
+        "flagged":  False
+    }])
+    reviews = get_reviews_by_author("test_id")
+    assert reviews[0].id == 7777
+    assert reviews[0].movieId == "asdfsesfsesfe"
+    assert reviews[0].reviewTitle == "Good Movie"
+    assert reviews[0].reviewBody == "this is a review body"
+    assert reviews[0].rating == 4.5
+    assert reviews[0].votes == 6
+    assert reviews[0].flagged == False
+    assert isinstance(reviews[0], Review)

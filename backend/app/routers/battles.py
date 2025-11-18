@@ -4,6 +4,7 @@ from app.schemas.battle import Battle, VoteRequest
 from app.schemas.review import Review
 from app.services import battle_service
 from app.services.user_service import get_user_by_id
+from app.services import battle_pair_selector
 from app.services import review_service
 from app.middleware.auth_middleware import jwt_auth_dependency
 
@@ -18,20 +19,15 @@ def create_battle(response: Response, current_user: dict = Depends(jwt_auth_depe
     """
     user_id = current_user.get("user_id")
     user = get_user_by_id(user_id)
-
+    
     try:
-        reviews = review_service.sample_reviews_for_battle(user_id, sample_size=200)
-    except FileNotFoundError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No reviews available"
-        )
-    except (OSError, ValueError) as e:
+        reviews = battle_pair_selector.sample_reviews_for_battle(user_id, sample_size=200)
+    except OSError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to load reviews: {str(e)}"
         )
-
+    
     if not reviews:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -39,21 +35,13 @@ def create_battle(response: Response, current_user: dict = Depends(jwt_auth_depe
         )
     
     try:
-        # Create the battle
-        battle = battle_service.createBattle(user, reviews)
-        
+        battle = battle_service.create_battle(user, reviews)
         response.headers["Location"] = f"/battles/{battle.id}"
         return battle
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
-        )
-    except Exception as e:
-        # Persistence or unexpected errors from service layer
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create battle: {str(e)}"
         )
 
 
@@ -73,17 +61,16 @@ def get_battle(battle_id: str) -> Battle:
         )
 
 
-@router.post("/battles/{battle_id}/votes", status_code=204)
-def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depends(jwt_auth_dependency)) -> None:
+@router.post("/battles/{battle_id}/votes", response_model=Review, status_code=200)
+def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depends(jwt_auth_dependency)) -> Review:
     """
     Submit a vote for a battle.
     
-    Returns 204 No Content on success.
+    Returns the winning review (the one that won this battle) with updated vote count.
     """
     user_id = current_user.get("user_id")
     user = get_user_by_id(user_id)
     
-    # Get the battle by ID
     try:
         battle = battle_service.get_battle_by_id(battle_id)
     except ValueError as e:
@@ -92,14 +79,25 @@ def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depen
             detail=str(e)
         )
     
-    # Submit the vote
     try:
-        battle_service.submitBattleResult(
+        battle_service.submit_battle_result(
             battle=battle,
             winner_id=payload.winnerId,
             user_id=user_id
         )
     except ValueError as e:
-        if "already voted" in str(e).lower():
-            raise HTTPException(status_code=409, detail=str(e))
-        raise HTTPException(status_code=400, detail=str(e))
+        error_msg = str(e)
+        status_code = 409 if "already voted" in error_msg.lower() else 400
+        raise HTTPException(status_code=status_code, detail=error_msg)
+    
+    try:
+        review_service.increment_vote(payload.winnerId)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Vote recorded but failed to update review count: {str(e)}"
+        )
+    
+    winning_review = review_service.get_review_by_id(payload.winnerId)
+    
+    return winning_review
