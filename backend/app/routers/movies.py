@@ -10,6 +10,7 @@ from app.services.movie_service import (
     search_movies_titles,
     movie_summary_by_id,
 )
+ 
 
 router = APIRouter(prefix="/movies", tags=["movies"])
 
