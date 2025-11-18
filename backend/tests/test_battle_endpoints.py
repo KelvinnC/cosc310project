@@ -1,5 +1,3 @@
-# test_battle_endpoints.py
-"""Tests for RESTful battles router endpoints."""
 import pytest
 from fastapi import HTTPException, status, Response
 from datetime import datetime, date
@@ -68,13 +66,12 @@ def mock_response():
     return Response()
 
 
-# POST /battles tests
 def test_create_battle_success(mocker, mock_user, mock_jwt_payload, sample_reviews, mock_battle, mock_response):
     """Test successful battle creation with Location header."""
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.services.review_service.sample_reviews_for_battle", return_value=sample_reviews)
-    mocker.patch("app.routers.battles.battle_service.createBattle", return_value=mock_battle)
+    mocker.patch("app.routers.battles.battle_pair_selector.sample_reviews_for_battle", return_value=sample_reviews)
+    mocker.patch("app.routers.battles.battle_service.create_battle", return_value=mock_battle)
     
     result = create_battle(response=mock_response, current_user=mock_jwt_payload)
     
@@ -102,7 +99,7 @@ def test_create_battle_no_reviews(mocker, mock_user, mock_jwt_payload, mock_resp
     """Test when reviews are not available."""
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.services.review_service.sample_reviews_for_battle", return_value=[])
+    mocker.patch("app.services.battle_pair_selector.sample_reviews_for_battle", return_value=[])
     
     with pytest.raises(HTTPException) as exc_info:
         create_battle(response=mock_response, current_user=mock_jwt_payload)
@@ -114,10 +111,10 @@ def test_create_battle_no_eligible_pairs(mocker, mock_user, mock_jwt_payload, sa
     """Test when user has voted on all available pairs."""
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
-    mocker.patch("app.services.review_service.sample_reviews_for_battle", return_value=sample_reviews)
+    mocker.patch("app.services.battle_pair_selector.sample_reviews_for_battle", return_value=sample_reviews)
     mocker.patch(
-        "app.routers.battles.battle_service.createBattle",
-        side_effect=ValueError("No eligible review pairs available for this user.")
+        "app.routers.battles.battle_service.create_battle",
+        side_effect=ValueError("No eligible review pair found")
     )
     
     with pytest.raises(HTTPException) as exc_info:
@@ -131,7 +128,7 @@ def test_create_battle_file_error(mocker, mock_user, mock_jwt_payload, mock_resp
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
     mocker.patch(
-        "app.services.review_service.sample_reviews_for_battle",
+        "app.services.battle_pair_selector.sample_reviews_for_battle",
         side_effect=OSError("File error")
     )
     
@@ -141,18 +138,24 @@ def test_create_battle_file_error(mocker, mock_user, mock_jwt_payload, mock_resp
     assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
-# POST /battles/{battle_id}/votes tests
-def test_submit_vote_success(mocker, mock_user, mock_jwt_payload, mock_battle):
+def test_submit_vote_success(mocker, mock_user, mock_jwt_payload, mock_battle, sample_reviews):
     """Test successful vote submission."""
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
     mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)
-    mocker.patch("app.routers.battles.battle_service.submitBattleResult", return_value=None)
+    mocker.patch("app.routers.battles.battle_service.submit_battle_result", return_value=None)
+    mock_increment = mocker.patch("app.routers.battles.review_service.increment_vote")
+    
+    # Mock get_review_by_id to return the winning review
+    winning_review = sample_reviews[0]  # Review with id=1
+    mocker.patch("app.routers.battles.review_service.get_review_by_id", return_value=winning_review)
     
     vote_request = VoteRequest(winnerId=1)
     result = submit_vote(battle_id=mock_battle.id, payload=vote_request, current_user=mock_jwt_payload)
     
-    assert result is None
+    assert result == winning_review
+    assert result.id == 1
+    mock_increment.assert_called_once_with(1)
 
 
 def test_submit_vote_user_not_found(mocker, mock_battle):
@@ -194,7 +197,7 @@ def test_submit_vote_invalid_winner(mocker, mock_user, mock_jwt_payload, mock_ba
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
     mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)
     mocker.patch(
-        "app.routers.battles.battle_service.submitBattleResult",
+        "app.routers.battles.battle_service.submit_battle_result",
         side_effect=ValueError(f"Winner 999 not in battle {mock_battle.id}")
     )
     
@@ -212,7 +215,7 @@ def test_submit_vote_duplicate_vote(mocker, mock_user, mock_jwt_payload, mock_ba
     mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
     mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)
     mocker.patch(
-        "app.routers.battles.battle_service.submitBattleResult",
+        "app.routers.battles.battle_service.submit_battle_result",
         side_effect=ValueError("User has already voted on this review pair")
     )
     
@@ -224,7 +227,26 @@ def test_submit_vote_duplicate_vote(mocker, mock_user, mock_jwt_payload, mock_ba
     assert exc_info.value.status_code == 409
 
 
-# GET /battles/{battle_id} tests
+def test_submit_vote_increment_failure(mocker, mock_user, mock_jwt_payload, mock_battle):
+    """Test when vote is recorded but review vote increment fails."""
+    mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
+    mocker.patch("app.routers.battles.get_user_by_id", return_value=mock_user)
+    mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)
+    mocker.patch("app.routers.battles.battle_service.submit_battle_result", return_value=None)
+    mocker.patch(
+        "app.routers.battles.review_service.increment_vote",
+        side_effect=Exception("Review not found")
+    )
+    
+    vote_request = VoteRequest(winnerId=1)
+    
+    with pytest.raises(HTTPException) as exc_info:
+        submit_vote(battle_id=mock_battle.id, payload=vote_request, current_user=mock_jwt_payload)
+    
+    assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert "Vote recorded" in exc_info.value.detail
+
+
 def test_get_battle_success(mocker, mock_battle):
     """Test successful retrieval of a battle by ID."""
     mocker.patch("app.routers.battles.battle_service.get_battle_by_id", return_value=mock_battle)

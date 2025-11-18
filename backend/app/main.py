@@ -25,3 +25,5 @@ app.include_router(admin_router)
 if login_router is not None:
     app.include_router(login_router)
 app.include_router(battles_router)
+
+
