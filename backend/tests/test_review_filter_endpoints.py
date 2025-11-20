@@ -17,7 +17,7 @@ def test_filter_and_sort_by_rating_desc(mocker, client):
         {"id": 4, "movieId": "D", "authorId": 13, "rating": 4, "reviewTitle": "t4", "reviewBody": "b4", "flagged": False, "votes": 0, "date": "2020-01-04"},
         {"id": 5, "movieId": "E", "authorId": 14, "reviewTitle": "t5", "reviewBody": "b5", "flagged": False, "votes": 0, "date": "2020-01-05"},
     ]
-    mocker.patch("app.repositories.review_repo.load_all", return_value=reviews)
+    mocker.patch("app.services.review_service.load_all", return_value=reviews)
 
     resp = client.get("/reviews", params={"rating": 5, "sort_by": "rating", "order": "desc"})
     assert resp.status_code == 200
@@ -37,7 +37,7 @@ def test_sort_by_movie_title_asc(mocker, client):
         {"id": "B", "title": "Alpha"},
         {"id": "C", "title": "Omega"},
     ]
-    mocker.patch("app.repositories.review_repo.load_all", return_value=reviews)
+    mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
     resp = client.get("/reviews", params={"sort_by": "movie", "order": "asc"})
