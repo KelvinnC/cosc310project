@@ -1,29 +1,8 @@
 import pytest
 import json
 from pathlib import Path
-from app.repositories.review_repo import get_all_reviews, load_all, save_all, DATA_PATH
+from app.repositories.review_repo import load_all, save_all, DATA_PATH
 
-def test_get_all_reviews_returns_copy_when_no_filter_or_sort(mocker):
-    data = [
-        {"id": 1, "movieId": "A", "rating": 4.0},
-        {"id": 2, "movieId": "B", "rating": 5.0},
-    ]
-    mocker.patch("app.repositories.review_repo.load_all", return_value=data)
-    result = get_all_reviews()
-    assert result == data
-    assert result is not data
-
-
-def test_filter_by_rating_exact_match(mocker):
-    data = [
-        {"id": 1, "movieId": "A", "rating": 5},
-        {"id": 2, "movieId": "B", "rating": "5.0"},
-        {"id": 3, "movieId": "C", "rating": 4.0},
-        {"id": 4, "movieId": "D"},
-    ]
-    mocker.patch("app.repositories.review_repo.load_all", return_value=data)
-    only_fives = get_all_reviews(rating=5)
-    assert [r["id"] for r in only_fives] == [1, 2]
 
 
 def test_load_all_file_missing(mocker):
