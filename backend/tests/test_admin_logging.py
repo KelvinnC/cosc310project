@@ -1,10 +1,3 @@
-"""
-Integration tests for admin service logging.
-
-Tests verify that admin and moderation operations correctly log their actions
-with appropriate log levels and context information.
-"""
-
 import pytest
 import json
 from pathlib import Path
@@ -17,7 +10,6 @@ from app.schemas.user import User
 
 @pytest.fixture(autouse=True)
 def reset_logger():
-    """Reset singleton before and after each test"""
     Logger._instance = None
     yield
     Logger._instance = None
@@ -25,7 +17,6 @@ def reset_logger():
 
 @pytest.fixture
 def mock_user():
-    """Mock user for testing"""
     from datetime import datetime
     return User(
         id="test-user-123",

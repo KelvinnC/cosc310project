@@ -1,10 +1,3 @@
-"""
-Unit tests for the singleton logger implementation.
-
-Tests verify that the Logger follows the singleton pattern and correctly
-writes structured log entries to the JSON log file.
-"""
-
 import pytest
 import json
 from pathlib import Path
