@@ -2,7 +2,7 @@ from typing import List, Optional, Literal
 from fastapi import APIRouter, status, Query, HTTPException, Depends
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.schemas.search import MovieSearch, MovieWithReviews
-from app.services.review_service import list_reviews, create_review, delete_review, update_review, get_review_by_id
+from app.services.review_service import list_reviews, create_review, delete_review, update_review, get_review_by_id, get_reviews_by_author
 from app.services.search_service import search_movies_with_reviews
 from app.repositories.review_repo import get_all_reviews
 
@@ -72,6 +72,15 @@ def get_review(review_id: int):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Review {review_id} not found"
         )
+
+@router.get("/author/{author_id}", response_model=List[Review])
+def get_author_reviews(author_id: str):
+    try:
+        return get_reviews_by_author(author_id)
+    except HTTPException as exc:
+        if getattr(exc, "status_code", None) == 404:
+            return []
+        raise
 
 @router.put("/{review_id}", response_model=Review)
 def put_review(review_id: int, review_update: ReviewUpdate):
