@@ -17,12 +17,9 @@ def _matching_movie_ids(search: MovieSearch) -> Set[str]:
 
 
 def _iter_matching_reviews(search: MovieSearch, *, page: int, per_page: int) -> List[Review]:
-    movies = load_movies()
     matched_movie_ids = _matching_movie_ids(search)
     if not matched_movie_ids:
         return []
-
-    idx_to_uuid: Dict[int, str] = {idx + 1: mv.get("id") for idx, mv in enumerate(movies) if isinstance(mv.get("id"), str)}
 
     start = (page - 1) * per_page
     taken = 0
@@ -31,20 +28,14 @@ def _iter_matching_reviews(search: MovieSearch, *, page: int, per_page: int) -> 
 
     for rv in load_reviews():
         movie_id = rv.get("movieId")
-        uuid = None
-        if isinstance(movie_id, str):
-            uuid = movie_id
-        elif isinstance(movie_id, int):
-            uuid = idx_to_uuid.get(movie_id)
-        else:
+        if not isinstance(movie_id, str):
             continue
-        if uuid not in matched_movie_ids:
+        if movie_id not in matched_movie_ids:
             continue
         if seen < start:
             seen += 1
             continue
-        rv_out = rv if isinstance(movie_id, str) else {**rv, "movieId": uuid}
-        results.append(Review(**rv_out))
+        results.append(Review(**rv))
         taken += 1
         seen += 1
         if taken >= per_page:
@@ -53,27 +44,18 @@ def _iter_matching_reviews(search: MovieSearch, *, page: int, per_page: int) -> 
 
 
 def all_matching_reviews(search: MovieSearch) -> List[Review]:
-    movies = load_movies()
     matched_movie_ids = _matching_movie_ids(search)
     if not matched_movie_ids:
         return []
 
-    idx_to_uuid: Dict[int, str] = {idx + 1: mv.get("id") for idx, mv in enumerate(movies) if isinstance(mv.get("id"), str)}
-
     results: List[Review] = []
     for rv in load_reviews():
         movie_id = rv.get("movieId")
-        uuid = None
-        if isinstance(movie_id, str):
-            uuid = movie_id
-        elif isinstance(movie_id, int):
-            uuid = idx_to_uuid.get(movie_id)
-        else:
+        if not isinstance(movie_id, str):
             continue
-        if uuid not in matched_movie_ids:
+        if movie_id not in matched_movie_ids:
             continue
-        rv_out = rv if isinstance(movie_id, str) else {**rv, "movieId": uuid}
-        results.append(Review(**rv_out))
+        results.append(Review(**rv))
     return results
 
 
@@ -94,23 +76,14 @@ def search_movies_with_reviews(search: MovieSearch) -> List[MovieWithReviews]:
     if not matched_ids:
         return []
 
-    idx_to_uuid: Dict[int, str] = {idx + 1: m.get("id") for idx, m in enumerate(movies) if isinstance(m.get("id"), str)}
-
     buckets: Dict[str, List[Review]] = {mid: [] for mid in matched_ids}
     for rv in load_reviews():
         mv_id = rv.get("movieId")
-        uuid = None
-        if isinstance(mv_id, str):
-            uuid = mv_id
-        elif isinstance(mv_id, int):
-            uuid = idx_to_uuid.get(mv_id)
-            if uuid:
-                rv = {**rv, "movieId": uuid}
-        else:
+        if not isinstance(mv_id, str):
             continue
-        if uuid in matched_ids:
+        if mv_id in matched_ids:
             try:
-                buckets[uuid].append(Review(**rv))
+                buckets[mv_id].append(Review(**rv))
             except Exception:
                 continue
 

@@ -96,10 +96,10 @@ def test_sort_by_rating_ascending_descending(mocker):
 
 def test_sort_by_movie_id_supports_uuid_and_index(mocker):
     reviews = [
-        {"id": 1, "movieId": 1, "rating": 3.0},
+        {"id": 1, "movieId": "A", "rating": 3.0},
         {"id": 2, "movieId": "C", "rating": 4.0},
         {"id": 3, "movieId": "B", "rating": 2.0},
-        {"id": 4, "movieId": 99, "rating": 5.0},
+        {"id": 4, "movieId": None, "rating": 5.0},
     ]
     movies = [
         {"id": "A", "title": "Zeta"},
@@ -119,9 +119,9 @@ def test_sort_by_movie_id_supports_uuid_and_index(mocker):
 def test_sort_by_movie_title_ascending_descending(mocker):
     reviews = [
         {"id": 1, "movieId": "A", "rating": 3.0},
-        {"id": 2, "movieId": 2, "rating": 4.0},
+        {"id": 2, "movieId": "B", "rating": 4.0},
         {"id": 3, "movieId": "C", "rating": 2.0},
-        {"id": 4, "movieId": 99, "rating": 5.0},
+        {"id": 4, "movieId": None, "rating": 5.0},
     ]
     movies = [
         {"id": "A", "title": "Zeta"},

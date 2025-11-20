@@ -6,11 +6,14 @@ import app.repositories.movie_repo as movie_repo
 from app.repositories.review_repo import load_all as load_reviews
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 
+
 def load_all() -> List[Dict[str, Any]]:
     return movie_repo.load_all()
 
+
 def save_all(movies: List[Dict[str, Any]]) -> None:
     movie_repo.save_all(movies)
+
 
 def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
     movies: List[Dict[str, Any]] = load_all()
@@ -22,23 +25,13 @@ def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
         reviews_data = load_reviews()
         if reviews_data:
             movie_ids = {mv.get("id") for mv in movies}
-            index_to_id: Dict[int, Any] = {
-                idx + 1: mv.get("id") for idx, mv in enumerate(movies)
-            }
 
             rating_sums: Dict[str, float] = {}
             rating_counts: Dict[str, int] = {}
 
             for rv in reviews_data:
                 mv_id = rv.get("movieId")
-                resolved_id = None
-
-                if isinstance(mv_id, str) and mv_id in movie_ids:
-                    resolved_id = mv_id
-                elif isinstance(mv_id, int):
-                    resolved_id = index_to_id.get(mv_id)
-
-                if not resolved_id:
+                if not isinstance(mv_id, str) or mv_id not in movie_ids:
                     continue
 
                 try:
@@ -46,8 +39,8 @@ def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
                 except (TypeError, ValueError):
                     continue
 
-                rating_sums[resolved_id] = rating_sums.get(resolved_id, 0.0) + rating_val
-                rating_counts[resolved_id] = rating_counts.get(resolved_id, 0) + 1
+                rating_sums[mv_id] = rating_sums.get(mv_id, 0.0) + rating_val
+                rating_counts[mv_id] = rating_counts.get(mv_id, 0) + 1
 
             avg_ratings: Dict[str, float] = {
                 movie_id: rating_sums[movie_id] / rating_counts[movie_id]
@@ -71,6 +64,7 @@ def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
 
     return [Movie(**mv) for mv in movies]
 
+
 def create_movie(payload: MovieCreate) -> Movie:
     movies = load_all()
     new_movie_id = str(uuid.uuid4())
@@ -87,22 +81,16 @@ def get_movie_by_id(movie_id: str) -> MovieWithReviews:
     target_index = find_dict_by_id(movies, "id", movie_id)
     if target_index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
-    
+
     target = movies[target_index]
-    index_1_based = target_index + 1
     reviews_data = load_reviews()
     reviews_list = []
     for rv in reviews_data:
         mv_id = rv.get("movieId")
         if isinstance(mv_id, str) and mv_id == movie_id:
             reviews_list.append(rv)
-        elif isinstance(mv_id, int) and mv_id == index_1_based:
-            reviews_list.append({**rv, "movieId": movie_id})
 
-    wrapped_reviews = [
-        rv
-        for rv in reviews_list
-    ]
+    wrapped_reviews = [rv for rv in reviews_list]
 
     return MovieWithReviews(
         id=target.get("id"),

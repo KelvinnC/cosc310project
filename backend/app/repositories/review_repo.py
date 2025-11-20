@@ -5,6 +5,7 @@ from app.repositories import movie_repo
 
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "reviews.json"
 
+
 def load_all(load_invisible=False) -> List[Dict[str, Any]]:
     """Loads reviews from reviews.json. If the output is user-facing, invisible reviews should not be loaded.
     Hidden reviews should be loaded in cases of subsequent save_all calls to prevent overwriting of data."""
@@ -24,14 +25,6 @@ def _to_float(val: Any) -> Optional[float]:
         return None
 
 
-def _normalize_movie_id(raw_id: Any, idx_to_uuid: Dict[int, str]) -> Optional[str]:
-    if isinstance(raw_id, str):
-        return raw_id
-    if isinstance(raw_id, int):
-        return idx_to_uuid.get(raw_id)
-    return None
-
-
 def get_all_reviews(
     *,
     rating: Optional[float] = None,
@@ -43,9 +36,8 @@ def get_all_reviews(
     this value. Non-numeric ratings wont match.
 
     Sorting: `sort_by` supports 'rating', 'movieId', or 'movieTitle'
-    with `order` controlling ascending or descending. Movie-based sorts support
-    both string UUID `movieId` and legacy 1-based numeric indices mapped to the
-    movies dataset order. The original data is not changed.
+    with `order` controlling ascending or descending. Movie-based sorts
+    use string UUID `movieId`; legacy integer index handling has been removed.
     """
     reviews = load_all()
     result: List[Dict[str, Any]] = list(reviews)
@@ -71,14 +63,13 @@ def get_all_reviews(
 
     if key in ("movieid", "movietitle"):
         movies = movie_repo.load_all()
-        idx_to_uuid: Dict[int, str] = {
-            idx + 1: mv.get("id") for idx, mv in enumerate(movies) if isinstance(mv.get("id"), str)
-        }
 
         if key == "movieid":
             def _movie_id_key(rv: Dict[str, Any]):
-                norm = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
-                return (0, "") if norm is None else (1, norm)
+                mid = rv.get("movieId")
+                if not isinstance(mid, str):
+                    return (0, "")
+                return (1, mid)
 
             return sorted(result, key=_movie_id_key, reverse=reverse)
 
@@ -90,14 +81,15 @@ def get_all_reviews(
                 id_to_title[mid] = title
 
         def _movie_title_key(rv: Dict[str, Any]):
-            mid = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
-            if mid is None:
+            mid = rv.get("movieId")
+            if not isinstance(mid, str):
                 return (0, "")
             return (1, id_to_title.get(mid, ""))
 
         return sorted(result, key=_movie_title_key, reverse=reverse)
 
     return result
+
 
 def save_all(reviews: List[Dict[str, Any]]) -> None:
     tmp = DATA_PATH.with_suffix(".tmp")
