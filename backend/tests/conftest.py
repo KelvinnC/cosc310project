@@ -21,3 +21,19 @@ def user_data():
         "warnings": 0
     }
     return payload
+
+@pytest.fixture
+def mock_admin_user():
+    import datetime
+    return {"user_id": "5678",
+                "username": "admin",
+                "exp": datetime.datetime.now() + datetime.timedelta(1),
+                "role": "admin"}
+
+@pytest.fixture
+def mock_unauthorized_user():
+    import datetime
+    return {"user_id": "1234",
+                "username": "user",
+                "exp": datetime.datetime.now() + datetime.timedelta(1),
+                "role": "user"}

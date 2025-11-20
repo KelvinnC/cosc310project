@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.routers import user_endpoints
 from app.schemas.user import User
+from app.middleware.auth_middleware import jwt_auth_dependency
 
 client = TestClient(app)
 
@@ -20,25 +21,8 @@ def user_object():
     )
 
 
-@pytest.fixture
-def mock_admin_user():
-    import datetime
-    return {"user_id": "5678",
-                "username": "admin",
-                "exp": datetime.datetime.now() + datetime.timedelta(1),
-                "role": "admin"}
-
-@pytest.fixture
-def mock_unauthorized_user():
-    import datetime
-    return {"user_id": "1234",
-                "username": "user",
-                "exp": datetime.datetime.now() + datetime.timedelta(1),
-                "role": "user"}
-
-
 def test_remove_user_warning_success(mocker, mock_admin_user, user_object):
-    app.dependency_overrides[user_endpoints.jwt_auth_dependency] = lambda: mock_admin_user
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
     warned_user = user_object.model_copy(update={"warnings": 1})
     mocker.patch("app.services.penalty_service.get_user_by_id_unsafe", return_value=warned_user)
     save = mocker.patch("app.services.penalty_service.save_all")
@@ -50,7 +34,7 @@ def test_remove_user_warning_success(mocker, mock_admin_user, user_object):
 
 
 def test_remove_user_warning_unauthorized(mocker, user_object, mock_unauthorized_user):
-    app.dependency_overrides[user_endpoints.jwt_auth_dependency] = lambda: mock_unauthorized_user
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_unauthorized_user
     mocker.patch("app.services.penalty_service.get_user_by_id_unsafe", return_value=user_object)
     save = mocker.patch("app.services.penalty_service.save_all")
     response = client.patch(f"/users/{user_object.id}/unwarn")
@@ -61,7 +45,7 @@ def test_remove_user_warning_unauthorized(mocker, user_object, mock_unauthorized
 
 
 def test_add_user_ban_success(mocker, mock_admin_user, user_object):
-    app.dependency_overrides[user_endpoints.jwt_auth_dependency] = lambda: mock_admin_user
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
     active_user = user_object.model_copy()
     mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
                  return_value=active_user)
@@ -74,7 +58,7 @@ def test_add_user_ban_success(mocker, mock_admin_user, user_object):
 
 
 def test_add_user_ban_unauthorized(mocker, user_object, mock_unauthorized_user):
-    app.dependency_overrides[user_endpoints.jwt_auth_dependency] = lambda: mock_unauthorized_user
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_unauthorized_user
     mocker.patch("app.services.penalty_service.get_user_by_id_unsafe", return_value=user_object)
     save = mocker.patch("app.services.penalty_service.save_all")
     response = client.patch(f"/users/{user_object.id}/ban")
@@ -85,7 +69,7 @@ def test_add_user_ban_unauthorized(mocker, user_object, mock_unauthorized_user):
 
 
 def test_remove_user_ban_success(mocker, mock_admin_user, user_object):
-    app.dependency_overrides[user_endpoints.jwt_auth_dependency] = lambda: mock_admin_user
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
     banned_user = user_object.model_copy(update={"active": False})
     mocker.patch("app.services.penalty_service.get_user_by_id_unsafe", return_value=banned_user)
     save = mocker.patch("app.services.penalty_service.save_all")
@@ -97,7 +81,7 @@ def test_remove_user_ban_success(mocker, mock_admin_user, user_object):
 
 
 def test_remove_user_ban_unauthorized(mocker, user_object, mock_unauthorized_user):
-    app.dependency_overrides[user_endpoints.jwt_auth_dependency] = lambda: mock_unauthorized_user
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_unauthorized_user
     mocker.patch("app.services.penalty_service.get_user_by_id_unsafe", return_value=user_object)
     save = mocker.patch("app.services.penalty_service.save_all")
     response = client.patch(f"/users/{user_object.id}/unban")
