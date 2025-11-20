@@ -7,6 +7,7 @@ only one logger instance exists throughout the application lifecycle.
 """
 
 import json
+import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -14,14 +15,15 @@ from typing import Any
 
 class Logger:
     """
-    Singleton logger class that writes structured logs to JSON file.
+    Thread-safe singleton logger class that writes structured logs to JSON file.
     
     The singleton pattern ensures all parts of the application share the same
     logger instance, preventing duplicate file handles and ensuring consistent
-    log formatting.
+    log formatting. Thread safety is guaranteed through a lock mechanism.
     """
     
     _instance = None
+    _lock = threading.Lock()
     
     def __new__(cls):
         """
@@ -67,18 +69,20 @@ class Logger:
             "context": context
         }
         
-        try:
-            # Read existing logs
-            logs = json.loads(self.log_file.read_text())
-            
-            # Append new entry
-            logs.append(entry)
-            
-            # Write back to file with pretty formatting
-            self.log_file.write_text(json.dumps(logs, indent=2))
-        except Exception:
-            # Fail silently - logging errors should not break the application
-            pass
+        # Thread-safe write operation
+        with self._lock:
+            try:
+                # Read existing logs
+                logs = json.loads(self.log_file.read_text())
+                
+                # Append new entry
+                logs.append(entry)
+                
+                # Write back to file with pretty formatting
+                self.log_file.write_text(json.dumps(logs, indent=2))
+            except Exception:
+                # Fail silently - logging errors should not break the application
+                pass
     
     def info(self, message: str, component: str = "system", **context: Any) -> None:
         """
