@@ -45,6 +45,7 @@ def test_warn_user_logs_action(tmp_path, monkeypatch, mock_user):
     logger = Logger()
     logger.log_file = test_log_file
     
+    monkeypatch.setattr("app.services.penalty_service.logger", logger)
     monkeypatch.setattr("app.services.penalty_service.get_user_by_id_unsafe", 
                        lambda uid: mock_user)
     monkeypatch.setattr("app.services.penalty_service._save_updated_user", 
@@ -68,6 +69,7 @@ def test_unwarn_user_logs_action(tmp_path, monkeypatch, mock_user):
     logger = Logger()
     logger.log_file = test_log_file
     
+    monkeypatch.setattr("app.services.penalty_service.logger", logger)
     mock_user.warnings = 2
     monkeypatch.setattr("app.services.penalty_service.get_user_by_id_unsafe", 
                        lambda uid: mock_user)
@@ -92,6 +94,7 @@ def test_ban_user_logs_action(tmp_path, monkeypatch, mock_user):
     logger = Logger()
     logger.log_file = test_log_file
     
+    monkeypatch.setattr("app.services.penalty_service.logger", logger)
     monkeypatch.setattr("app.services.penalty_service.get_user_by_id_unsafe", 
                        lambda uid: mock_user)
     monkeypatch.setattr("app.services.penalty_service._save_updated_user", 
@@ -114,6 +117,7 @@ def test_unban_user_logs_action(tmp_path, monkeypatch, mock_user):
     logger = Logger()
     logger.log_file = test_log_file
     
+    monkeypatch.setattr("app.services.penalty_service.logger", logger)
     mock_user.active = False
     monkeypatch.setattr("app.services.penalty_service.get_user_by_id_unsafe", 
                        lambda uid: mock_user)
@@ -137,6 +141,7 @@ def test_hide_review_logs_success(tmp_path, monkeypatch):
     logger = Logger()
     logger.log_file = test_log_file
     
+    monkeypatch.setattr("app.services.admin_review_service.logger", logger)
     mock_reviews = [{
         "id": 1, 
         "movieId": "tt1234567",
@@ -172,6 +177,7 @@ def test_hide_review_logs_not_found(tmp_path, monkeypatch):
     logger = Logger()
     logger.log_file = test_log_file
     
+    monkeypatch.setattr("app.services.admin_review_service.logger", logger)
     monkeypatch.setattr("app.services.admin_review_service.load_all", 
                        lambda load_invisible=False: [])
     
@@ -193,6 +199,7 @@ def test_flag_review_logs_action(tmp_path, monkeypatch):
     logger = Logger()
     logger.log_file = test_log_file
     
+    monkeypatch.setattr("app.services.flag_service.logger", logger)
     mock_review = {"id": 1, "text": "Test review", "flagged": False}
     monkeypatch.setattr("app.services.flag_service.get_review_by_id", 
                        lambda rid: mock_review)
@@ -222,6 +229,7 @@ def test_duplicate_flag_logs_warning(tmp_path, monkeypatch):
     logger = Logger()
     logger.log_file = test_log_file
     
+    monkeypatch.setattr("app.services.flag_service.logger", logger)
     existing_flags = [{"user_id": "user123", "review_id": 1, "timestamp": "2024-01-01T00:00:00"}]
     mock_review = {"id": 1, "text": "Test review", "flagged": True}
     monkeypatch.setattr("app.services.flag_service.get_review_by_id", 

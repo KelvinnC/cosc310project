@@ -6,11 +6,11 @@ from app.utils.logger import get_logger
 
 from typing import Dict, Any
 
+logger = get_logger()
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 @router.get("/", response_model=AdminSummaryResponse, status_code=status.HTTP_200_OK)
 def get_admin_summary(current_user: dict = Depends(admin_required)):
-    logger = get_logger()
     logger.info(
         "Admin dashboard accessed",
         component="admin",

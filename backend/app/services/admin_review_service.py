@@ -7,13 +7,14 @@ from fastapi import HTTPException
 from typing import Dict, Any
 from app.utils.logger import get_logger
 
+logger = get_logger()
+
 def get_flagged_reviews() -> List[Review]:
     reviews = list_reviews()
     return [review for review in reviews if review.flagged]
 
 def hide_review(review_id: int) -> Review:
     """Marks a review's visible field as False"""
-    logger = get_logger()
     reviews = load_all(load_invisible=True)
     index = find_dict_by_id(reviews, "id", review_id)
     

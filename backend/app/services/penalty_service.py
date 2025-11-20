@@ -4,6 +4,8 @@ from app.services.user_service import get_user_by_id_unsafe
 from app.schemas.user import User
 from app.utils.logger import get_logger
 
+logger = get_logger()
+
 def _save_updated_user(user, user_id):
     """Replace the old user with the updated one and save all users"""
     users = [usr for usr in load_all() if usr.get("id") != user_id]
@@ -11,7 +13,6 @@ def _save_updated_user(user, user_id):
     save_all(users)
 
 def warn_user(user_id: str) -> User:
-    logger = get_logger()
     user = get_user_by_id_unsafe(user_id)
     user.warnings += 1
     _save_updated_user(user, user_id)
@@ -24,7 +25,6 @@ def warn_user(user_id: str) -> User:
     return user
 
 def unwarn_user(user_id: str) -> User:
-    logger = get_logger()
     user = get_user_by_id_unsafe(user_id)
     old_warning_count = user.warnings
     user.warnings = max(0, user.warnings - 1)
@@ -39,7 +39,6 @@ def unwarn_user(user_id: str) -> User:
     return user
 
 def ban_user(user_id: str) -> User:
-    logger = get_logger()
     user = get_user_by_id_unsafe(user_id)
     user.active = False
     _save_updated_user(user, user_id)
@@ -51,7 +50,6 @@ def ban_user(user_id: str) -> User:
     return user
 
 def unban_user(user_id: str) -> User:
-    logger = get_logger()
     user = get_user_by_id_unsafe(user_id)
     user.active = True
     _save_updated_user(user, user_id)

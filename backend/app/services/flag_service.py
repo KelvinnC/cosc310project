@@ -3,9 +3,10 @@ from app.repositories import flag_repo
 from app.services.review_service import get_review_by_id, mark_review_as_flagged
 from app.utils.logger import get_logger
 
+logger = get_logger()
+
 def flag_review(user_id: str, review_id: int) -> dict:
     """Flag a review as inappropriate"""
-    logger = get_logger()
     review = get_review_by_id(review_id)
     
     flags = flag_repo.load_all()
