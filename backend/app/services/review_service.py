@@ -25,7 +25,7 @@ def _normalize_movie_id(raw_id: Any, idx_to_uuid: Dict[int, str]) -> Optional[st
     return None
 
 
-def list_reviews(
+def filter_and_sort_reviews(
     *,
     rating: Optional[float] = None,
     sort_by: Optional[str] = None,
@@ -55,9 +55,6 @@ def list_reviews(
                 if val is None:
                     return (0, 0.0)
                 return (1, val)
-            # Always sort ascending by the tuple key; we want "invalid"
-            # ratings to come first, and reverse order for val handled
-            # by negating in the key when order is descending.
             if reverse:
                 def _rating_key(rv: Dict[str, Any]):
                     val = _to_float(rv.get("rating"))
@@ -96,6 +93,15 @@ def list_reviews(
                 result = sorted(result, key=_movie_title_key, reverse=reverse)
 
     return [Review(**review) for review in result]
+
+
+def list_reviews(
+    *,
+    rating: Optional[float] = None,
+    sort_by: Optional[str] = None,
+    order: str = "asc",
+) -> List[Review]:
+    return filter_and_sort_reviews(rating=rating, sort_by=sort_by, order=order)
 
 def get_review_by_id(review_id: int) -> Review:
     """Get a review by ID."""
