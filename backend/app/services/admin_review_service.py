@@ -31,6 +31,6 @@ def hide_review(review_id: int) -> Review:
         "Review hidden by admin",
         component="admin",
         review_id=review_id,
-        author_id=reviews[index].get("author_id")
+        author_id=reviews[index].get("authorId")
     )
     return Review(**reviews[index])
