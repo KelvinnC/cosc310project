@@ -29,18 +29,18 @@ def mock_user():
     )
 
 
-def test_warn_user_logs_action(tmp_path, monkeypatch, mock_user):
+def test_warn_user_logs_action(tmp_path, mocker, mock_user):
     """Verify warn_user logs WARNING level entry"""
     test_log_file = tmp_path / "logs.json"
     test_log_file.write_text("[]")
     logger = Logger()
     logger.log_file = test_log_file
     
-    monkeypatch.setattr("app.services.penalty_service.logger", logger)
-    monkeypatch.setattr("app.services.penalty_service.get_user_by_id_unsafe", 
-                       lambda uid: mock_user)
-    monkeypatch.setattr("app.services.penalty_service._save_updated_user", 
-                       lambda u, uid: None)
+    mocker.patch("app.services.penalty_service.logger", logger)
+    mocker.patch("app.services.penalty_service.get_user_by_id", 
+                 return_value=mock_user)
+    mocker.patch("app.services.penalty_service._save_updated_user", 
+                 return_value=None)
     
     warn_user("test-user-123")
     
@@ -53,19 +53,19 @@ def test_warn_user_logs_action(tmp_path, monkeypatch, mock_user):
     assert logs[0]["context"]["new_warning_count"] == 1
 
 
-def test_unwarn_user_logs_action(tmp_path, monkeypatch, mock_user):
+def test_unwarn_user_logs_action(tmp_path, mocker, mock_user):
     """Verify unwarn_user logs INFO level entry"""
     test_log_file = tmp_path / "logs.json"
     test_log_file.write_text("[]")
     logger = Logger()
     logger.log_file = test_log_file
     
-    monkeypatch.setattr("app.services.penalty_service.logger", logger)
+    mocker.patch("app.services.penalty_service.logger", logger)
     mock_user.warnings = 2
-    monkeypatch.setattr("app.services.penalty_service.get_user_by_id_unsafe", 
-                       lambda uid: mock_user)
-    monkeypatch.setattr("app.services.penalty_service._save_updated_user", 
-                       lambda u, uid: None)
+    mocker.patch("app.services.penalty_service.get_user_by_id", 
+                 return_value=mock_user)
+    mocker.patch("app.services.penalty_service._save_updated_user", 
+                 return_value=None)
     
     unwarn_user("test-user-123")
     
@@ -78,18 +78,18 @@ def test_unwarn_user_logs_action(tmp_path, monkeypatch, mock_user):
     assert logs[0]["context"]["new_warning_count"] == 1
 
 
-def test_ban_user_logs_action(tmp_path, monkeypatch, mock_user):
+def test_ban_user_logs_action(tmp_path, mocker, mock_user):
     """Verify ban_user logs ERROR level entry"""
     test_log_file = tmp_path / "logs.json"
     test_log_file.write_text("[]")
     logger = Logger()
     logger.log_file = test_log_file
     
-    monkeypatch.setattr("app.services.penalty_service.logger", logger)
-    monkeypatch.setattr("app.services.penalty_service.get_user_by_id_unsafe", 
-                       lambda uid: mock_user)
-    monkeypatch.setattr("app.services.penalty_service._save_updated_user", 
-                       lambda u, uid: None)
+    mocker.patch("app.services.penalty_service.logger", logger)
+    mocker.patch("app.services.penalty_service.get_user_by_id", 
+                 return_value=mock_user)
+    mocker.patch("app.services.penalty_service._save_updated_user", 
+                 return_value=None)
     
     ban_user("test-user-123")
     
@@ -101,19 +101,19 @@ def test_ban_user_logs_action(tmp_path, monkeypatch, mock_user):
     assert logs[0]["context"]["user_id"] == "test-user-123"
 
 
-def test_unban_user_logs_action(tmp_path, monkeypatch, mock_user):
+def test_unban_user_logs_action(tmp_path, mocker, mock_user):
     """Verify unban_user logs INFO level entry"""
     test_log_file = tmp_path / "logs.json"
     test_log_file.write_text("[]")
     logger = Logger()
     logger.log_file = test_log_file
     
-    monkeypatch.setattr("app.services.penalty_service.logger", logger)
+    mocker.patch("app.services.penalty_service.logger", logger)
     mock_user.active = False
-    monkeypatch.setattr("app.services.penalty_service.get_user_by_id_unsafe", 
-                       lambda uid: mock_user)
-    monkeypatch.setattr("app.services.penalty_service._save_updated_user", 
-                       lambda u, uid: None)
+    mocker.patch("app.services.penalty_service.get_user_by_id", 
+                 return_value=mock_user)
+    mocker.patch("app.services.penalty_service._save_updated_user", 
+                 return_value=None)
     
     unban_user("test-user-123")
     
@@ -124,7 +124,7 @@ def test_unban_user_logs_action(tmp_path, monkeypatch, mock_user):
     assert "unbanned" in logs[0]["message"].lower()
 
 
-def test_hide_review_logs_success(tmp_path, monkeypatch):
+def test_hide_review_logs_success(tmp_path, mocker):
     """Verify hide_review logs successful hiding"""
     from datetime import date
     test_log_file = tmp_path / "logs.json"
@@ -132,7 +132,7 @@ def test_hide_review_logs_success(tmp_path, monkeypatch):
     logger = Logger()
     logger.log_file = test_log_file
     
-    monkeypatch.setattr("app.services.admin_review_service.logger", logger)
+    mocker.patch("app.services.admin_review_service.logger", logger)
     mock_reviews = [{
         "id": 1, 
         "movieId": "tt1234567",
@@ -145,10 +145,10 @@ def test_hide_review_logs_success(tmp_path, monkeypatch):
         "flagged": False,
         "votes": 0
     }]
-    monkeypatch.setattr("app.services.admin_review_service.load_all", 
-                       lambda load_invisible=False: mock_reviews)
-    monkeypatch.setattr("app.services.admin_review_service.save_all", 
-                       lambda reviews: None)
+    mocker.patch("app.services.admin_review_service.load_all", 
+                 return_value=mock_reviews)
+    mocker.patch("app.services.admin_review_service.save_all", 
+                 return_value=None)
     
     hide_review(1)
     
@@ -161,16 +161,16 @@ def test_hide_review_logs_success(tmp_path, monkeypatch):
     assert logs[0]["context"]["author_id"] == "author123"
 
 
-def test_hide_review_logs_not_found(tmp_path, monkeypatch):
+def test_hide_review_logs_not_found(tmp_path, mocker):
     """Verify hide_review logs when review not found"""
     test_log_file = tmp_path / "logs.json"
     test_log_file.write_text("[]")
     logger = Logger()
     logger.log_file = test_log_file
     
-    monkeypatch.setattr("app.services.admin_review_service.logger", logger)
-    monkeypatch.setattr("app.services.admin_review_service.load_all", 
-                       lambda load_invisible=False: [])
+    mocker.patch("app.services.admin_review_service.logger", logger)
+    mocker.patch("app.services.admin_review_service.load_all", 
+                 return_value=[])
     
     with pytest.raises(Exception):  # HTTPException
         hide_review(999)
@@ -183,23 +183,23 @@ def test_hide_review_logs_not_found(tmp_path, monkeypatch):
     assert logs[0]["context"]["review_id"] == 999
 
 
-def test_flag_review_logs_action(tmp_path, monkeypatch):
+def test_flag_review_logs_action(tmp_path, mocker):
     """Verify flag_review logs flagging action"""
     test_log_file = tmp_path / "logs.json"
     test_log_file.write_text("[]")
     logger = Logger()
     logger.log_file = test_log_file
     
-    monkeypatch.setattr("app.services.flag_service.logger", logger)
+    mocker.patch("app.services.flag_service.logger", logger)
     mock_review = {"id": 1, "text": "Test review", "flagged": False}
-    monkeypatch.setattr("app.services.flag_service.get_review_by_id", 
-                       lambda rid: mock_review)
-    monkeypatch.setattr("app.services.flag_service.flag_repo.load_all", 
-                       lambda: [])
-    monkeypatch.setattr("app.services.flag_service.flag_repo.save_all", 
-                       lambda flags: None)
-    monkeypatch.setattr("app.services.flag_service.mark_review_as_flagged", 
-                       lambda review: None)
+    mocker.patch("app.services.flag_service.get_review_by_id", 
+                 return_value=mock_review)
+    mocker.patch("app.services.flag_service.flag_repo.load_all", 
+                 return_value=[])
+    mocker.patch("app.services.flag_service.flag_repo.save_all", 
+                 return_value=None)
+    mocker.patch("app.services.flag_service.mark_review_as_flagged", 
+                 return_value=None)
     
     flag_review("user123", 1)
     
@@ -213,20 +213,20 @@ def test_flag_review_logs_action(tmp_path, monkeypatch):
     assert logs[0]["context"]["total_flags"] == 1
 
 
-def test_duplicate_flag_logs_warning(tmp_path, monkeypatch):
+def test_duplicate_flag_logs_warning(tmp_path, mocker):
     """Verify duplicate flag attempt logs WARNING"""
     test_log_file = tmp_path / "logs.json"
     test_log_file.write_text("[]")
     logger = Logger()
     logger.log_file = test_log_file
     
-    monkeypatch.setattr("app.services.flag_service.logger", logger)
+    mocker.patch("app.services.flag_service.logger", logger)
     existing_flags = [{"user_id": "user123", "review_id": 1, "timestamp": "2024-01-01T00:00:00"}]
     mock_review = {"id": 1, "text": "Test review", "flagged": True}
-    monkeypatch.setattr("app.services.flag_service.get_review_by_id", 
-                       lambda rid: mock_review)
-    monkeypatch.setattr("app.services.flag_service.flag_repo.load_all", 
-                       lambda: existing_flags)
+    mocker.patch("app.services.flag_service.get_review_by_id", 
+                 return_value=mock_review)
+    mocker.patch("app.services.flag_service.flag_repo.load_all", 
+                 return_value=existing_flags)
     
     with pytest.raises(ValueError, match="already flagged"):
         flag_review("user123", 1)
