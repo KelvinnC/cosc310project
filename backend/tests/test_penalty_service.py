@@ -16,7 +16,7 @@ def user_object():
     )
 
 def test_penalty_service_valid_warn(mocker, user_object):
-    mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
+    mocker.patch("app.services.penalty_service.get_user_by_id",
                  return_value=user_object)
     save = mocker.patch("app.services.penalty_service.save_all")
     assert user_object.warnings == 0
@@ -25,7 +25,7 @@ def test_penalty_service_valid_warn(mocker, user_object):
     assert save.called
 
 def test_penalty_service_warn_invalid_user(mocker, user_object):
-    mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
+    mocker.patch("app.services.penalty_service.get_user_by_id",
                  side_effect=HTTPException(status_code=404, detail="User not found"))
     save = mocker.patch("app.services.penalty_service.save_all")
     with pytest.raises(HTTPException) as ex:
@@ -34,7 +34,7 @@ def test_penalty_service_warn_invalid_user(mocker, user_object):
     assert not save.called
 
 def test_penalty_service_valid_unwarn(mocker, user_object):
-    mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
+    mocker.patch("app.services.penalty_service.get_user_by_id",
                  return_value=user_object)
     save = mocker.patch("app.services.penalty_service.save_all")
     assert user_object.warnings == 0
@@ -43,7 +43,7 @@ def test_penalty_service_valid_unwarn(mocker, user_object):
     assert save.called
 
 def test_penalty_service_unwarn_invalid_user(mocker, user_object):
-    mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
+    mocker.patch("app.services.penalty_service.get_user_by_id",
                  side_effect=HTTPException(status_code=404, detail="User not found"))
     save = mocker.patch("app.services.penalty_service.save_all")
     with pytest.raises(HTTPException) as ex:
@@ -52,7 +52,7 @@ def test_penalty_service_unwarn_invalid_user(mocker, user_object):
     assert not save.called
 
 def test_penalty_service_valid_ban(mocker, user_object):
-    mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
+    mocker.patch("app.services.penalty_service.get_user_by_id",
                  return_value=user_object)
     save = mocker.patch("app.services.penalty_service.save_all")
     assert user_object.active == True
@@ -61,7 +61,7 @@ def test_penalty_service_valid_ban(mocker, user_object):
     assert save.called
 
 def test_penalty_service_warn_invalid_ban(mocker, user_object):
-    mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
+    mocker.patch("app.services.penalty_service.get_user_by_id",
                  side_effect=HTTPException(status_code=404, detail="User not found"))
     save = mocker.patch("app.services.penalty_service.save_all")
     with pytest.raises(HTTPException) as ex:
@@ -70,7 +70,7 @@ def test_penalty_service_warn_invalid_ban(mocker, user_object):
     assert not save.called
 
 def test_penalty_service_valid_unban(mocker, user_object):
-    mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
+    mocker.patch("app.services.penalty_service.get_user_by_id",
                  return_value=user_object)
     save = mocker.patch("app.services.penalty_service.save_all")
     user = unban_user(user_object.id)
@@ -78,7 +78,7 @@ def test_penalty_service_valid_unban(mocker, user_object):
     assert save.called
 
 def test_penalty_service_warn_invalid_unban(mocker, user_object):
-    mocker.patch("app.services.penalty_service.get_user_by_id_unsafe",
+    mocker.patch("app.services.penalty_service.get_user_by_id",
                  side_effect=HTTPException(status_code=404, detail="User not found"))
     save = mocker.patch("app.services.penalty_service.save_all")
     with pytest.raises(HTTPException) as ex:
