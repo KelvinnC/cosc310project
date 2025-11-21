@@ -1,6 +1,6 @@
 import random
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, date
 from fastapi import HTTPException
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.repositories.review_repo import load_all, save_all
@@ -105,11 +105,16 @@ def list_reviews(
 
 
 def get_leaderboard_reviews(limit: int = 10) -> List[Review]:
-    """Return top reviews ranked by votes (descending), limited to `limit`."""
+    """Return top reviews ranked by votes (descending), limited to `limit`.
+    Ties on votes are broken by review date (most recent first).
+    """
     reviews = list_reviews()
     sorted_reviews = sorted(
         reviews,
-        key=lambda r: getattr(r, "votes", 0),
+        key=lambda r: (
+            getattr(r, "votes", 0),
+            getattr(r, "date", None) or date.min,
+        ),
         reverse=True,
     )
     return sorted_reviews[:limit]
