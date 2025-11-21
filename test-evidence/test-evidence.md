@@ -84,10 +84,10 @@ with pytest.raises(HTTPException):
 **User Authorization** (`backend/tests/test_penalty_endpoints.py` - Lines 27-65)
 ```python
 # Warnings < 3: Can add penalty
-mocker.patch("app.services.penalty_service.get_user_by_id_unsafe", return_value=warned_user)
+mocker.patch("app.services.penalty_service.get_user_by_id", return_value=warned_user)
 
 # Warnings >= 3: Reject with 400
-mocker.patch("app.services.penalty_service.get_user_by_id_unsafe", return_value=banned_user)
+mocker.patch("app.services.penalty_service.get_user_by_id", return_value=banned_user)
 ```
 
 ---
