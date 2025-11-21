@@ -103,6 +103,17 @@ def list_reviews(
 ) -> List[Review]:
     return filter_and_sort_reviews(rating=rating, sort_by=sort_by, order=order)
 
+
+def get_leaderboard_reviews(limit: int = 10) -> List[Review]:
+    """Return top reviews ranked by votes (descending), limited to `limit`."""
+    reviews = list_reviews()
+    sorted_reviews = sorted(
+        reviews,
+        key=lambda r: getattr(r, "votes", 0),
+        reverse=True,
+    )
+    return sorted_reviews[:limit]
+
 def get_review_by_id(review_id: int) -> Review:
     """Get a review by ID."""
     reviews = load_all()
