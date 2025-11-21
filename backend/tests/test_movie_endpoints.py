@@ -9,7 +9,7 @@ def client():
 
 def test_list_movies(mocker, client):
     mocker.patch(
-        "app.services.movie_service.load_all",
+        "app.repositories.movie_repo.load_all",
         return_value=[
             {
                 "id": "1234",
@@ -26,6 +26,7 @@ def test_list_movies(mocker, client):
     data = response.json()
     assert isinstance(data, list)
     assert len(data) == 1
+    assert "id" in data[0] and "title" in data[0]
 
 def test_get_movie_by_id_valid_id(client):
     response = client.get("/movies/6bca4027-ad52-414e-810c-b830571cc07d")
@@ -38,13 +39,12 @@ def test_get_movie_by_id_valid_id(client):
 
 def test_get_movie_by_id_invalid_id(client):
     response = client.get("/movies/NotAValidID")
-    # Endpoint now mirrors /movies/search shape: returns empty list when not found
     assert response.status_code == 200
     assert response.json() == []
 
 def test_post_movie_valid_movie(mocker, client):
-    mocker.patch("app.services.movie_service.load_all", return_value=[])
-    mock_save = mocker.patch("app.services.movie_service.save_all")
+    mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
+    mock_save = mocker.patch("app.repositories.movie_repo.save_all")
     payload = {
         "id": "1234",
         "title": "Test",
@@ -59,13 +59,13 @@ def test_post_movie_valid_movie(mocker, client):
     assert data["title"] == "Test"
 
 def test_post_movie_missing_json(mocker, client):
-    mocker.patch("app.services.movie_service.load_all", return_value=[])
-    mocker.patch("app.services.movie_service.save_all")
+    mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
+    mocker.patch("app.repositories.movie_repo.save_all")
     response = client.post("/movies", json={})
     assert response.status_code == 422
 
 def test_put_movie_valid_put(mocker, client):
-    mocker.patch("app.services.movie_service.load_all",
+    mocker.patch("app.repositories.movie_repo.load_all",
     return_value=[{
         "id": "1234",
         "title": "Test",
@@ -74,7 +74,7 @@ def test_put_movie_valid_put(mocker, client):
         "description": "Testing Description",
         "duration": 90
     }])
-    mocker.patch("app.services.movie_service.save_all")
+    mocker.patch("app.repositories.movie_repo.save_all")
     response = client.put("/movies/1234", json={
         "title": "UpdatedTest",
         "genre": "Horror",
@@ -87,7 +87,7 @@ def test_put_movie_valid_put(mocker, client):
     assert data["title"] == "UpdatedTest"
 
 def test_put_movie_invalid_put(mocker, client):
-    mocker.patch("app.services.movie_service.load_all",
+    mocker.patch("app.repositories.movie_repo.load_all",
     return_value=[{
         "id": "1234",
         "title": "Test",
@@ -96,7 +96,7 @@ def test_put_movie_invalid_put(mocker, client):
         "description": "Testing Description",
         "duration": 90
     }])
-    mocker.patch("app.services.movie_service.save_all")
+    mocker.patch("app.repositories.movie_repo.save_all")
     response = client.put("/movies/5678", json={
         "title": "InvalidTest",
         "genre": "Horror",
@@ -107,7 +107,7 @@ def test_put_movie_invalid_put(mocker, client):
     assert response.status_code == 404
 
 def test_delete_movie_valid_movie(mocker, client):
-    mocker.patch("app.services.movie_service.load_all",
+    mocker.patch("app.repositories.movie_repo.load_all",
     return_value=[{
         "id": "1234",
         "title": "Test",
@@ -116,14 +116,14 @@ def test_delete_movie_valid_movie(mocker, client):
         "description": "Testing Description",
         "duration": 90
     }])
-    mock_save = mocker.patch("app.services.movie_service.save_all")
+    mock_save = mocker.patch("app.repositories.movie_repo.save_all")
     response = client.delete("/movies/1234")
     assert(len(mock_save.call_args[0][0]) == 0)
     assert response.status_code == 204
 
 def test_delete_movie_invalid_movie(mocker, client):
-    mocker.patch("app.services.movie_service.load_all",
+    mocker.patch("app.repositories.movie_repo.load_all",
     return_value=[])
-    mocker.patch("app.services.movie_service.save_all")
+    mocker.patch("app.repositories.movie_repo.save_all")
     response = client.delete("/movies/invalidid")
     assert response.status_code == 404
