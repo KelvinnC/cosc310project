@@ -212,3 +212,6 @@ __marimo__/
 
 # macOS system file
 .DS_Store
+
+# Application logs
+backend/app/data/logs.json

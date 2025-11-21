@@ -5,6 +5,9 @@ from app.utils.list_helpers import find_dict_by_id
 from app.repositories.review_repo import load_all
 from fastapi import HTTPException
 from typing import Dict, Any
+from app.utils.logger import get_logger
+
+logger = get_logger()
 
 def get_flagged_reviews() -> List[Review]:
     reviews = list_reviews()
@@ -16,8 +19,19 @@ def hide_review(review_id: int) -> Review:
     index = find_dict_by_id(reviews, "id", review_id)
     
     if index == NOT_FOUND:
+        logger.warning(
+            "Admin attempted to hide non-existent review",
+            component="admin",
+            review_id=review_id
+        )
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     
     reviews[index]["visible"] = False
     save_all(reviews)
+    logger.warning(
+        "Review hidden by admin",
+        component="admin",
+        review_id=review_id,
+        author_id=reviews[index].get("authorId")
+    )
     return Review(**reviews[index])
