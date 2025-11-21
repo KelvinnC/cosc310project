@@ -3,9 +3,12 @@ import json
 from pathlib import Path
 from app.repositories.review_repo import load_all, save_all, DATA_PATH
 
+
+
 def test_load_all_file_missing(mocker):
     mocker.patch.object(Path, "exists", return_value=False)
     assert load_all() == []
+
 
 def test_load_all_with_data(mocker):
     mocker.patch.object(Path, "exists", return_value=True)
@@ -24,6 +27,7 @@ def test_load_all_with_data(mocker):
     result = load_all()
     assert result == payload
     mock_open.assert_called_once_with("r", encoding="utf-8-sig")
+
 
 def test_save_all_saves_data(mocker):
     reviews = [{
@@ -50,5 +54,5 @@ def test_save_all_saves_data(mocker):
 
     handle = mock_file()
     handle.write.assert_called()
-    
+
     mock_replace.assert_called_once_with(tmp_path, DATA_PATH)
