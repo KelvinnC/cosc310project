@@ -106,15 +106,15 @@ def mark_review_as_flagged(review: Review) -> None:
 
 def mark_review_as_unflagged(review: Review) -> None:
     """Mark a review as unflagged"""
-    review_update = ReviewUpdate(
-        rating=review.rating,
-        reviewTitle=review.reviewTitle,
-        reviewBody=review.reviewBody,
-        flagged=False,
-        voets=review.votes,
-        date=review.date
-    )
-    update_review(review.id, review_update)
+    reviews = load_all(load_invisible=True)
+    index = find_dict_by_id(reviews, "id", review.id)
+
+    if index == NOT_FOUND:
+        raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
+
+    reviews[index]["flagged"] = False
+    save_all(reviews)
+    
 def get_reviews_by_author(user_id: str) -> List[Review]:
     results = []
     for rv in load_all():
