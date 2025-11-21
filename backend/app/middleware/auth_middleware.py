@@ -1,4 +1,6 @@
 from fastapi import Request, HTTPException, Depends
+import jwt
+
 from app.services.validate_access import validate_user_access
 from app.services.review_service import get_review_by_id
 
@@ -12,8 +14,8 @@ async def jwt_auth_dependency(request: Request):
     try:
         payload = validate_user_access(access_token)
         return payload
-    except Exception as ex:
-        raise HTTPException(status_code=401, detail=str(ex))
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError) as ex:
+        raise HTTPException(status_code=401, detail=str(ex)) from ex
 
 async def user_is_author(review_id: int, current_user: dict = Depends(jwt_auth_dependency)):
     """Verify that the current user is the author of the review."""
