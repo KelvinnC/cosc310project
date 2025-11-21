@@ -57,8 +57,8 @@ class ReviewCreate(BaseModel):
 class ReviewUpdate(BaseModel):
     """Update a review. Note: authorId and date cannot be modified."""
     rating: float = Field(..., ge=1, le=5, description="Rating must be between 1 and 5")
-    reviewTitle: str
-    reviewBody: str
+    reviewTitle: str = Field(..., min_length=3, max_length=100)
+    reviewBody: str = Field(..., min_length=50, max_length=1000)
     flagged: bool = False
     votes: int = 0
     date: date
