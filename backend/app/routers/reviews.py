@@ -144,3 +144,8 @@ def flag_review(review_id: int, current_user: dict = Depends(jwt_auth_dependency
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to flag review: {str(e)}"
         )
+    
+@router.post("/{review_id}/unflag", status_code=204)
+def flag_review(review_id: int, current_user: dict = Depends(admin_required)):
+    """Unflag a review. Admin only endpoint"""
+    flag_service.unflag_review(review_id)

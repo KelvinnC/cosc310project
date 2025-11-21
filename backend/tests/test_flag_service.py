@@ -19,6 +19,20 @@ def mock_review():
         date="2023-01-15"
     )
 
+@pytest.fixture
+def mock_flagged_review():
+    return Review(
+        id=1,
+        movieId="movie-123",
+        authorId="author-456",
+        rating=4.5,
+        reviewTitle="Great movie",
+        reviewBody="I really enjoyed this film. The acting was superb and the plot was engaging throughout.",
+        flagged=True,
+        votes=10,
+        date="2023-01-15"
+    )
+
 
 def test_flag_review_success(mocker, mock_review):
     """Test successfully flagging a review"""
@@ -172,3 +186,27 @@ def test_get_flagged_reviews_count_cross_review_isolation(mocker):
     assert flag_service.get_flagged_reviews_count(7) == 2
     assert flag_service.get_flagged_reviews_count(8) == 1
     assert flag_service.get_flagged_reviews_count(99) == 0
+
+def test_unflag_review_success(mocker, mock_flagged_review):
+    """Test successfully unflagging a review"""
+    mocker.patch("app.services.flag_service.get_review_by_id", return_value=mock_flagged_review)
+    mocker.patch("app.repositories.flag_repo.load_all", return_value=[])
+    mock_save = mocker.patch("app.repositories.flag_repo.save_all")
+    mock_mark = mocker.patch("app.services.flag_service.mark_review_as_unflagged")
+    
+    flag_service.unflag_review(review_id=1)
+    
+    mock_save.assert_called_once()
+    mock_mark.assert_called_once_with(mock_flagged_review)
+
+def test_unflag_review_not_found(mocker, mock_flagged_review):
+    """Test unflagging a review that is not found"""
+    mocker.patch("app.services.flag_service.get_review_by_id", side_effect=HTTPException(status_code=404, detail="Review Not Found"))
+    mocker.patch("app.repositories.flag_repo.load_all", return_value=[])
+    mock_save = mocker.patch("app.repositories.flag_repo.save_all")
+    mock_mark = mocker.patch("app.services.flag_service.mark_review_as_unflagged")
+    
+    with pytest.raises(HTTPException) as ex:
+        flag_service.unflag_review(review_id=123)
+    assert ex.value.status_code == 404
+

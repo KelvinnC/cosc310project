@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.middleware.auth_middleware import jwt_auth_dependency
+from fastapi import HTTPException
 
 
 @pytest.fixture
@@ -128,3 +129,25 @@ def test_flag_review_invalid_path_param_returns_422(client):
         assert resp.status_code == 422
     finally:
         app.dependency_overrides.clear()
+
+def test_unflag_review_success(mocker, client, mock_admin_user):
+    """Test successfully unflagging a review"""
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
+    
+    mock_unflag_service = mocker.patch("app.routers.reviews.flag_service.unflag_review")
+    
+    response = client.post("/reviews/1/unflag")
+    app.dependency_overrides.clear()
+    
+    assert response.status_code == 204
+    
+def test_unflag_review_not_found(mocker, client, mock_admin_user):
+    """Test flagging a review that is not found"""
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
+    
+    mock_unflag_service = mocker.patch("app.routers.reviews.flag_service.unflag_review", side_effect=HTTPException(status_code=404, detail="Review Not Found"))
+    
+    response = client.post("/reviews/123/unflag")
+    app.dependency_overrides.clear()
+    
+    assert response.status_code == 404
