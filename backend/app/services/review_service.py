@@ -103,6 +103,17 @@ def list_reviews(
 ) -> List[Review]:
     return filter_and_sort_reviews(rating=rating, sort_by=sort_by, order=order)
 
+
+def get_leaderboard_reviews(limit: int = 10) -> List[Review]:
+    """Return top reviews ranked by votes (descending), limited to `limit`."""
+    reviews = list_reviews()
+    sorted_reviews = sorted(
+        reviews,
+        key=lambda r: getattr(r, "votes", 0),
+        reverse=True,
+    )
+    return sorted_reviews[:limit]
+
 def get_review_by_id(review_id: int) -> Review:
     """Get a review by ID."""
     reviews = load_all()
@@ -192,7 +203,20 @@ def mark_review_as_flagged(review: Review) -> None:
     
     reviews[index]["flagged"] = True
     save_all(reviews)
+
     
+def mark_review_as_unflagged(review: Review) -> None:
+    """Mark a review as unflagged"""
+    reviews = load_all(load_invisible=True)
+    index = find_dict_by_id(reviews, "id", review.id)
+
+    if index == NOT_FOUND:
+        raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
+
+    reviews[index]["flagged"] = False
+    save_all(reviews)
+    
+
 def get_reviews_by_author(user_id: str) -> List[Review]:
     results = []
     for rv in load_all():

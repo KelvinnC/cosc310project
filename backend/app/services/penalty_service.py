@@ -1,6 +1,6 @@
 from app.repositories.user_repo import load_all, save_all
 from fastapi import HTTPException
-from app.services.user_service import get_user_by_id_unsafe
+from app.services.user_service import get_user_by_id
 from app.schemas.user import User
 from app.utils.logger import get_logger
 
@@ -13,7 +13,7 @@ def _save_updated_user(user, user_id):
     save_all(users)
 
 def warn_user(user_id: str) -> User:
-    user = get_user_by_id_unsafe(user_id)
+    user = get_user_by_id(user_id, show_password=True)
     user.warnings += 1
     _save_updated_user(user, user_id)
     logger.warning(
@@ -25,7 +25,7 @@ def warn_user(user_id: str) -> User:
     return user
 
 def unwarn_user(user_id: str) -> User:
-    user = get_user_by_id_unsafe(user_id)
+    user = get_user_by_id(user_id, show_password=True)
     old_warning_count = user.warnings
     user.warnings = max(0, user.warnings - 1)
     _save_updated_user(user, user_id)
@@ -39,7 +39,7 @@ def unwarn_user(user_id: str) -> User:
     return user
 
 def ban_user(user_id: str) -> User:
-    user = get_user_by_id_unsafe(user_id)
+    user = get_user_by_id(user_id, show_password=True)
     user.active = False
     _save_updated_user(user, user_id)
     logger.error(
@@ -50,7 +50,7 @@ def ban_user(user_id: str) -> User:
     return user
 
 def unban_user(user_id: str) -> User:
-    user = get_user_by_id_unsafe(user_id)
+    user = get_user_by_id(user_id, show_password=True)
     user.active = True
     _save_updated_user(user, user_id)
     logger.info(
