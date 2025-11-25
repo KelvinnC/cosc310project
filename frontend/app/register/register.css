@@ -1,0 +1,39 @@
+.register-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.register-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #4292c6;
+    color: white;
+    font-weight: 500;
+    height: 20rem;
+    border-radius: 16px;
+    padding: 16px;
+    gap: 16px;
+}
+
+.register-textbox {
+    background-color: white;
+    padding: 8px;
+    color: grey;
+    width: 20rem;
+    height: 2rem;
+    border-radius: 8px;
+}
+
+.register-button {
+    background-color: #2171b5;
+    width: 8rem;
+    height: 2.5rem;
+    border-radius: 12px;
+}
+
+.register-button:hover {
+    background-color: #08306b;
+    transition: background-color 0.3s ease;
+}
