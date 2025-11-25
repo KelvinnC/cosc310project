@@ -152,15 +152,15 @@ def server_process(test_data_files, temp_data_dir):
     
     startup_script_content = f'''
 import sys
-sys.path.insert(0, "{backend_dir}")
+sys.path.insert(0, r"{backend_dir}")
 
 # Patch data paths before importing app
 from pathlib import Path
 from app.repositories import user_repo, review_repo, battle_repo
 
-user_repo.DATA_PATH = Path("{test_data_files["users"]}")
-review_repo.DATA_PATH = Path("{test_data_files["reviews"]}")
-battle_repo.DATA_PATH = Path("{test_data_files["battles"]}")
+user_repo.DATA_PATH = Path(r"{test_data_files["users"]}")
+review_repo.DATA_PATH = Path(r"{test_data_files["reviews"]}")
+battle_repo.DATA_PATH = Path(r"{test_data_files["battles"]}")
 
 # Now import and run the app
 import uvicorn
