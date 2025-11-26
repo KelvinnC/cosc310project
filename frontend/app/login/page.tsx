@@ -67,18 +67,7 @@ const Page = () => {
         return
       }
 
-      let token = null
-      if (data) {
-        if (typeof data === 'string') {
-          token = data
-        } else if (data.access_token) {
-          token = data.access_token
-        } else if (data.token) {
-          token = data.token
-        } else if (data.bearer) {
-          token = data.bearer
-        }
-      }
+      let token = data.access_token
 
       if (token) {
         ;(setAccessToken as any)(token)
