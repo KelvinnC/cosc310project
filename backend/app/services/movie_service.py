@@ -145,3 +145,18 @@ def delete_movie(movie_id: str) -> None:
     if len(new_movies) == len(movies):
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
     movie_repo.save_all(new_movies)
+
+def get_leaderboard_movies(limit: int = 10) -> List[Movie]:
+    """Return top movies ranked by rating (descending), limited to `limit`.
+    Ties on votes are broken by movie relese date (most recent first).
+    """
+    movies = list_movies()
+    sorted_movies = sorted(
+        movies,
+        key=lambda r: (
+            getattr(r, "rating", 0),
+            getattr(r, "release", None),
+        ),
+        reverse=True,
+    )
+    return sorted_movies[:limit]
