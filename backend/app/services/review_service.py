@@ -1,6 +1,6 @@
 import random
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, date
 from fastapi import HTTPException
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.repositories.review_repo import load_all, save_all
@@ -105,11 +105,16 @@ def list_reviews(
 
 
 def get_leaderboard_reviews(limit: int = 10) -> List[Review]:
-    """Return top reviews ranked by votes (descending), limited to `limit`."""
+    """Return top reviews ranked by votes (descending), limited to `limit`.
+    Ties on votes are broken by review date (most recent first).
+    """
     reviews = list_reviews()
     sorted_reviews = sorted(
         reviews,
-        key=lambda r: getattr(r, "votes", 0),
+        key=lambda r: (
+            getattr(r, "votes", 0),
+            getattr(r, "date", None) or date.min,
+        ),
         reverse=True,
     )
     return sorted_reviews[:limit]
@@ -147,7 +152,7 @@ def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
     return new_review
 
 def update_review(review_id: int, payload: ReviewUpdate) -> Review:
-    """Update an existing review."""
+    """Update an existing review. Only rating, title, and body can be modified."""
     reviews = load_all(load_invisible=True)
     index = find_dict_by_id(reviews, "id", review_id)
 
@@ -162,9 +167,9 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
         rating=payload.rating,
         reviewTitle=payload.reviewTitle,
         reviewBody=payload.reviewBody,
-        flagged=payload.flagged,
-        votes=payload.votes,
-        date=payload.date
+        flagged=old_review.get("flagged", False),
+        votes=old_review.get("votes", 0),
+        date=old_review["date"]
     )
 
     reviews[index] = updated_review.model_dump(mode="json")
@@ -195,16 +200,16 @@ def increment_vote(review_id: int) -> None:
 
 def mark_review_as_flagged(review: Review) -> None:
     """Mark a review as flagged"""
-    review_update = ReviewUpdate(
-        rating=review.rating,
-        reviewTitle=review.reviewTitle,
-        reviewBody=review.reviewBody,
-        flagged=True,
-        votes=review.votes,
-        date=review.date
-    )
-    update_review(review.id, review_update)
+    reviews = load_all()
+    index = find_dict_by_id(reviews, "id", review.id)
+    
+    if index == NOT_FOUND:
+        raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
+    
+    reviews[index]["flagged"] = True
+    save_all(reviews)
 
+    
 def mark_review_as_unflagged(review: Review) -> None:
     """Mark a review as unflagged"""
     reviews = load_all(load_invisible=True)

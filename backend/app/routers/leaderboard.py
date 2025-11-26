@@ -10,6 +10,5 @@ router = APIRouter(prefix="/leaderboard", tags=["leaderboard"])
 
 
 @router.get("", response_model=List[Review])
-def get_leaderboard() -> List[Review]:
-    """ top reviews ranked by votes (descending)."""
-    return get_leaderboard_reviews(limit=10)
+def get_leaderboard(limit: int = 10) -> List[Review]:
+    return get_leaderboard_reviews(limit=limit)
