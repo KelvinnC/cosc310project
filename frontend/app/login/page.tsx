@@ -5,11 +5,14 @@ import './login.css'
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useData } from '../context';
+import { apiFetch } from '../../lib/api';
 
 const FASTAPI_URL = "http://127.0.0.1:8000"
 
 const Page = () => {
   const router = useRouter();
+  const { setAccessToken } = useData();
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -47,7 +50,7 @@ const Page = () => {
     setError("")
 
     try {
-      const response = await fetch(`${FASTAPI_URL}/login`, {
+      const response = await apiFetch(`${FASTAPI_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -59,10 +62,28 @@ const Page = () => {
       })
       const data = await response.json()
       if (!response.ok) {
-        const errorMessage = data.detail || data.message || response.statusText || "Registration failed"
+        const errorMessage = data.detail || data.message || response.statusText || "Login failed"
         setError(errorMessage)
         return
       }
+
+      let token = null
+      if (data) {
+        if (typeof data === 'string') {
+          token = data
+        } else if (data.access_token) {
+          token = data.access_token
+        } else if (data.token) {
+          token = data.token
+        } else if (data.bearer) {
+          token = data.bearer
+        }
+      }
+
+      if (token) {
+        ;(setAccessToken as any)(token)
+      }
+
       router.push('/')
     } catch (err) {
       setError("Network error. Please try again.")
