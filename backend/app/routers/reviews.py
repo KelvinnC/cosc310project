@@ -2,6 +2,7 @@ from typing import List, Optional, Literal
 from fastapi import APIRouter, status, Query, HTTPException, Depends
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate
 from app.schemas.search import MovieSearch, MovieWithReviews
+from app.schemas.comment import Comment, CommentCreate
 from app.services.review_service import (
     list_reviews,
     filter_and_sort_reviews,
@@ -11,6 +12,7 @@ from app.services.review_service import (
     get_review_by_id,
     get_reviews_by_author,
 )
+from app.services.comment_service import get_comments_by_movie_id, create_comment
 from app.services.search_service import search_movies_with_reviews
 from app.services import flag_service
 from app.middleware.auth_middleware import jwt_auth_dependency, user_is_author
@@ -76,6 +78,17 @@ def get_review(review_id: int):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Review {review_id} not found"
         )
+    
+@router.get("/{review_id}/comments", response_model=List[Comment], status_code=200)
+def get_comments(review_id: int):
+    """Retrieve a comment by review id."""
+    return get_comments_by_movie_id(review_id)
+
+@router.post("/{review_id}/comments", status_code=204)
+def post_comment(payload: CommentCreate, current_user: dict = Depends(jwt_auth_dependency)):
+    """Creates a comment for a review"""
+    return create_comment(payload, current_user["user_id"])
+
 
 @router.get("/author/{author_id}", response_model=List[Review])
 def get_author_reviews(author_id: str):
