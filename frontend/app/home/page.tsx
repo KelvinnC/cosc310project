@@ -5,6 +5,7 @@ import {useEffect} from 'react'
 import { apiFetch } from '@/lib/api'
 import './home.css'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const FASTAPI_URL = "http://127.0.0.1:8000"
 
@@ -13,10 +14,15 @@ const page = () => {
     const [battles, setBattles] = useState([])
     const [reviews, setReviews] = useState([])
     const [user, setUser] = useState(null)
+    const router = useRouter()
 
     useEffect(() => {
         const fetchUserData = async () => {
             const response = await apiFetch(`${FASTAPI_URL}/home`)
+            if (response.status == 401) {
+                router.push('/login')
+                return
+            }
             const data = await response.json()
             setUserData(data)
             setBattles(data["battles"])
