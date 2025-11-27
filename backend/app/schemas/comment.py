@@ -2,8 +2,12 @@ from pydantic import BaseModel
 from datetime import date
 
 class Comment(BaseModel):
-    commentId: int
+    id: int
     reviewId: int
     authorId: str
     commentBody: str
     date: date
+
+class CommentCreate(BaseModel):
+    reviewId: int
+    commentBody: str
