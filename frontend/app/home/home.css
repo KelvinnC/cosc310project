@@ -6,6 +6,7 @@
     width: 25rem;
     height: 15rem;
     border-radius: 8px;
+    user-select: none;
 }
 
 body {
@@ -62,4 +63,31 @@ body {
     align-items: center;
     justify-content: center;
     flex-direction: column;
+}
+
+.winner-text {
+    color: rgb(246, 247, 247);
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.click-text {
+    text-align: end;
+    color: white;
+    font-size: 18px;
+}
+
+.battle {
+    display: flex;
+    flex-direction: column;
+    background-color: #4292c6;
+    padding: 16px;
+    width: 25rem;
+    border-radius: 8px;
+    user-select: none;
+}
+
+.battle:hover {
+    background-color: #50b3f5;
+    transform: scale(1.01)
 }
