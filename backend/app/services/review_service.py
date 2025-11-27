@@ -1,4 +1,3 @@
-import random
 from typing import List, Dict, Any, Optional
 from datetime import datetime, date
 from fastapi import HTTPException
@@ -25,72 +24,86 @@ def _normalize_movie_id(raw_id: Any, idx_to_uuid: Dict[int, str]) -> Optional[st
     return None
 
 
+def _filter_by_rating_dicts(
+    reviews: List[Dict[str, Any]], rating: Optional[float]
+) -> List[Dict[str, Any]]:
+    if rating is None:
+        return list(reviews)
+    target = _to_float(rating)
+    return [rv for rv in reviews if _to_float(rv.get("rating")) == target]
+
+
+def _make_rating_sort_key(descending: bool = False):
+    def _key(rv: Dict[str, Any]):
+        val = _to_float(rv.get("rating"))
+        if val is None:
+            return (0, 0.0)
+        return (1, -val) if descending else (1, val)
+
+    return _key
+
+
+def _build_movie_indexes() -> tuple[Dict[int, str], Dict[str, str]]:
+    movies = movie_repo.load_all()
+    idx_to_uuid: Dict[int, str] = {
+        idx + 1: mv.get("id")
+        for idx, mv in enumerate(movies)
+        if isinstance(mv.get("id"), str)
+    }
+    id_to_title: Dict[str, str] = {
+        mv.get("id"): (mv.get("title") or "")
+        for mv in movies
+        if isinstance(mv.get("id"), str)
+    }
+    return idx_to_uuid, id_to_title
+
+
+def _make_movie_id_sort_key(idx_to_uuid: Dict[int, str]):
+    def _key(rv: Dict[str, Any]):
+        norm = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
+        return (0, "") if norm is None else (1, norm)
+
+    return _key
+
+
+def _make_movie_title_sort_key(
+    idx_to_uuid: Dict[int, str], id_to_title: Dict[str, str]
+):
+    def _key(rv: Dict[str, Any]):
+        mid = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
+        if mid is None:
+            return (0, "")
+        return (1, id_to_title.get(mid, ""))
+
+    return _key
+
+
 def filter_and_sort_reviews(
     *,
     rating: Optional[float] = None,
     sort_by: Optional[str] = None,
     order: str = "asc",
 ) -> List[Review]:
-    """Filtering:
-        - If `rating` is provided, include only reviews whose numeric rating
-          equals this value. Non-numeric ratings won't match.
-    Sorting:
-        - `sort_by` supports 'rating', 'movieId', or 'movieTitle'
-          with `order` controlling ascending or descending.
-    """
     reviews_raw = load_all()
-    result: List[Dict[str, Any]] = list(reviews_raw)
-
-    if rating is not None:
-        target = _to_float(rating)
-        result = [rv for rv in result if _to_float(rv.get("rating")) == target]
+    result: List[Dict[str, Any]] = _filter_by_rating_dicts(reviews_raw, rating)
 
     if sort_by:
-        key = (sort_by or "").lower()
-        reverse = (order or "asc").lower() == "desc"
+        key_name = (sort_by or "").lower()
+        descending = (order or "asc").lower() == "desc"
 
-        if key == "rating":
-            def _rating_key(rv: Dict[str, Any]):
-                val = _to_float(rv.get("rating"))
-                if val is None:
-                    return (0, 0.0)
-                return (1, val)
-            if reverse:
-                def _rating_key(rv: Dict[str, Any]):
-                    val = _to_float(rv.get("rating"))
-                    if val is None:
-                        return (0, 0.0)
-                    return (1, -val)
+        if key_name == "rating":
+            sort_key = _make_rating_sort_key(descending)
+            result = sorted(result, key=sort_key)
 
-            result = sorted(result, key=_rating_key)
+        elif key_name in ("movieid", "movietitle"):
+            idx_to_uuid, id_to_title = _build_movie_indexes()
 
-        elif key in ("movieid", "movietitle"):
-            movies = movie_repo.load_all()
-            idx_to_uuid: Dict[int, str] = {
-                idx + 1: mv.get("id") for idx, mv in enumerate(movies) if isinstance(mv.get("id"), str)
-            }
-
-            if key == "movieid":
-                def _movie_id_key(rv: Dict[str, Any]):
-                    norm = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
-                    return (0, "") if norm is None else (1, norm)
-
-                result = sorted(result, key=_movie_id_key, reverse=reverse)
+            if key_name == "movieid":
+                sort_key = _make_movie_id_sort_key(idx_to_uuid)
             else:
-                id_to_title: Dict[str, str] = {}
-                for mv in movies:
-                    mid = mv.get("id")
-                    title = mv.get("title") or ""
-                    if isinstance(mid, str):
-                        id_to_title[mid] = title
+                sort_key = _make_movie_title_sort_key(idx_to_uuid, id_to_title)
 
-                def _movie_title_key(rv: Dict[str, Any]):
-                    mid = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
-                    if mid is None:
-                        return (0, "")
-                    return (1, id_to_title.get(mid, ""))
-
-                result = sorted(result, key=_movie_title_key, reverse=reverse)
+            result = sorted(result, key=sort_key, reverse=descending)
 
     return [Review(**review) for review in result]
 
