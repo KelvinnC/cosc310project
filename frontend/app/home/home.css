@@ -8,6 +8,10 @@
     border-radius: 8px;
 }
 
+body {
+    padding-bottom: 32px;
+}
+
 .review:hover {
     background-color: #50b3f5;
     transform: scale(1.01)
@@ -18,6 +22,7 @@
     flex-wrap: wrap;
     gap: 32px;
     justify-content: center;
+    margin-bottom: 32px;
 }
 
 .review-body {
@@ -38,4 +43,23 @@
     font-size: 30px;
     font-weight: 600;
     text-align: center;
+}
+
+.user-container {
+    background-color: #4292c6;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    color: white;
+    font-size: 18px;
+    padding: 16px;
+    margin-bottom: 32px;
+}
+
+.user-div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
