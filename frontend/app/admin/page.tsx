@@ -15,6 +15,7 @@ const page = () => {
     const [warnedUsers, setWarnedUsers] = useState<any[]>([])
     const [bannedUsers, setBannedUsers] = useState<any[]>([])
     const [flaggedReviews, setFlaggedReviews] = useState<any[]>([])
+    const [refresh, setRefresh] = useState(true)
     const router = useRouter()
 
     
@@ -25,6 +26,7 @@ const page = () => {
         if (!response.ok) {
             console.log("Error warning user")
         }
+        setRefresh(r => !r)
     }
 
     const hideReview = async (review_id: string) => {
@@ -34,6 +36,7 @@ const page = () => {
         if (!response.ok) {
             console.log("Error hiding review")
         }
+        setRefresh(r => !r)
     }
 
     const clearReviewFlags = async (review_id: string) => {
@@ -43,6 +46,7 @@ const page = () => {
         if (!response.ok) {
             console.log("Error unflagging review")
         }
+        setRefresh(r => !r)
     }
 
     const unwarnUser = async (user_id: string) => {
@@ -52,6 +56,7 @@ const page = () => {
         if (!response.ok) {
             console.log("Error unwarning user")
         }
+        setRefresh(r => !r)
     }
 
     const toggleBan = async (user_id: string, user_active: boolean) => {
@@ -62,6 +67,7 @@ const page = () => {
         if (!response.ok) {
             console.log("Error banning user")
         }
+        setRefresh(r => !r)
     }
 
     useEffect(() => {
@@ -79,7 +85,7 @@ const page = () => {
             setFlaggedReviews(data["flagged_reviews"])
         }
         fetchAdminData();
-    }, [warnUser, unwarnUser, toggleBan])
+    }, [refresh])
 
   return (
     <div className="user-dashboard">
