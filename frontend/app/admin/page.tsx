@@ -25,10 +25,15 @@ const page = () => {
         if (!response.ok) {
             console.log("Error warning user")
         }
-        const new_users = warnedUsers.map((user: any) => (
-            user["id"] == user_id ? {...user, warnings: user["warnings"]+1} : user
-        ))
-        setWarnedUsers(new_users)
+    }
+
+    const toggleHide = async (review_id: string) => {
+        const response = await apiFetch(`${FASTAPI_URL}/reviews/${review_id}/hide`, {
+            method: 'PATCH'
+        })
+        if (!response.ok) {
+            console.log("Error hiding review")
+        }
     }
 
     const unwarnUser = async (user_id: string) => {
@@ -38,10 +43,6 @@ const page = () => {
         if (!response.ok) {
             console.log("Error unwarning user")
         }
-        const new_users = warnedUsers.map((user: any) => (
-            user["id"] == user_id ? {...user, warnings: user["warnings"]-1} : user
-        ))
-        setWarnedUsers(new_users)
     }
 
     const toggleBan = async (user_id: string, user_active: boolean) => {
@@ -52,10 +53,6 @@ const page = () => {
         if (!response.ok) {
             console.log("Error banning user")
         }
-        const new_users = warnedUsers.map((user: any) => (
-            user["id"] == user_id ? {...user, active: !user["active"]} : user
-        ))
-        setWarnedUsers(new_users)
     }
 
     useEffect(() => {
@@ -136,7 +133,7 @@ const page = () => {
                                     <span>Votes: {flaggedReview["votes"]}</span>
                                     <span>{flaggedReview["reviewBody"]}</span>
                                     <div className="admin-actions-container">
-                                        <button onClick={(e) => toggleBan(flaggedReview["id"], flaggedReview["active"])}>{flaggedReview["active"] ? "Ban" : "Unban"}</button>
+                                        <button onClick={(e) => toggleHide(flaggedReview["id"])}>Hide Review </button>
                                     </div>
                                 </div>
                             </div>
