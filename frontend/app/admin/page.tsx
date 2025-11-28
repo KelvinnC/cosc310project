@@ -27,12 +27,21 @@ const page = () => {
         }
     }
 
-    const toggleHide = async (review_id: string) => {
+    const hideReview = async (review_id: string) => {
         const response = await apiFetch(`${FASTAPI_URL}/reviews/${review_id}/hide`, {
             method: 'PATCH'
         })
         if (!response.ok) {
             console.log("Error hiding review")
+        }
+    }
+
+    const clearReviewFlags = async (review_id: string) => {
+        const response = await apiFetch(`${FASTAPI_URL}/reviews/${review_id}/unflag`, {
+            method: 'PATCH'
+        })
+        if (!response.ok) {
+            console.log("Error unflagging review")
         }
     }
 
@@ -133,7 +142,8 @@ const page = () => {
                                     <span>Votes: {flaggedReview["votes"]}</span>
                                     <span>{flaggedReview["reviewBody"]}</span>
                                     <div className="admin-actions-container">
-                                        <button onClick={(e) => toggleHide(flaggedReview["id"])}>Hide Review </button>
+                                        <button onClick={(e) => hideReview(flaggedReview["id"])}>Hide Review </button>
+                                        <button onClick={(e) => clearReviewFlags(flaggedReview["id"])}>Clear Flags</button>
                                     </div>
                                 </div>
                             </div>
