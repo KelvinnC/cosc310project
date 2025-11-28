@@ -100,7 +100,8 @@ const page = () => {
                 <div>
                     <h1 className="review-container-title">Warned Users</h1>
                     <div className="review-container">
-                        {warnedUsers.map((warnedUser, idx) => (
+                        {warnedUsers.length == 0 && <p>No warned users to show</p>}
+                        {warnedUsers.length > 0 && warnedUsers.map((warnedUser, idx) => (
                             <div key={idx}>
                                 <div className="review">
                                     <h2 className="review-title">{warnedUser["username"]}</h2>
@@ -121,7 +122,8 @@ const page = () => {
                 <div>
                     <h1 className="review-container-title">Banned Users</h1>
                     <div className="review-container">
-                        {bannedUsers.map((bannedUser, idx) => (
+                        {bannedUsers.length == 0 && <p>No banned users to show</p>}
+                        {bannedUsers.length > 0 && bannedUsers.map((bannedUser, idx) => (
                             <div key={idx}>
                                 <div className="review">
                                     <h2 className="review-title">{bannedUser["username"]}</h2>
@@ -140,7 +142,8 @@ const page = () => {
                 <div>
                     <h1 className="review-container-title">Flagged Reviews</h1>
                     <div className="review-container">
-                        {flaggedReviews.map((flaggedReview, idx) => (
+                        {flaggedReviews.length == 0 && <p>No flagged reviews to show</p>}
+                        {flaggedReviews.length > 0 && flaggedReviews.map((flaggedReview, idx) => (
                             <div key={idx}>
                                 <div className="flagged-review">
                                     <h2 className="review-title">{flaggedReview["reviewTitle"]}</h2>
