@@ -76,6 +76,9 @@ const page = () => {
             if (response.status == 401) {
                 router.push('/login')
                 return
+            } else if (response.status == 403) {
+                router.push('/home')
+                return
             }
             const data = await response.json()
             setAdminData(data)
