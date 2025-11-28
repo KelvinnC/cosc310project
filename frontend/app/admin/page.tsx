@@ -38,7 +38,7 @@ const page = () => {
 
     const clearReviewFlags = async (review_id: string) => {
         const response = await apiFetch(`${FASTAPI_URL}/reviews/${review_id}/unflag`, {
-            method: 'PATCH'
+            method: 'POST'
         })
         if (!response.ok) {
             console.log("Error unflagging review")
@@ -77,7 +77,6 @@ const page = () => {
             setWarnedUsers(data["warned_users"].filter((user: any) => user["active"]))
             setBannedUsers(data["banned_users"])
             setFlaggedReviews(data["flagged_reviews"])
-            console.log(data)
         }
         fetchAdminData();
     }, [warnUser, unwarnUser, toggleBan])
