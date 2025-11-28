@@ -17,24 +17,7 @@ const page = () => {
     const [flaggedReviews, setFlaggedReviews] = useState<any[]>([])
     const router = useRouter()
 
-    useEffect(() => {
-        const fetchAdminData = async () => {
-            const response = await apiFetch(`${FASTAPI_URL}/admin`)
-            if (response.status == 401) {
-                router.push('/login')
-                return
-            }
-            const data = await response.json()
-            setAdminData(data)
-            setTotalUsers(data["total_users"])
-            setWarnedUsers(data["warned_users"])
-            setBannedUsers(data["banned_users"])
-            setFlaggedReviews(data["flagged_reviews"])
-            console.log(data)
-        }
-        fetchAdminData();
-    }, [])
-
+    
     const warnUser = async (user_id: string) => {
         const response = await apiFetch(`${FASTAPI_URL}/users/${user_id}/warn`, {
             method: 'PATCH'
@@ -75,6 +58,24 @@ const page = () => {
         setWarnedUsers(new_users)
     }
 
+    useEffect(() => {
+        const fetchAdminData = async () => {
+            const response = await apiFetch(`${FASTAPI_URL}/admin`)
+            if (response.status == 401) {
+                router.push('/login')
+                return
+            }
+            const data = await response.json()
+            setAdminData(data)
+            setTotalUsers(data["total_users"])
+            setWarnedUsers(data["warned_users"].filter((user: any) => user["active"]))
+            setBannedUsers(data["banned_users"])
+            setFlaggedReviews(data["flagged_reviews"])
+            console.log(data)
+        }
+        fetchAdminData();
+    }, [warnUser, unwarnUser, toggleBan])
+
   return (
     <div className="user-dashboard">
         {adminData && (
@@ -108,8 +109,35 @@ const page = () => {
                     <div className="review-container">
                         {bannedUsers.map((bannedUser, idx) => (
                             <div key={idx}>
-                                <div className="battle">
-                                    <span>User {bannedUser["id"]}</span>
+                                <div className="review">
+                                    <h2 className="review-title">{bannedUser["username"]}</h2>
+                                    <span>Created on {(bannedUser["created_at"] as string).split("T")[0]}</span>
+                                    <span>Role: {bannedUser["role"]}</span>
+                                    <span>Warnings: {bannedUser["warnings"]}</span>
+                                    <span>User is {bannedUser["active"] ? "active" : "banned"}</span>
+                                    <div className="admin-actions-container">
+                                        <button onClick={(e) => toggleBan(bannedUser["id"], bannedUser["active"])}>{bannedUser["active"] ? "Ban" : "Unban"}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div>
+                    <h1 className="review-container-title">Flagged Reviews</h1>
+                    <div className="review-container">
+                        {flaggedReviews.map((flaggedReview, idx) => (
+                            <div key={idx}>
+                                <div className="flagged-review">
+                                    <h2 className="review-title">{flaggedReview["reviewTitle"]}</h2>
+                                    <span>Author: {flaggedReview["authorId"]}</span>
+                                    <span>Created: {flaggedReview["date"]}</span>
+                                    <span>Rating: {flaggedReview["rating"]}</span>
+                                    <span>Votes: {flaggedReview["votes"]}</span>
+                                    <span>{flaggedReview["reviewBody"]}</span>
+                                    <div className="admin-actions-container">
+                                        <button onClick={(e) => toggleBan(flaggedReview["id"], flaggedReview["active"])}>{flaggedReview["active"] ? "Ban" : "Unban"}</button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
