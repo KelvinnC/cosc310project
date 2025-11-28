@@ -9,5 +9,4 @@ class Comment(BaseModel):
     date: datetime
 
 class CommentCreate(BaseModel):
-    reviewId: int
     commentBody: str

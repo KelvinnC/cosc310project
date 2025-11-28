@@ -85,9 +85,9 @@ def get_comments(review_id: int):
     return get_comments_by_movie_id(review_id)
 
 @router.post("/{review_id}/comments", status_code=204)
-def post_comment(payload: CommentCreate, current_user: dict = Depends(jwt_auth_dependency)):
+def post_comment(payload: CommentCreate, review_id: int, current_user: dict = Depends(jwt_auth_dependency)):
     """Creates a comment for a review"""
-    return create_comment(payload, current_user["user_id"])
+    return create_comment(payload, review_id, current_user["user_id"])
 
 
 @router.get("/author/{author_id}", response_model=List[Review])
