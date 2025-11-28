@@ -1,2 +1,16 @@
 [
+  {
+    "id": 1,
+    "reviewId": 1946,
+    "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
+    "commentBody": "Nice job!",
+    "date": "2025-11-28T17:40:45.116407"
+  },
+  {
+    "id": 2,
+    "reviewId": 1946,
+    "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
+    "commentBody": "Great review!",
+    "date": "2025-11-28T17:41:01.441055"
+  }
 ]
