@@ -32,6 +32,26 @@ const page = () => {
         fetchUserData();
     }, [])
 
+    const downloadData = async () => {
+        const response = await apiFetch(`${FASTAPI_URL}/home/download`, {
+            method: "GET"
+        }
+        )
+        if (!response.ok) {
+            console.log("Error: could not download data")
+        }
+
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = "dashboard.json"
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+        window.URL.revokeObjectURL(url)
+    }
+
   return (
     <div className="user-dashboard">
         {userData && (
@@ -44,6 +64,9 @@ const page = () => {
                         <span>Role: {user["role"]}</span>
                         <span>Warnings: {user['warnings']}</span>
                         <span>Account created on {(user["created_at"] as string).split("T")[0]}</span>
+                        <button type="submit" 
+                        className="download-button"
+                        onClick={downloadData}>Download my Data</button>
                     </div>
                 </div>
                 }

@@ -91,3 +91,14 @@ body {
     background-color: #50b3f5;
     transform: scale(1.01)
 }
+
+.download-button {
+    background-color: #000000;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.download-button:hover {
+    background-color: rgb(39, 38, 38);
+    transition: 0.1s;
+}
