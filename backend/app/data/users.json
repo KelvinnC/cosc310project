@@ -18,21 +18,21 @@
     "warnings": 0
   },
   {
-    "id": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
-    "username": "userbrad",
-    "hashed_password": "$2b$12$d6yXbS87iL.taUSzTBd5ou1QRXnvc4YGk/r0iAPMuBq6aBN33BjtO",
-    "role": "user",
-    "created_at": "2025-11-11T18:58:12.908457",
-    "active": false,
-    "warnings": 4
-  },
-  {
     "id": "a5277e89-3a43-406c-8dd5-150bbfd679a8",
     "username": "banneduser",
     "hashed_password": "$2b$12$6tpBM9ZBZV3bDRwgtnvOiuZUgerkSGBtX9JXrUL..JJ.5/8bJTjIq",
     "role": "user",
     "created_at": "2025-11-11T18:59:51.175257",
     "active": false,
-    "warnings": 2
+    "warnings": 3
+  },
+  {
+    "id": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
+    "username": "userbrad",
+    "hashed_password": "$2b$12$d6yXbS87iL.taUSzTBd5ou1QRXnvc4YGk/r0iAPMuBq6aBN33BjtO",
+    "role": "user",
+    "created_at": "2025-11-11T18:58:12.908457",
+    "active": false,
+    "warnings": 0
   }
 ]

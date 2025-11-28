@@ -1,1 +1,555 @@
-[]
+[
+  {
+    "timestamp": "2025-11-28T18:18:47.004044Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:19:10.171375Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:19:16.119095Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:19:55.641457Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:20:05.086376Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:20:22.226301Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:21:19.704632Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:21:41.139087Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:22:45.724796Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:24:24.891961Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:30:32.001553Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:30:35.282152Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:30:57.264067Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:31:22.458433Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:31:23.479919Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "User warned by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
+      "new_warning_count": 5
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:31:25.274501Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:37:29.766358Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:37:31.527007Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "User warned by admin",
+    "context": {
+      "user_id": "a5277e89-3a43-406c-8dd5-150bbfd679a8",
+      "new_warning_count": 3
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:37:32.606407Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:38:05.524232Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:38:07.079865Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
+      "old_warning_count": 5,
+      "new_warning_count": 4
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:38:08.178900Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "a5277e89-3a43-406c-8dd5-150bbfd679a8",
+      "old_warning_count": 3,
+      "new_warning_count": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:38:09.400232Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:39:25.757825Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:39:37.977055Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:39:40.387827Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User unbanned by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:39:41.574197Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:39:45.506681Z",
+    "level": "ERROR",
+    "component": "admin",
+    "message": "User banned by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:39:46.973813Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:41:30.428660Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:45:06.625259Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:46:12.361692Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:46:14.596114Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "User warned by admin",
+    "context": {
+      "user_id": "a5277e89-3a43-406c-8dd5-150bbfd679a8",
+      "new_warning_count": 3
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:46:15.792145Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "User warned by admin",
+    "context": {
+      "user_id": "a5277e89-3a43-406c-8dd5-150bbfd679a8",
+      "new_warning_count": 4
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:46:18.697675Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:46:58.215839Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:46:59.723035Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
+      "old_warning_count": 4,
+      "new_warning_count": 3
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:47:00.344975Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
+      "old_warning_count": 3,
+      "new_warning_count": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:47:00.793228Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "User warned by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
+      "new_warning_count": 3
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:47:00.993370Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "User warned by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
+      "new_warning_count": 4
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:47:02.891397Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
+      "old_warning_count": 4,
+      "new_warning_count": 3
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:47:04.035911Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:47:06.071502Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "a5277e89-3a43-406c-8dd5-150bbfd679a8",
+      "old_warning_count": 4,
+      "new_warning_count": 3
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:47:07.328071Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:48:00.440342Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:48:02.881042Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User unbanned by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:48:04.367804Z",
+    "level": "ERROR",
+    "component": "admin",
+    "message": "User banned by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:48:05.856586Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User unbanned by admin",
+    "context": {
+      "user_id": "a5277e89-3a43-406c-8dd5-150bbfd679a8"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:48:08.317396Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:48:10.282450Z",
+    "level": "ERROR",
+    "component": "admin",
+    "message": "User banned by admin",
+    "context": {
+      "user_id": "a5277e89-3a43-406c-8dd5-150bbfd679a8"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:48:11.940288Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:48:13.009501Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
+      "old_warning_count": 3,
+      "new_warning_count": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:48:13.407778Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
+      "old_warning_count": 2,
+      "new_warning_count": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:48:13.802436Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
+      "old_warning_count": 1,
+      "new_warning_count": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-28T18:48:15.331747Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  }
+]

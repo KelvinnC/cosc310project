@@ -1,0 +1,124 @@
+"use client"
+
+import React, { useState } from 'react'
+import {useEffect} from 'react'
+import { apiFetch } from '@/lib/api'
+import './admin.css'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
+const FASTAPI_URL = "http://127.0.0.1:8000"
+
+const page = () => {
+    const [adminData, setAdminData] = useState(null)
+    const [totalUsers, setTotalUsers] = useState(0)
+    const [warnedUsers, setWarnedUsers] = useState<any[]>([])
+    const [bannedUsers, setBannedUsers] = useState<any[]>([])
+    const [flaggedReviews, setFlaggedReviews] = useState<any[]>([])
+    const router = useRouter()
+
+    useEffect(() => {
+        const fetchAdminData = async () => {
+            const response = await apiFetch(`${FASTAPI_URL}/admin`)
+            if (response.status == 401) {
+                router.push('/login')
+                return
+            }
+            const data = await response.json()
+            setAdminData(data)
+            setTotalUsers(data["total_users"])
+            setWarnedUsers(data["warned_users"])
+            setBannedUsers(data["banned_users"])
+            setFlaggedReviews(data["flagged_reviews"])
+            console.log(data)
+        }
+        fetchAdminData();
+    }, [])
+
+    const warnUser = async (user_id: string) => {
+        const response = await apiFetch(`${FASTAPI_URL}/users/${user_id}/warn`, {
+            method: 'PATCH'
+        })
+        if (!response.ok) {
+            console.log("Error warning user")
+        }
+        const new_users = warnedUsers.map((user: any) => (
+            user["id"] == user_id ? {...user, warnings: user["warnings"]+1} : user
+        ))
+        setWarnedUsers(new_users)
+    }
+
+    const unwarnUser = async (user_id: string) => {
+        const response = await apiFetch(`${FASTAPI_URL}/users/${user_id}/unwarn`, {
+            method: 'PATCH'
+        })
+        if (!response.ok) {
+            console.log("Error unwarning user")
+        }
+        const new_users = warnedUsers.map((user: any) => (
+            user["id"] == user_id ? {...user, warnings: user["warnings"]-1} : user
+        ))
+        setWarnedUsers(new_users)
+    }
+
+    const toggleBan = async (user_id: string, user_active: boolean) => {
+        const action = user_active ? "ban" : "unban"
+        const response = await apiFetch(`${FASTAPI_URL}/users/${user_id}/${action}`, {
+            method: 'PATCH'
+        })
+        if (!response.ok) {
+            console.log("Error banning user")
+        }
+        const new_users = warnedUsers.map((user: any) => (
+            user["id"] == user_id ? {...user, active: !user["active"]} : user
+        ))
+        setWarnedUsers(new_users)
+    }
+
+  return (
+    <div className="user-dashboard">
+        {adminData && (
+            <div>
+                <div>
+                    <h2 className="review-container-title">Total Users: {totalUsers}</h2>
+                </div>
+                <div>
+                    <h1 className="review-container-title">Warned Users</h1>
+                    <div className="review-container">
+                        {warnedUsers.map((warnedUser, idx) => (
+                            <div key={idx}>
+                                <div className="review">
+                                    <h2 className="review-title">{warnedUser["username"]}</h2>
+                                    <span>Created on {(warnedUser["created_at"] as string).split("T")[0]}</span>
+                                    <span>Role: {warnedUser["role"]}</span>
+                                    <span>Warnings: {warnedUser["warnings"]}</span>
+                                    <span>User is {warnedUser["active"] ? "active" : "banned"}</span>
+                                    <div className="admin-actions-container">
+                                        <button onClick={(e) => warnUser(warnedUser["id"])}>Warn</button>
+                                        <button onClick={(e) => unwarnUser(warnedUser["id"])}>Unwarn</button>
+                                        <button onClick={(e) => toggleBan(warnedUser["id"], warnedUser["active"])}>{warnedUser["active"] ? "Ban" : "Unban"}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div>
+                    <h1 className="review-container-title">Banned Users</h1>
+                    <div className="review-container">
+                        {bannedUsers.map((bannedUser, idx) => (
+                            <div key={idx}>
+                                <div className="battle">
+                                    <span>User {bannedUser["id"]}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )}
+    </div>
+  )
+}
+
+export default page
