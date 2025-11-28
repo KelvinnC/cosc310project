@@ -1,74 +1,65 @@
-import { useState, useEffect } from 'react';
-
 'use client';
 
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import './movies.css';
+
+const FASTAPI_URL = "http://127.0.0.1:8000";
 
 interface Movie {
-    id: string;
-    title: string;
-    year: number;
-    genre: string[];
-    rating: number;
-    poster: string;
-    description: string;
+  id: string;
+  title: string;
+  year: number;
+  genre: string;
+  rating: number;
 }
 
-export default function MoviesPage() {
-    const [movies, setMovies] = useState<Movie[]>([]);
-    const [search, setSearch] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+const MoviesPage = () => {
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [error, setError] = useState('');
 
-    useEffect(() => {
-        fetchMovies();
-    }, []);
-
+  useEffect(() => {
     const fetchMovies = async () => {
-        try {
-            setLoading(true);
-            const response = await fetch('/api/movies');
-            if (!response.ok) throw new Error('Failed to fetch movies');
-            const data = await response.json();
-            setMovies(data);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred');
-        } finally {
-            setLoading(false);
+      try {
+        const response = await fetch(`${FASTAPI_URL}/movies`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch movies');
         }
+        const data = await response.json();
+        setMovies(data);
+      } catch (err: any) {
+        setError(err.message || 'Error fetching movies');
+      }
     };
+    fetchMovies();
+  }, []);
 
-    const filtered = movies.filter(movie =>
-        movie.title.toLowerCase().includes(search.toLowerCase())
-    );
-
-    if (loading) return <div className="p-8">Loading...</div>;
-    if (error) return <div className="p-8 text-red-500">Error: {error}</div>;
-
-    return (
-        <div className="p-8">
-            <h1 className="text-4xl font-bold mb-8">Movies</h1>
-            
-            <input
-                type="text"
-                placeholder="Search movies..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full p-2 border rounded mb-8"
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {filtered.map(movie => (
-                    <div key={movie.id} className="border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition">
-                        <img src={movie.poster} alt={movie.title} className="w-full h-64 object-cover" />
-                        <div className="p-4">
-                            <h2 className="font-bold text-lg">{movie.title}</h2>
-                            <p className="text-sm text-gray-600">{movie.year}</p>
-                            <p className="text-yellow-500 font-semibold">★ {movie.rating}</p>
-                            <p className="text-sm mt-2">{movie.description}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
+  return (
+    <div className="movies-page">
+      <div className="movies-box">
+        <h1>All Movies</h1>
+        {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+        <div className="movies-grid">
+          {movies.length > 0 ? (
+            movies.map((movie) => (
+              <Link
+                key={movie.id}
+                href={`/movies/${movie.id}`}
+                className="movie-card"
+              >
+                <div className="movie-title">{movie.title}</div>
+                <div className="movie-meta">
+                  {movie.year} • {movie.genre} • ⭐ {movie.rating}
+                </div>
+              </Link>
+            ))
+          ) : (
+            <p>No movies found.</p>
+          )}
         </div>
-    );
-}
+      </div>
+    </div>
+  );
+};
+
+export default MoviesPage;
