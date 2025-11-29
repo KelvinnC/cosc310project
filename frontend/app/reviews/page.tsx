@@ -29,6 +29,7 @@ interface Movie {
 
 const ReviewsPage = () => {
   const { accessToken } = useData();
+  const [mounted, setMounted] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [movies, setMovies] = useState<Map<string, Movie>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -37,6 +38,10 @@ const ReviewsPage = () => {
   const [ratingFilter, setRatingFilter] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<string>("desc");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchMovieTitle = useCallback(async (movieId: string): Promise<Movie | null> => {
     try {
@@ -175,7 +180,7 @@ const ReviewsPage = () => {
               <option value="desc">Descending</option>
               <option value="asc">Ascending</option>
             </select>
-            {accessToken && (
+            {mounted && accessToken && (
               <Link href="/reviews/new" className="action-button">
                 + New Review
               </Link>
@@ -202,11 +207,11 @@ const ReviewsPage = () => {
               <p>
                 {searchQuery 
                   ? "Try adjusting your search or filters"
-                  : accessToken 
+                  : mounted && accessToken 
                     ? "Be the first to write a review!"
                     : "Login to write the first review!"}
               </p>
-              {accessToken && (
+              {mounted && accessToken && (
                 <Link href="/reviews/new" className="action-button" style={{ marginTop: '16px' }}>
                   Write a Review
                 </Link>
