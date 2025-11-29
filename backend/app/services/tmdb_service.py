@@ -1,149 +1,106 @@
-"""
-TMDb API integration service
-Fetches movie data from The Movie Database (TMDb) API
-"""
+"""TMDb API integration service."""
 import httpx
 import os
 from typing import Optional, Dict, Any, List
-from datetime import date
 from fastapi import HTTPException
 
 TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
 
 
+def _ensure_api_key() -> None:
+    """Raise 503 if API key is not configured."""
+    if not TMDB_API_KEY:
+        raise HTTPException(status_code=503, detail="TMDb API key not configured")
+
+
+def _is_bearer_token(key: str) -> bool:
+    """Check if key is a JWT bearer token (starts with 'eyJ')."""
+    return key.startswith("eyJ")
+
+
 def _get_auth_headers() -> Dict[str, str]:
-    """
-    Get authentication headers for TMDb API
-    Supports both API Key and Bearer Token (Read Access Token)
-    """
-    if TMDB_API_KEY.startswith("eyJ"):  # JWT Bearer token
+    """Get auth headers (used for bearer token auth)."""
+    if _is_bearer_token(TMDB_API_KEY):
         return {"Authorization": f"Bearer {TMDB_API_KEY}"}
-    return {}  # Will use api_key param instead
+    return {}
 
 
 def _get_auth_params() -> Dict[str, str]:
-    """Get authentication params for TMDb API (for API Key authentication)"""
-    if not TMDB_API_KEY.startswith("eyJ"):  # Regular API key
+    """Get auth params (used for API key auth)."""
+    if not _is_bearer_token(TMDB_API_KEY):
         return {"api_key": TMDB_API_KEY}
-    return {}  # Bearer token uses headers instead
+    return {}
 
 
-async def search_tmdb_movies(query: str) -> List[Dict[str, Any]]:
-    """
-    Search for movies on TMDb by title
-    Returns a list of movies with basic info
-    """
-    if not TMDB_API_KEY:
-        raise HTTPException(
-            status_code=503, 
-            detail="TMDb API key not configured"
-        )
-    
+async def _tmdb_get(endpoint: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
+    """Make authenticated GET request to TMDb API."""
+    _ensure_api_key()
+    request_params = {"language": "en-US", **(params or {}), **_get_auth_params()}
+
     async with httpx.AsyncClient() as client:
-        try:
-            params = {
-                "query": query,
-                "language": "en-US",
-                "page": 1,
-                **_get_auth_params()
+        response = await client.get(
+            f"{TMDB_BASE_URL}{endpoint}",
+            params=request_params,
+            headers=_get_auth_headers(),
+            timeout=10.0
+        )
+        response.raise_for_status()
+        return response.json()
+
+
+async def search_tmdb_movies(query: str, limit: int = 10) -> List[Dict[str, Any]]:
+    """Search TMDb for movies by title."""
+    try:
+        data = await _tmdb_get("/search/movie", {"query": query, "page": 1})
+        return [
+            {
+                "tmdb_id": m.get("id"),
+                "title": m.get("title"),
+                "overview": m.get("overview", ""),
+                "release_date": m.get("release_date", ""),
+                "poster_path": m.get("poster_path"),
             }
-            response = await client.get(
-                f"{TMDB_BASE_URL}/search/movie",
-                params=params,
-                headers=_get_auth_headers(),
-                timeout=10.0
-            )
-            response.raise_for_status()
-            data = response.json()
-            
-            # Transform TMDb format to our format
-            results = []
-            for movie in data.get("results", [])[:10]:  # Limit to 10 results
-                results.append({
-                    "tmdb_id": movie.get("id"),
-                    "title": movie.get("title"),
-                    "overview": movie.get("overview", ""),
-                    "release_date": movie.get("release_date", ""),
-                    "poster_path": movie.get("poster_path"),
-                })
-            return results
-            
-        except httpx.HTTPError as e:
-            raise HTTPException(
-                status_code=503,
-                detail=f"TMDb API error: {str(e)}"
-            )
+            for m in data.get("results", [])[:limit]
+        ]
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=503, detail=f"TMDb API error: {e}")
 
 
 async def get_tmdb_movie_details(tmdb_id: int) -> Optional[Dict[str, Any]]:
-    """
-    Fetch detailed movie information from TMDb by TMDb ID
-    """
-    if not TMDB_API_KEY:
-        raise HTTPException(
-            status_code=503,
-            detail="TMDb API key not configured"
-        )
-    
-    async with httpx.AsyncClient() as client:
-        try:
-            params = {
-                "language": "en-US",
-                **_get_auth_params()
-            }
-            response = await client.get(
-                f"{TMDB_BASE_URL}/movie/{tmdb_id}",
-                params=params,
-                headers=_get_auth_headers(),
-                timeout=10.0
-            )
-            response.raise_for_status()
-            movie = response.json()
-            
-            # Transform to our movie format
-            genres = ", ".join([g["name"] for g in movie.get("genres", [])])
-            release_date_str = movie.get("release_date", "")
-            
-            return {
-                "tmdb_id": movie.get("id"),
-                "title": movie.get("title"),
-                "description": movie.get("overview", ""),
-                "duration": movie.get("runtime", 0),
-                "genre": genres or "Unknown",
-                "release": release_date_str,
-                "poster_path": movie.get("poster_path"),
-                "backdrop_path": movie.get("backdrop_path"),
-            }
-            
-        except httpx.HTTPError as e:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Movie not found on TMDb: {str(e)}"
-            )
+    """Fetch movie details from TMDb by ID."""
+    try:
+        movie = await _tmdb_get(f"/movie/{tmdb_id}")
+        genres = ", ".join(g["name"] for g in movie.get("genres", []))
+        return {
+            "tmdb_id": movie.get("id"),
+            "title": movie.get("title"),
+            "description": movie.get("overview", ""),
+            "duration": movie.get("runtime", 0),
+            "genre": genres or "Unknown",
+            "release": movie.get("release_date", ""),
+            "poster_path": movie.get("poster_path"),
+            "backdrop_path": movie.get("backdrop_path"),
+        }
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=404, detail=f"Movie not found on TMDb: {e}")
 
 
 def is_tmdb_movie_id(movie_id: str) -> bool:
-    """
-    Check if a movie_id is a TMDb ID (format: tmdb_<id>)
-    """
+    """Check if movie_id is a TMDb ID (format: tmdb_<id>)."""
     return movie_id.startswith("tmdb_")
 
 
 def extract_tmdb_id(movie_id: str) -> Optional[int]:
-    """
-    Extract numeric TMDb ID from our format (tmdb_12345)
-    """
-    if is_tmdb_movie_id(movie_id):
-        try:
-            return int(movie_id.split("_")[1])
-        except (IndexError, ValueError):
-            return None
-    return None
+    """Extract numeric ID from tmdb_<id> format."""
+    if not is_tmdb_movie_id(movie_id):
+        return None
+    try:
+        return int(movie_id.split("_")[1])
+    except (IndexError, ValueError):
+        return None
 
 
 def create_tmdb_movie_id(tmdb_id: int) -> str:
-    """
-    Create our internal movie ID format from TMDb ID
-    """
+    """Create internal movie ID from TMDb ID."""
     return f"tmdb_{tmdb_id}"
