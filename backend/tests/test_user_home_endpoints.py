@@ -34,3 +34,24 @@ def test_get_user_homepage(mocker, client, mock_unauthorized_user, user_data):
     assert user_summary["battles"] == ["battle1", "battle2"]
     assert user_summary["user"]["username"] == "testmovielover"
     assert user_summary["reviews"][0]["id"] == 1
+
+def test_download_dashboard(mocker, client, mock_unauthorized_user, user_data):
+    """Test /home/download returns JSON with download header"""
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_unauthorized_user
+    mocker.patch("app.services.user_summary_service.get_reviews_by_author", return_value=[])
+    mocker.patch("app.services.user_summary_service.load_user_battles", return_value=[])
+    mocker.patch("app.services.user_summary_service.get_user_by_id", return_value=User(**user_data))
+
+    response = client.get("/home/download")
+    app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    assert "Content-Disposition" in response.headers
+    assert "dashboard.json" in response.headers["Content-Disposition"]
+    assert response.json()["user"]["username"] == "testmovielover"
+
+def test_download_dashboard_unauthenticated(client):
+    """Test /home/download requires authentication"""
+    response = client.get("/home/download")
+
+    assert response.status_code == 401
