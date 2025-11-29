@@ -1,4 +1,3 @@
-"""TMDb API router - direct access to external movie data."""
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Dict, Any
 from app.services.tmdb_service import search_tmdb_movies, get_tmdb_movie_details, create_tmdb_movie_id
