@@ -20,7 +20,7 @@
 }
 
 body {
-  background: var(--background);
+  background: #eef6fb;
   color: var(--foreground);
   font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
 }
