@@ -8,6 +8,7 @@ import './reviews.css';
 
 // TODO: Use environment variable for production: process.env.NEXT_PUBLIC_API_URL
 const FASTAPI_URL = "http://127.0.0.1:8000";
+const REVIEWS_PER_PAGE = 20;
 
 interface ReviewWithMovie {
   id: number;
@@ -65,7 +66,7 @@ const ReviewsPage = () => {
     try {
       const params = new URLSearchParams();
       params.append('page', currentPage.toString());
-      params.append('per_page', '50');
+      params.append('per_page', REVIEWS_PER_PAGE.toString());
       
       if (debouncedSearch) {
         params.append('search', debouncedSearch);
