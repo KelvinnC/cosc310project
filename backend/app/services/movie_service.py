@@ -10,7 +10,7 @@ from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 from app.services.tmdb_service import (
     get_tmdb_movie_details, 
     is_tmdb_movie_id, 
-    extract_tmdb_id
+    validate_tmdb_movie_id
 )
 
 def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
@@ -90,9 +90,7 @@ async def get_movie_by_id(movie_id: str) -> MovieWithReviews:
     """
     # Check if this is a TMDb movie
     if is_tmdb_movie_id(movie_id):
-        tmdb_id = extract_tmdb_id(movie_id)
-        if tmdb_id is None:
-            raise HTTPException(status_code=400, detail="Invalid TMDb movie ID format")
+        tmdb_id = validate_tmdb_movie_id(movie_id)
         
         # Fetch from TMDb API
         tmdb_data = await get_tmdb_movie_details(tmdb_id)

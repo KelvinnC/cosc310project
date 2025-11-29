@@ -87,12 +87,10 @@ async def get_tmdb_movie_details(tmdb_id: int) -> Optional[Dict[str, Any]]:
 
 
 def is_tmdb_movie_id(movie_id: str) -> bool:
-    """Check if movie_id is a TMDb ID (format: tmdb_<id>)."""
     return movie_id.startswith("tmdb_")
 
 
 def extract_tmdb_id(movie_id: str) -> Optional[int]:
-    """Extract numeric ID from tmdb_<id> format."""
     if not is_tmdb_movie_id(movie_id):
         return None
     try:
@@ -102,5 +100,12 @@ def extract_tmdb_id(movie_id: str) -> Optional[int]:
 
 
 def create_tmdb_movie_id(tmdb_id: int) -> str:
-    """Create internal movie ID from TMDb ID."""
     return f"tmdb_{tmdb_id}"
+
+
+def validate_tmdb_movie_id(movie_id: str) -> int:
+    """Validate and extract TMDb ID, raising HTTPException if invalid."""
+    tmdb_id = extract_tmdb_id(movie_id)
+    if tmdb_id is None:
+        raise HTTPException(status_code=400, detail="Invalid TMDb movie ID format")
+    return tmdb_id

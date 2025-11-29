@@ -6,7 +6,7 @@ from app.schemas.review import Review, ReviewCreate, ReviewUpdate, ReviewWithMov
 from app.repositories.review_repo import load_all, save_all
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 from app.repositories import movie_repo
-from app.services.tmdb_service import is_tmdb_movie_id, extract_tmdb_id, get_tmdb_movie_details
+from app.services.tmdb_service import is_tmdb_movie_id, validate_tmdb_movie_id, get_tmdb_movie_details
 
 REVIEW_NOT_FOUND = "Review not found"
 
@@ -226,10 +226,7 @@ async def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
     
     # Check if it's a TMDb movie or local movie
     if is_tmdb_movie_id(movie_id):
-        # Validate TMDb movie exists
-        tmdb_id = extract_tmdb_id(movie_id)
-        if tmdb_id is None:
-            raise HTTPException(status_code=400, detail="Invalid TMDb movie ID format")
+        tmdb_id = validate_tmdb_movie_id(movie_id)
         try:
             await get_tmdb_movie_details(tmdb_id)
         except HTTPException:
