@@ -9,6 +9,7 @@ from app.repositories import movie_repo
 from app.services.tmdb_service import is_tmdb_movie_id, validate_tmdb_movie_id, get_tmdb_movie_details
 
 REVIEW_NOT_FOUND = "Review not found"
+DEFAULT_PAGE_SIZE = 20
 
 
 def _to_float(val: Any) -> Optional[float]:
@@ -166,7 +167,7 @@ def list_reviews_paginated(
     sort_by: Optional[str] = None,
     order: str = "asc",
     page: int = 1,
-    per_page: int = 20,
+    per_page: int = DEFAULT_PAGE_SIZE,
 ) -> PaginatedReviews:
     """Return paginated reviews with movie titles."""
     reviews_raw = load_all()
