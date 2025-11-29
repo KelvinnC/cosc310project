@@ -48,6 +48,13 @@ const NewReviewPage = () => {
   // Search movies when user types
   useEffect(() => {
     const searchMovies = async () => {
+      // Don't search if a movie is already selected
+      if (selectedMovie) {
+        setMovieResults([]);
+        setShowMovieDropdown(false);
+        return;
+      }
+      
       if (movieSearch.length < 2) {
         setMovieResults([]);
         return;
@@ -72,7 +79,7 @@ const NewReviewPage = () => {
 
     const debounce = setTimeout(searchMovies, 300);
     return () => clearTimeout(debounce);
-  }, [movieSearch]);
+  }, [movieSearch, selectedMovie]);
 
   const selectMovie = (movie: MovieSummary) => {
     setSelectedMovie(movie);

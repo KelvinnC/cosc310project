@@ -146,7 +146,7 @@ const ReviewsPage = () => {
           <div className="reviews-actions">
             <input
               type="text"
-              placeholder="Search reviews..."
+              placeholder="Search by title, body, or movie..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
