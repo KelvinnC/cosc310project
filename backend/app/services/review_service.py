@@ -33,29 +33,69 @@ def _filter_by_rating_dicts(
     target = _to_float(rating)
     return [rv for rv in reviews if _to_float(rv.get("rating")) == target]
 
-def _filter_by_search(
+
+async def _build_tmdb_title_cache(reviews: List[Dict[str, Any]]) -> Dict[str, str]:
+    """Build a cache of TMDb movie IDs to titles for the given reviews."""
+    tmdb_cache: Dict[str, str] = {}
+    for rv in reviews:
+        movie_id = str(rv.get("movieId", ""))
+        if is_tmdb_movie_id(movie_id) and movie_id not in tmdb_cache:
+            tmdb_id = extract_tmdb_id(movie_id)
+            if tmdb_id:
+                try:
+                    tmdb_data = await get_tmdb_movie_details(tmdb_id)
+                    tmdb_cache[movie_id] = tmdb_data.get("title", "") if tmdb_data else ""
+                except Exception:
+                    tmdb_cache[movie_id] = ""
+    return tmdb_cache
+
+
+def _get_movie_title(
+    raw_movie_id: Any,
+    idx_to_uuid: Dict[int, str],
+    id_to_title: Dict[str, str],
+    tmdb_cache: Dict[str, str],
+    default: str = "",
+) -> str:
+    """Get movie title from local DB or TMDb cache. Single source of truth for title lookup."""
+    movie_id_str = str(raw_movie_id) if raw_movie_id else ""
+    
+    if is_tmdb_movie_id(movie_id_str):
+        return tmdb_cache.get(movie_id_str, default)
+    
+    movie_id = _normalize_movie_id(raw_movie_id, idx_to_uuid)
+    return id_to_title.get(movie_id, default) if movie_id else default
+
+
+def _matches_search_query(
+    rv: Dict[str, Any],
+    query: str,
+    idx_to_uuid: Dict[int, str],
+    id_to_title: Dict[str, str],
+    tmdb_cache: Dict[str, str],
+) -> bool:
+    """Check if a review matches a search query (title, body, or movie title)."""
+    if query in rv.get("reviewTitle", "").lower():
+        return True
+    if query in rv.get("reviewBody", "").lower():
+        return True
+    movie_title = _get_movie_title(rv.get("movieId"), idx_to_uuid, id_to_title, tmdb_cache)
+    return query in movie_title.lower()
+
+
+async def _filter_by_search_async(
     reviews: List[Dict[str, Any]],
     search: Optional[str],
     id_to_title: Dict[str, str],
     idx_to_uuid: Dict[int, str],
 ) -> List[Dict[str, Any]]:
-    """Filter reviews by search query (title, body, movie title)."""
+    """Filter reviews by search query, including TMDb movie titles."""
     if not search:
         return reviews
+    
+    tmdb_cache = await _build_tmdb_title_cache(reviews)
     query = search.lower()
-    result = []
-    for rv in reviews:
-        if query in rv.get("reviewTitle", "").lower():
-            result.append(rv)
-            continue
-        if query in rv.get("reviewBody", "").lower():
-            result.append(rv)
-            continue
-        movie_id = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
-        movie_title = id_to_title.get(movie_id, "") if movie_id else ""
-        if query in movie_title.lower():
-            result.append(rv)
-    return result
+    return [rv for rv in reviews if _matches_search_query(rv, query, idx_to_uuid, id_to_title, tmdb_cache)]
 
 def _make_rating_sort_key(descending: bool = False):
     def _key(rv: Dict[str, Any]):
@@ -133,49 +173,17 @@ def _paginate(
     start = (page - 1) * per_page
     return items[start : start + per_page], total, total_pages
 
-def _enrich_with_movie_titles(
-    reviews: List[Dict[str, Any]],
-    idx_to_uuid: Dict[int, str],
-    id_to_title: Dict[str, str],
-) -> List[ReviewWithMovie]:
-    """Convert review dicts to ReviewWithMovie models with titles (local movies only)."""
-    result = []
-    for review in reviews:
-        movie_id = _normalize_movie_id(review.get("movieId"), idx_to_uuid)
-        title = id_to_title.get(movie_id, "Unknown Movie") if movie_id else "Unknown Movie"
-        review_data = {**review, "movieId": str(review.get("movieId", ""))}
-        result.append(ReviewWithMovie(**review_data, movieTitle=title))
-    return result
-
-
 async def _enrich_with_movie_titles_async(
     reviews: List[Dict[str, Any]],
     idx_to_uuid: Dict[int, str],
     id_to_title: Dict[str, str],
 ) -> List[ReviewWithMovie]:
     """Convert review dicts to ReviewWithMovie models with titles (supports TMDb movies)."""
+    tmdb_cache = await _build_tmdb_title_cache(reviews)
     result = []
     for review in reviews:
-        raw_movie_id = review.get("movieId")
-        movie_id_str = str(raw_movie_id) if raw_movie_id else ""
-        
-        # Check if this is a TMDb movie
-        if is_tmdb_movie_id(movie_id_str):
-            tmdb_id = extract_tmdb_id(movie_id_str)
-            if tmdb_id:
-                try:
-                    tmdb_data = await get_tmdb_movie_details(tmdb_id)
-                    title = tmdb_data.get("title", "Unknown Movie") if tmdb_data else "Unknown Movie"
-                except Exception:
-                    title = "Unknown Movie"
-            else:
-                title = "Unknown Movie"
-        else:
-            # Local movie lookup
-            movie_id = _normalize_movie_id(raw_movie_id, idx_to_uuid)
-            title = id_to_title.get(movie_id, "Unknown Movie") if movie_id else "Unknown Movie"
-        
-        review_data = {**review, "movieId": movie_id_str}
+        title = _get_movie_title(review.get("movieId"), idx_to_uuid, id_to_title, tmdb_cache, "Unknown Movie")
+        review_data = {**review, "movieId": str(review.get("movieId", ""))}
         result.append(ReviewWithMovie(**review_data, movieTitle=title))
     return result
 
@@ -205,7 +213,8 @@ async def list_reviews_paginated(
     reviews_raw = load_all()
     filtered = _filter_by_rating_dicts(reviews_raw, rating)
     idx_to_uuid, id_to_title = _build_movie_indexes()
-    filtered = _filter_by_search(filtered, search, id_to_title, idx_to_uuid)
+    # Use async search to include TMDb movie titles
+    filtered = await _filter_by_search_async(filtered, search, id_to_title, idx_to_uuid)
     sorted_reviews = _sort_reviews(filtered, sort_by, order, idx_to_uuid, id_to_title)
     paginated, total, total_pages = _paginate(sorted_reviews, page, per_page)
     reviews_with_movies = await _enrich_with_movie_titles_async(paginated, idx_to_uuid, id_to_title)

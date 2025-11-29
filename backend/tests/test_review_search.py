@@ -249,3 +249,93 @@ def test_search_endpoint_with_sort(mocker, client):
     data = resp.json()
     assert data["total"] == 3
     assert [r["id"] for r in data["reviews"]] == [2, 3, 1]
+
+
+# TMDb movie title search tests
+
+@pytest.mark.asyncio
+async def test_search_by_tmdb_movie_title(mocker):
+    """Test that reviews for TMDb movies can be searched by movie title."""
+    reviews = [
+        {"id": 1, "movieId": "tmdb_12345", "authorId": 1, "rating": 5, "reviewTitle": "Great Musical", "reviewBody": "Loved the songs", "date": "2020-01-01", "visible": True},
+        {"id": 2, "movieId": "A", "authorId": 2, "rating": 4, "reviewTitle": "Good", "reviewBody": "Nice film", "date": "2020-01-02", "visible": True},
+    ]
+    movies = [
+        {"id": "A", "title": "The Matrix"},
+    ]
+    mocker.patch("app.services.review_service.load_all", return_value=reviews)
+    mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
+    
+    # Mock TMDb API to return movie details
+    async def mock_tmdb_details(tmdb_id):
+        if tmdb_id == 12345:
+            return {"title": "Wicked: For Good", "id": 12345}
+        return None
+    
+    mocker.patch("app.services.review_service.get_tmdb_movie_details", side_effect=mock_tmdb_details)
+
+    # Search for "Wicked" should find the TMDb movie review
+    result = await list_reviews_paginated(search="Wicked")
+    assert result.total == 1
+    assert result.reviews[0].id == 1
+    assert result.reviews[0].movieTitle == "Wicked: For Good"
+
+
+@pytest.mark.asyncio
+async def test_search_by_tmdb_movie_partial_title(mocker):
+    """Test partial title search works for TMDb movies."""
+    reviews = [
+        {"id": 1, "movieId": "tmdb_67890", "authorId": 1, "rating": 5, "reviewTitle": "Amazing", "reviewBody": "Great", "date": "2020-01-01", "visible": True},
+    ]
+    mocker.patch("app.services.review_service.load_all", return_value=reviews)
+    mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
+    
+    async def mock_tmdb_details(tmdb_id):
+        if tmdb_id == 67890:
+            return {"title": "Wicked: For Good", "id": 67890}
+        return None
+    
+    mocker.patch("app.services.review_service.get_tmdb_movie_details", side_effect=mock_tmdb_details)
+
+    # Partial search should work
+    result = await list_reviews_paginated(search="For Good")
+    assert result.total == 1
+
+    result2 = await list_reviews_paginated(search="wicked:")
+    assert result2.total == 1
+
+
+@pytest.mark.asyncio
+async def test_search_mixed_local_and_tmdb_movies(mocker):
+    """Test search works across both local and TMDb movies."""
+    reviews = [
+        {"id": 1, "movieId": "tmdb_11111", "authorId": 1, "rating": 5, "reviewTitle": "Great", "reviewBody": "Body", "date": "2020-01-01", "visible": True},
+        {"id": 2, "movieId": "A", "authorId": 2, "rating": 4, "reviewTitle": "Nice", "reviewBody": "Body", "date": "2020-01-02", "visible": True},
+        {"id": 3, "movieId": "tmdb_22222", "authorId": 3, "rating": 3, "reviewTitle": "Okay", "reviewBody": "Body", "date": "2020-01-03", "visible": True},
+    ]
+    movies = [
+        {"id": "A", "title": "The Wizard of Oz"},
+    ]
+    mocker.patch("app.services.review_service.load_all", return_value=reviews)
+    mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
+    
+    async def mock_tmdb_details(tmdb_id):
+        if tmdb_id == 11111:
+            return {"title": "Wicked: Part One", "id": 11111}
+        if tmdb_id == 22222:
+            return {"title": "Wicked: For Good", "id": 22222}
+        return None
+    
+    mocker.patch("app.services.review_service.get_tmdb_movie_details", side_effect=mock_tmdb_details)
+
+    # Search "Wicked" should find both TMDb movies
+    result = await list_reviews_paginated(search="Wicked")
+    assert result.total == 2
+    ids = [r.id for r in result.reviews]
+    assert 1 in ids
+    assert 3 in ids
+
+    # Search "Wizard" should find the local movie
+    result2 = await list_reviews_paginated(search="Wizard")
+    assert result2.total == 1
+    assert result2.reviews[0].id == 2
