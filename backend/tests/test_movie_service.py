@@ -2,7 +2,7 @@ import pytest
 import datetime
 from fastapi import HTTPException
 from app.services.movie_service import create_movie, update_movie, get_movie_by_id, list_movies, delete_movie
-from app.schemas.movie import MovieCreate, Movie
+from app.schemas.movie import MovieCreate, Movie, MovieWithReviews
 
 def test_list_movie_empty_list(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
@@ -80,8 +80,9 @@ def test_create_movie_strips_whitespace(mocker):
     assert movie.description == "Testing Description"
     assert mock_save.called
 
-def test_get_movie_by_id_valid_id(mocker):
-    mocker.patch("app.repositories.movie_repo.load_all", return_value=[
+@pytest.mark.asyncio
+async def test_get_movie_by_id_valid_id(mocker):
+    mocker.patch("app.services.movie_service.load_all", return_value=[
     {
         "id": "1234",
         "title": "Test",
@@ -90,15 +91,17 @@ def test_get_movie_by_id_valid_id(mocker):
         "description": "Testing Description",
         "duration": 90
     }])
-    movie = get_movie_by_id("1234")
+    mocker.patch("app.services.movie_service.load_reviews", return_value=[])
+    movie = await get_movie_by_id("1234")
     assert movie.id == "1234"
     assert movie.title == "Test"
-    assert isinstance(movie, Movie)
+    assert isinstance(movie, MovieWithReviews)
 
-def test_get_movie_by_id_invalid_id(mocker):
-    mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
+@pytest.mark.asyncio
+async def test_get_movie_by_id_invalid_id(mocker):
+    mocker.patch("app.services.movie_service.load_all", return_value=[])
     with pytest.raises(HTTPException) as ex:
-        get_movie_by_id("1234")
+        await get_movie_by_id("1234")
     assert ex.value.status_code == 404
     assert "not found" in ex.value.detail
 

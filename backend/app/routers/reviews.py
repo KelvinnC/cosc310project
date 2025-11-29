@@ -19,10 +19,17 @@ from app.services.admin_review_service import hide_review
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
 @router.post("", response_model=Review, status_code=201)
-def post_review(review: ReviewCreate, current_user: dict = Depends(jwt_auth_dependency)):
-    """Create a new review."""
+async def post_review(review: ReviewCreate, current_user: dict = Depends(jwt_auth_dependency)):
+    """
+    Create a new review.
+    
+    Supports both local movies and external TMDb movies.
+    For TMDb movies, use movieId format: tmdb_<id> (e.g., tmdb_12345)
+    
+    Note: authorId and date are server-assigned and cannot be set by the client.
+    """
     author_id = current_user.get("user_id")
-    return create_review(review, author_id=author_id)
+    return await create_review(review, author_id=author_id)
 
 @router.get("/search", response_model=List[MovieWithReviews])
 def search_reviews(title: str = Query(..., min_length=1)):
