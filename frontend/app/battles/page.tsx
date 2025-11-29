@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './battles.css';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useData } from '../context';
 import { apiFetch } from '../../lib/api';
 
+// TODO: Replace hardcoded URL with environment variable for production
+// Use: const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 const FASTAPI_URL = "http://127.0.0.1:8000";
 
 interface Review {
@@ -46,26 +48,31 @@ const Page = () => {
   const [selectedReviewId, setSelectedReviewId] = useState<number | null>(null);
   const [winningReview, setWinningReview] = useState<Review | null>(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true); // Start true to avoid hydration mismatch
+  const [loading, setLoading] = useState(true); 
   const [submitting, setSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Handle hydration - wait for client-side mount
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!mounted) return;
-    
-    if (!accessToken) {
-      router.push('/login');
-      return;
+  // Helper function to fetch movie by ID
+  const fetchMovie = async (movieId: string): Promise<Movie | null> => {
+    try {
+      const res = await apiFetch(`${FASTAPI_URL}/movies/${movieId}`);
+      if (res.ok) {
+        const movies = await res.json();
+        if (movies.length > 0) {
+          return { id: movies[0].id, title: movies[0].title };
+        }
+      }
+    } catch {
+      // Silently fail for movie fetch
     }
-    createBattle();
-  }, [mounted, accessToken]);
+    return null;
+  };
 
-  const createBattle = async () => {
+  const createBattle = useCallback(async () => {
     setLoading(true);
     setError("");
     setWinningReview(null);
@@ -92,49 +99,44 @@ const Page = () => {
       const battleData: Battle = await response.json();
       setBattle(battleData);
 
-      // Fetch both reviews
+      // Fetch both reviews in parallel
       const [res1, res2] = await Promise.all([
         apiFetch(`${FASTAPI_URL}/reviews/${battleData.review1Id}`),
         apiFetch(`${FASTAPI_URL}/reviews/${battleData.review2Id}`)
       ]);
 
-      let r1: Review | null = null;
-      let r2: Review | null = null;
+      const r1: Review | null = res1.ok ? await res1.json() : null;
+      const r2: Review | null = res2.ok ? await res2.json() : null;
 
-      if (res1.ok) {
-        r1 = await res1.json();
-        setReview1(r1);
-      }
-      if (res2.ok) {
-        r2 = await res2.json();
-        setReview2(r2);
-      }
+      setReview1(r1);
+      setReview2(r2);
 
-      // Fetch movie names
-      if (r1?.movieId) {
-        const movieRes1 = await apiFetch(`${FASTAPI_URL}/movies/${r1.movieId}`);
-        if (movieRes1.ok) {
-          const movies = await movieRes1.json();
-          if (movies.length > 0) {
-            setMovie1({ id: movies[0].id, title: movies[0].title });
-          }
-        }
-      }
-      if (r2?.movieId) {
-        const movieRes2 = await apiFetch(`${FASTAPI_URL}/movies/${r2.movieId}`);
-        if (movieRes2.ok) {
-          const movies = await movieRes2.json();
-          if (movies.length > 0) {
-            setMovie2({ id: movies[0].id, title: movies[0].title });
-          }
-        }
-      }
+      // Fetch both movies in parallel
+      const [m1, m2] = await Promise.all([
+        r1?.movieId ? fetchMovie(r1.movieId) : Promise.resolve(null),
+        r2?.movieId ? fetchMovie(r2.movieId) : Promise.resolve(null)
+      ]);
+
+      setMovie1(m1);
+      setMovie2(m2);
     } catch (err) {
+      console.error("Failed to create battle:", err);
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
+    if (!accessToken) {
+      router.push('/login');
+      return;
+    }
+    createBattle();
+  }, [mounted, accessToken, router, createBattle]);
 
   const submitVote = async () => {
     if (!battle || !selectedReviewId) {
@@ -166,34 +168,48 @@ const Page = () => {
       const winner: Review = await response.json();
       setWinningReview(winner);
 
-      // Fetch winner movie name
       if (winner.movieId) {
-        const movieRes = await apiFetch(`${FASTAPI_URL}/movies/${winner.movieId}`);
-        if (movieRes.ok) {
-          const movies = await movieRes.json();
-          if (movies.length > 0) {
-            setWinnerMovie({ id: movies[0].id, title: movies[0].title });
-          }
-        }
+        const movie = await fetchMovie(winner.movieId);
+        setWinnerMovie(movie);
       }
     } catch (err) {
+      console.error("Failed to submit vote:", err);
       setError("Network error. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleNewBattle = () => {
-    createBattle();
+  const handleKeyDown = (reviewId: number) => (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setSelectedReviewId(reviewId);
+    }
   };
 
-  // Show loading state until mounted to avoid hydration mismatch
   if (!mounted || loading) {
     return (
       <div className="battles-page">
         <div className="battles-box">
           <h1>ReviewBattle</h1>
-          <p>Loading battle...</p>
+          <h2>Choose the Better Review</h2>
+          <div className="reviews-container">
+            <div className="review-card skeleton">
+              <div className="skeleton-line skeleton-title"></div>
+              <div className="skeleton-line skeleton-subtitle"></div>
+              <div className="skeleton-line"></div>
+              <div className="skeleton-line"></div>
+              <div className="skeleton-line skeleton-short"></div>
+            </div>
+            <div className="vs-divider">VS</div>
+            <div className="review-card skeleton">
+              <div className="skeleton-line skeleton-title"></div>
+              <div className="skeleton-line skeleton-subtitle"></div>
+              <div className="skeleton-line"></div>
+              <div className="skeleton-line"></div>
+              <div className="skeleton-line skeleton-short"></div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -215,7 +231,7 @@ const Page = () => {
       <div className="battles-page">
         <div className="battles-box result-box">
           <h1>ReviewBattle</h1>
-          <h2>🏆 Winner!</h2>
+          <h2>Winner!</h2>
           <div className="winner-card">
             {winnerMovie && <p className="review-movie">Movie: {winnerMovie.title}</p>}
             <h3 className="review-title">{winningReview.reviewTitle}</h3>
@@ -223,7 +239,7 @@ const Page = () => {
             <p className="review-body">{winningReview.reviewBody}</p>
             <p className="review-votes">Total Votes: {winningReview.votes}</p>
           </div>
-          <button className="battle-button" onClick={handleNewBattle}>
+          <button className="battle-button" onClick={createBattle}>
             New Battle
           </button>
           <Link href="/" className="home-link">Back to Home</Link>
@@ -249,6 +265,11 @@ const Page = () => {
               <div 
                 className={`review-card ${selectedReviewId === review1.id ? 'selected' : ''}`}
                 onClick={() => setSelectedReviewId(review1.id)}
+                onKeyDown={handleKeyDown(review1.id)}
+                tabIndex={0}
+                role="button"
+                aria-pressed={selectedReviewId === review1.id}
+                aria-label={`Select review: ${review1.reviewTitle}`}
               >
                 {movie1 && <p className="review-movie">{movie1.title}</p>}
                 <h3 className="review-title">{review1.reviewTitle}</h3>
@@ -261,6 +282,11 @@ const Page = () => {
               <div 
                 className={`review-card ${selectedReviewId === review2.id ? 'selected' : ''}`}
                 onClick={() => setSelectedReviewId(review2.id)}
+                onKeyDown={handleKeyDown(review2.id)}
+                tabIndex={0}
+                role="button"
+                aria-pressed={selectedReviewId === review2.id}
+                aria-label={`Select review: ${review2.reviewTitle}`}
               >
                 {movie2 && <p className="review-movie">{movie2.title}</p>}
                 <h3 className="review-title">{review2.reviewTitle}</h3>
