@@ -12,7 +12,8 @@ def client():
 
 # Service layer tests
 
-def test_search_by_review_title(mocker):
+@pytest.mark.asyncio
+async def test_search_by_review_title(mocker):
     reviews = [
         {"id": 1, "movieId": "A", "authorId": 1, "rating": 5, "reviewTitle": "Amazing Film", "reviewBody": "Great movie", "date": "2020-01-01", "visible": True},
         {"id": 2, "movieId": "B", "authorId": 2, "rating": 4, "reviewTitle": "Good Movie", "reviewBody": "Enjoyed it", "date": "2020-01-02", "visible": True},
@@ -26,12 +27,13 @@ def test_search_by_review_title(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
-    result = list_reviews_paginated(search="Amazing")
+    result = await list_reviews_paginated(search="Amazing")
     assert result.total == 1
     assert result.reviews[0].id == 1
 
 
-def test_search_by_review_body(mocker):
+@pytest.mark.asyncio
+async def test_search_by_review_body(mocker):
     reviews = [
         {"id": 1, "movieId": "A", "authorId": 1, "rating": 5, "reviewTitle": "Title One", "reviewBody": "This movie was incredible", "date": "2020-01-01", "visible": True},
         {"id": 2, "movieId": "B", "authorId": 2, "rating": 4, "reviewTitle": "Title Two", "reviewBody": "Loved every moment", "date": "2020-01-02", "visible": True},
@@ -45,12 +47,13 @@ def test_search_by_review_body(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
-    result = list_reviews_paginated(search="incredible")
+    result = await list_reviews_paginated(search="incredible")
     assert result.total == 1
     assert result.reviews[0].id == 1
 
 
-def test_search_by_movie_title(mocker):
+@pytest.mark.asyncio
+async def test_search_by_movie_title(mocker):
     reviews = [
         {"id": 1, "movieId": "A", "authorId": 1, "rating": 5, "reviewTitle": "Great", "reviewBody": "Loved it", "date": "2020-01-01", "visible": True},
         {"id": 2, "movieId": "B", "authorId": 2, "rating": 4, "reviewTitle": "Good", "reviewBody": "Nice film", "date": "2020-01-02", "visible": True},
@@ -64,13 +67,14 @@ def test_search_by_movie_title(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
-    result = list_reviews_paginated(search="Matrix")
+    result = await list_reviews_paginated(search="Matrix")
     assert result.total == 1
     assert result.reviews[0].id == 1
     assert result.reviews[0].movieTitle == "The Matrix"
 
 
-def test_search_case_insensitive(mocker):
+@pytest.mark.asyncio
+async def test_search_case_insensitive(mocker):
     reviews = [
         {"id": 1, "movieId": "A", "authorId": 1, "rating": 5, "reviewTitle": "AMAZING", "reviewBody": "Great", "date": "2020-01-01", "visible": True},
         {"id": 2, "movieId": "B", "authorId": 2, "rating": 4, "reviewTitle": "Good", "reviewBody": "Nice", "date": "2020-01-02", "visible": True},
@@ -82,12 +86,13 @@ def test_search_case_insensitive(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
-    result = list_reviews_paginated(search="amazing")
+    result = await list_reviews_paginated(search="amazing")
     assert result.total == 1
     assert result.reviews[0].id == 1
 
 
-def test_search_multiple_matches(mocker):
+@pytest.mark.asyncio
+async def test_search_multiple_matches(mocker):
     reviews = [
         {"id": 1, "movieId": "A", "authorId": 1, "rating": 5, "reviewTitle": "Great movie", "reviewBody": "Loved it", "date": "2020-01-01", "visible": True},
         {"id": 2, "movieId": "B", "authorId": 2, "rating": 4, "reviewTitle": "Good", "reviewBody": "Great film", "date": "2020-01-02", "visible": True},
@@ -101,14 +106,15 @@ def test_search_multiple_matches(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
-    result = list_reviews_paginated(search="great")
+    result = await list_reviews_paginated(search="great")
     assert result.total == 2
     ids = [r.id for r in result.reviews]
     assert 1 in ids
     assert 2 in ids
 
 
-def test_search_no_matches(mocker):
+@pytest.mark.asyncio
+async def test_search_no_matches(mocker):
     reviews = [
         {"id": 1, "movieId": "A", "authorId": 1, "rating": 5, "reviewTitle": "Great", "reviewBody": "Loved it", "date": "2020-01-01", "visible": True},
         {"id": 2, "movieId": "B", "authorId": 2, "rating": 4, "reviewTitle": "Good", "reviewBody": "Nice", "date": "2020-01-02", "visible": True},
@@ -120,12 +126,13 @@ def test_search_no_matches(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
-    result = list_reviews_paginated(search="nonexistent")
+    result = await list_reviews_paginated(search="nonexistent")
     assert result.total == 0
     assert result.reviews == []
 
 
-def test_search_empty_string_returns_all(mocker):
+@pytest.mark.asyncio
+async def test_search_empty_string_returns_all(mocker):
     reviews = [
         {"id": 1, "movieId": "A", "authorId": 1, "rating": 5, "reviewTitle": "Great", "reviewBody": "Loved it", "date": "2020-01-01", "visible": True},
         {"id": 2, "movieId": "B", "authorId": 2, "rating": 4, "reviewTitle": "Good", "reviewBody": "Nice", "date": "2020-01-02", "visible": True},
@@ -137,11 +144,12 @@ def test_search_empty_string_returns_all(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
-    result = list_reviews_paginated(search="")
+    result = await list_reviews_paginated(search="")
     assert result.total == 2
 
 
-def test_search_with_pagination(mocker):
+@pytest.mark.asyncio
+async def test_search_with_pagination(mocker):
     # Create 10 reviews that match search, test pagination
     reviews = [
         {"id": i, "movieId": "A", "authorId": 1, "rating": 5, "reviewTitle": f"Great Review {i}", "reviewBody": "Body", "date": "2020-01-01", "visible": True}
@@ -151,18 +159,19 @@ def test_search_with_pagination(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
-    result = list_reviews_paginated(search="Great", per_page=3, page=1)
+    result = await list_reviews_paginated(search="Great", per_page=3, page=1)
     assert result.total == 10
     assert result.total_pages == 4
     assert len(result.reviews) == 3
     assert result.page == 1
 
-    result2 = list_reviews_paginated(search="Great", per_page=3, page=2)
+    result2 = await list_reviews_paginated(search="Great", per_page=3, page=2)
     assert len(result2.reviews) == 3
     assert result2.page == 2
 
 
-def test_search_combined_with_rating_filter(mocker):
+@pytest.mark.asyncio
+async def test_search_combined_with_rating_filter(mocker):
     reviews = [
         {"id": 1, "movieId": "A", "authorId": 1, "rating": 5, "reviewTitle": "Great", "reviewBody": "Loved it", "date": "2020-01-01", "visible": True},
         {"id": 2, "movieId": "B", "authorId": 2, "rating": 3, "reviewTitle": "Great", "reviewBody": "It was okay", "date": "2020-01-02", "visible": True},
@@ -176,7 +185,7 @@ def test_search_combined_with_rating_filter(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
-    result = list_reviews_paginated(search="Great", rating=5)
+    result = await list_reviews_paginated(search="Great", rating=5)
     assert result.total == 1
     assert result.reviews[0].id == 1
 

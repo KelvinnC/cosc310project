@@ -6,7 +6,7 @@ from app.schemas.review import Review, ReviewCreate, ReviewUpdate, ReviewWithMov
 from app.repositories.review_repo import load_all, save_all
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 from app.repositories import movie_repo
-from app.services.tmdb_service import is_tmdb_movie_id, validate_tmdb_movie_id, get_tmdb_movie_details
+from app.services.tmdb_service import is_tmdb_movie_id, validate_tmdb_movie_id, get_tmdb_movie_details, extract_tmdb_id
 
 REVIEW_NOT_FOUND = "Review not found"
 DEFAULT_PAGE_SIZE = 20
@@ -138,12 +138,44 @@ def _enrich_with_movie_titles(
     idx_to_uuid: Dict[int, str],
     id_to_title: Dict[str, str],
 ) -> List[ReviewWithMovie]:
-    """Convert review dicts to ReviewWithMovie models with titles."""
+    """Convert review dicts to ReviewWithMovie models with titles (local movies only)."""
     result = []
     for review in reviews:
         movie_id = _normalize_movie_id(review.get("movieId"), idx_to_uuid)
         title = id_to_title.get(movie_id, "Unknown Movie") if movie_id else "Unknown Movie"
         review_data = {**review, "movieId": str(review.get("movieId", ""))}
+        result.append(ReviewWithMovie(**review_data, movieTitle=title))
+    return result
+
+
+async def _enrich_with_movie_titles_async(
+    reviews: List[Dict[str, Any]],
+    idx_to_uuid: Dict[int, str],
+    id_to_title: Dict[str, str],
+) -> List[ReviewWithMovie]:
+    """Convert review dicts to ReviewWithMovie models with titles (supports TMDb movies)."""
+    result = []
+    for review in reviews:
+        raw_movie_id = review.get("movieId")
+        movie_id_str = str(raw_movie_id) if raw_movie_id else ""
+        
+        # Check if this is a TMDb movie
+        if is_tmdb_movie_id(movie_id_str):
+            tmdb_id = extract_tmdb_id(movie_id_str)
+            if tmdb_id:
+                try:
+                    tmdb_data = await get_tmdb_movie_details(tmdb_id)
+                    title = tmdb_data.get("title", "Unknown Movie") if tmdb_data else "Unknown Movie"
+                except Exception:
+                    title = "Unknown Movie"
+            else:
+                title = "Unknown Movie"
+        else:
+            # Local movie lookup
+            movie_id = _normalize_movie_id(raw_movie_id, idx_to_uuid)
+            title = id_to_title.get(movie_id, "Unknown Movie") if movie_id else "Unknown Movie"
+        
+        review_data = {**review, "movieId": movie_id_str}
         result.append(ReviewWithMovie(**review_data, movieTitle=title))
     return result
 
@@ -160,7 +192,7 @@ def filter_and_sort_reviews(
     result = _sort_reviews(result, sort_by, order, idx_to_uuid, id_to_title)
     return [Review(**review) for review in result]
 
-def list_reviews_paginated(
+async def list_reviews_paginated(
     *,
     rating: Optional[float] = None,
     search: Optional[str] = None,
@@ -176,7 +208,7 @@ def list_reviews_paginated(
     filtered = _filter_by_search(filtered, search, id_to_title, idx_to_uuid)
     sorted_reviews = _sort_reviews(filtered, sort_by, order, idx_to_uuid, id_to_title)
     paginated, total, total_pages = _paginate(sorted_reviews, page, per_page)
-    reviews_with_movies = _enrich_with_movie_titles(paginated, idx_to_uuid, id_to_title)
+    reviews_with_movies = await _enrich_with_movie_titles_async(paginated, idx_to_uuid, id_to_title)
 
     return PaginatedReviews(
         reviews=reviews_with_movies,
