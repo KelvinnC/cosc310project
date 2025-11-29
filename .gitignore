@@ -217,3 +217,4 @@ __marimo__/
 backend/app/data/logs.json
 backend/app/data/battles.json
 /backend/app/data
+package-lock.json

@@ -17,10 +17,29 @@ A full-stack multiuser system for collaborative movie review management and comp
 
 ## Quick Start
 
+### Docker (Recommended)
 ```bash
 git clone https://github.com/KelvinnC/cosc310project.git
 cd cosc310project
 docker-compose up
+```
+
+### Local Development
+
+**Backend:**
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
 - **Frontend:** http://localhost:3000
