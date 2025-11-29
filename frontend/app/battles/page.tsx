@@ -190,7 +190,7 @@ const Page = () => {
     return (
       <div className="battles-page">
         <div className="battles-box">
-          <h1>Review Battle</h1>
+          <h1>ReviewBattle</h1>
           <h2>Choose the Better Review</h2>
           <div className="reviews-container">
             <div className="review-card skeleton">
@@ -218,7 +218,7 @@ const Page = () => {
     return (
       <div className="battles-page">
         <div className="battles-box">
-          <h1>Review Battle</h1>
+          <h1>ReviewBattle</h1>
           <p>Please <Link href="/login">login</Link> to participate in battles.</p>
         </div>
       </div>
@@ -229,7 +229,7 @@ const Page = () => {
     return (
       <div className="battles-page">
         <div className="battles-box result-box">
-          <h1>Review Battle</h1>
+          <h1>ReviewBattle</h1>
           <h2>Winner!</h2>
           <div className="winner-card">
             {winnerMovie && <p className="review-movie">Movie: {winnerMovie.title}</p>}
@@ -255,7 +255,7 @@ const Page = () => {
         </div>
       )}
       <div className="battles-box">
-        <h1>Review Battle</h1>
+        <h1>ReviewBattle</h1>
         <h2>Choose the Better Review</h2>
         
         {battle && review1 && review2 ? (
