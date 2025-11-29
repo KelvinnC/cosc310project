@@ -9,9 +9,11 @@ const FASTAPI_URL = "http://127.0.0.1:8000";
 interface Movie {
   id: string;
   title: string;
-  year: number;
+  description: string;
+  duration: number;
   genre: string;
-  rating: number;
+  release: string;
+  rating?: number;
 }
 
 const MoviesPage = () => {
@@ -49,7 +51,8 @@ const MoviesPage = () => {
               >
                 <div className="movie-title">{movie.title}</div>
                 <div className="movie-meta">
-                  {movie.year} • {movie.genre} • ⭐ {movie.rating}
+                  {new Date(movie.release).getFullYear()} • {movie.genre}
+                  {movie.rating != null && ` • ⭐ ${movie.rating.toFixed(1)}`}
                 </div>
               </Link>
             ))
