@@ -159,7 +159,11 @@ def search_movies_titles(query: str) -> List[MovieSummary]:
     for mv in movies:
         title = (mv.get("title") or "").lower()
         if q in title:
-            results.append(MovieSummary(id=mv.get("id"), title=mv.get("title")))
+            results.append(MovieSummary(
+                id=mv.get("id"),
+                title=mv.get("title"),
+                release=mv.get("release")
+            ))
     return results
 
 def movie_summary_by_id(movie_id: str) -> List[MovieSummary]:

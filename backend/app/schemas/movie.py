@@ -30,6 +30,7 @@ class MovieUpdate(BaseModel):
 class MovieSummary(BaseModel):
     id: str
     title: str
+    release: Optional[date] = None
 
 
 class MovieWithReviews(Movie):

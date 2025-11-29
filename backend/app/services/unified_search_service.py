@@ -15,11 +15,12 @@ async def search_all_movies(query: str) -> Dict[str, Any]:
     # Search local database first
     local_results = search_movies_titles(q)
     
-    # Convert to dict format with source marker
+    # Convert to dict format with source marker and release_date
     local_movies = [
         {
             "movie_id": movie.id,
             "title": movie.title,
+            "release_date": str(movie.release) if movie.release else "",
             "source": "local"
         }
         for movie in local_results

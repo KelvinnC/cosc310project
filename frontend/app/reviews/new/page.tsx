@@ -25,6 +25,12 @@ interface SearchAllResponse {
   source: "local" | "both" | "tmdb";
 }
 
+const getYear = (releaseDate?: string): string => {
+  if (!releaseDate) return "";
+  const year = releaseDate.split("-")[0];
+  return year && year.length === 4 ? year : "";
+};
+
 const NewReviewPage = () => {
   const router = useRouter();
   const { accessToken } = useData();
@@ -220,7 +226,12 @@ const NewReviewPage = () => {
                   onClick={() => selectMovie(movie)}
                   className="movie-dropdown-item"
                 >
-                  <span className="movie-title">{movie.title}</span>
+                  <span className="movie-title">
+                    {movie.title}
+                    {getYear(movie.release_date) && (
+                      <span className="movie-year"> ({getYear(movie.release_date)})</span>
+                    )}
+                  </span>
                   {movie.source === "tmdb" && (
                     <span className="movie-source-badge">TMDb</span>
                   )}
@@ -228,12 +239,14 @@ const NewReviewPage = () => {
               ))}
             </div>
           )}
-          {searchingMovies && (
-            <span className="helper-text">Searching...</span>
-          )}
-          {selectedMovie && (
-            <span className="helper-text success">✓ {selectedMovie.title}</span>
-          )}
+          <div className="helper-text-container">
+            {searchingMovies && (
+              <span className="helper-text">Searching...</span>
+            )}
+            {selectedMovie && (
+              <span className="helper-text success">✓ {selectedMovie.title}</span>
+            )}
+          </div>
         </div>
 
         <div className="form-group">
