@@ -231,6 +231,28 @@ const ReviewsPage = () => {
           )}
         </div>
 
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="pagination-button"
+            >
+              ← Previous
+            </button>
+            <span className="pagination-info">
+              Page {currentPage} of {totalPages} ({totalReviews} reviews)
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="pagination-button"
+            >
+              Next →
+            </button>
+          </div>
+        )}
+
         <div className="page-footer">
           <Link href="/" className="form-link">
             ← Back to Home
