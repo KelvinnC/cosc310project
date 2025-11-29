@@ -1,7 +1,7 @@
 # Review Battle
 
 **Team Name:** Kingfishers  
-**Members:** Will Kwan, Brad Cocar, Kelvin Chen, Duncan Rabenstein  
+**Members:** Brad Cocar, Duncan Rabenstein, Kelvin Chen, Will Kwan
 **Course:** COSC 310 - Software Engineering
 
 A full-stack multiuser system for collaborative movie review management and competitive "review battles." Users post and vote on movie reviews, competing for the top spot on a live leaderboard. Admins moderate content and manage user penalties.
@@ -10,17 +10,36 @@ A full-stack multiuser system for collaborative movie review management and comp
 
 - **Backend:** FastAPI (Python)
 - **Frontend:** Next.js
-- **Data Storage:** JSON files (no database)
+- **Data Storage:** JSON files
 - **Testing:** Pytest (90%+ coverage)
 - **CI/CD:** GitHub Actions
 - **Containerization:** Docker
 
 ## Quick Start
 
+### Docker (Recommended)
 ```bash
 git clone https://github.com/KelvinnC/cosc310project.git
 cd cosc310project
 docker-compose up
+```
+
+### Local Development
+
+**Backend:**
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
 - **Frontend:** http://localhost:3000
