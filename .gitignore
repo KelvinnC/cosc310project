@@ -215,3 +215,4 @@ __marimo__/
 
 # Application logs
 backend/app/data/logs.json
+backend/app/data/battles.json
