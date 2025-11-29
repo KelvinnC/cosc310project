@@ -56,7 +56,7 @@ const ReviewsPage = () => {
     try {
       const params = new URLSearchParams();
       params.append('page', currentPage.toString());
-      params.append('per_page', '100');
+      params.append('per_page', '50');
       
       if (ratingFilter) {
         params.append('rating', ratingFilter);
@@ -76,8 +76,6 @@ const ReviewsPage = () => {
       }
 
       const data: PaginatedReviews = await response.json();
-      
-      // Filter visible reviews only
       const visibleReviews = data.reviews.filter(r => r.visible);
       setReviews(visibleReviews);
       setTotalPages(data.total_pages);

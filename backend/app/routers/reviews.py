@@ -3,9 +3,7 @@ from fastapi import APIRouter, status, Query, HTTPException, Depends
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate, PaginatedReviews
 from app.schemas.search import MovieSearch, MovieWithReviews
 from app.services.review_service import (
-    list_reviews,
     list_reviews_paginated,
-    filter_and_sort_reviews,
     create_review,
     delete_review,
     update_review,
@@ -44,7 +42,7 @@ def list_or_filter_reviews(
     sort_by: Optional[Literal["rating", "movie"]] = Query(None),
     order: Literal["asc", "desc"] = Query("asc"),
     page: int = Query(1, ge=1),
-    per_page: int = Query(100, ge=1, le=500),
+    per_page: int = Query(50, ge=1, le=500),
 ):
     service_sort = None
     if sort_by == "rating":
@@ -67,12 +65,9 @@ def filter_reviews(
     sort_by: Optional[Literal["rating", "movie"]] = Query(None),
     order: Literal["asc", "desc"] = Query("asc"),
     page: int = Query(1, ge=1),
-    per_page: int = Query(100, ge=1, le=500),
+    per_page: int = Query(50, ge=1, le=500),
 ):
     return list_or_filter_reviews(rating=rating, sort_by=sort_by, order=order, page=page, per_page=per_page)
-    """Search for movies with reviews by title."""
-    search = MovieSearch(query=title)
-    return search_movies_with_reviews(search)
 
 @router.get("/{review_id}", response_model=Review)
 def get_review(review_id: int):
