@@ -155,7 +155,7 @@ const NewReviewPage = () => {
     return (
       <div className="review-form-page">
         <div className="review-form-box">
-          <h1>Review Battle</h1>
+          <h1>Write a Review</h1>
           <p>Loading...</p>
         </div>
       </div>
@@ -166,7 +166,7 @@ const NewReviewPage = () => {
     return (
       <div className="review-form-page">
         <div className="review-form-box">
-          <h1>Review Battle</h1>
+          <h1>Write a Review</h1>
           <p>Please <Link href="/login">login</Link> to write a review.</p>
         </div>
       </div>
@@ -181,10 +181,9 @@ const NewReviewPage = () => {
         </div>
       )}
       <form className="review-form-box" onSubmit={handleSubmit}>
-        <h1>Review Battle</h1>
-        <h2>Write a Review</h2>
+        <h1>Write a Review</h1>
 
-        <div className="form-group" style={{ position: 'relative' }}>
+        <div className="form-group movie-search-container">
           <label htmlFor="movie">Movie</label>
           <input
             id="movie"
@@ -202,30 +201,12 @@ const NewReviewPage = () => {
             autoComplete="off"
           />
           {showMovieDropdown && movieResults.length > 0 && (
-            <div style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              background: 'white',
-              borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-              maxHeight: '200px',
-              overflowY: 'auto',
-              zIndex: 10
-            }}>
+            <div className="movie-dropdown">
               {movieResults.map((movie) => (
                 <div
                   key={movie.id}
                   onClick={() => selectMovie(movie)}
-                  style={{
-                    padding: '10px 12px',
-                    cursor: 'pointer',
-                    color: '#333',
-                    borderBottom: '1px solid #eee'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                  className="movie-dropdown-item"
                 >
                   {movie.title}
                 </div>
@@ -233,26 +214,28 @@ const NewReviewPage = () => {
             </div>
           )}
           {searchingMovies && (
-            <span style={{ fontSize: '12px', opacity: 0.8 }}>Searching...</span>
+            <span className="helper-text">Searching...</span>
           )}
           {selectedMovie && (
-            <span style={{ fontSize: '12px', color: '#90EE90' }}>✓ {selectedMovie.title}</span>
+            <span className="helper-text success">✓ {selectedMovie.title}</span>
           )}
         </div>
 
         <div className="form-group">
-          <label htmlFor="rating">Rating</label>
-          <div className="rating-input">
-            <input
-              id="rating"
-              type="range"
-              min="1"
-              max="5"
-              step="0.5"
-              value={rating}
-              onChange={(e) => setRating(parseFloat(e.target.value))}
-              disabled={loading}
-            />
+          <label>Rating</label>
+          <div className="star-rating">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                className={`star-button ${rating >= star ? 'filled' : ''}`}
+                onClick={() => setRating(star)}
+                disabled={loading}
+                aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+              >
+                ★
+              </button>
+            ))}
             <span className="rating-value">{rating}/5</span>
           </div>
         </div>

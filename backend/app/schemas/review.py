@@ -70,3 +70,27 @@ class ReviewUpdate(BaseModel):
         def _strip_text_v1(cls, v):
             return v.strip() if isinstance(v, str) else v
 
+
+class ReviewWithMovie(BaseModel):
+    """Review with movie title included for efficient list display."""
+    id: int
+    movieId: str
+    movieTitle: str
+    authorId: Union[int, str]
+    rating: float
+    reviewTitle: str
+    reviewBody: str
+    flagged: bool = False
+    votes: int = 0
+    date: date
+    visible: bool = True
+
+
+class PaginatedReviews(BaseModel):
+    """Paginated response for reviews list."""
+    reviews: List[ReviewWithMovie]
+    total: int
+    page: int
+    per_page: int
+    total_pages: int
+

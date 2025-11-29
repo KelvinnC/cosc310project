@@ -1,7 +1,8 @@
 from typing import List, Dict, Any, Optional
 from datetime import datetime, date
+from math import ceil
 from fastapi import HTTPException
-from app.schemas.review import Review, ReviewCreate, ReviewUpdate
+from app.schemas.review import Review, ReviewCreate, ReviewUpdate, ReviewWithMovie, PaginatedReviews
 from app.repositories.review_repo import load_all, save_all
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 from app.repositories import movie_repo
@@ -115,6 +116,63 @@ def list_reviews(
     order: str = "asc",
 ) -> List[Review]:
     return filter_and_sort_reviews(rating=rating, sort_by=sort_by, order=order)
+
+
+def list_reviews_paginated(
+    *,
+    rating: Optional[float] = None,
+    sort_by: Optional[str] = None,
+    order: str = "asc",
+    page: int = 1,
+    per_page: int = 20,
+) -> PaginatedReviews:
+    """Return paginated reviews with movie titles included."""
+    reviews_raw = load_all()
+    result: List[Dict[str, Any]] = _filter_by_rating_dicts(reviews_raw, rating)
+    
+    # Build movie title lookup
+    idx_to_uuid, id_to_title = _build_movie_indexes()
+    
+    if sort_by:
+        key_name = (sort_by or "").lower()
+        descending = (order or "asc").lower() == "desc"
+
+        if key_name == "rating":
+            sort_key = _make_rating_sort_key(descending)
+            result = sorted(result, key=sort_key)
+
+        elif key_name in ("movieid", "movietitle"):
+            if key_name == "movieid":
+                sort_key = _make_movie_id_sort_key(idx_to_uuid)
+            else:
+                sort_key = _make_movie_title_sort_key(idx_to_uuid, id_to_title)
+
+            result = sorted(result, key=sort_key, reverse=descending)
+    
+    # Calculate pagination
+    total = len(result)
+    total_pages = ceil(total / per_page) if per_page > 0 else 1
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
+    paginated_result = result[start_idx:end_idx]
+    
+    # Add movie titles to reviews
+    reviews_with_movies = []
+    for review in paginated_result:
+        movie_id = _normalize_movie_id(review.get("movieId"), idx_to_uuid)
+        movie_title = id_to_title.get(movie_id, "Unknown Movie") if movie_id else "Unknown Movie"
+        reviews_with_movies.append(ReviewWithMovie(
+            **review,
+            movieTitle=movie_title
+        ))
+    
+    return PaginatedReviews(
+        reviews=reviews_with_movies,
+        total=total,
+        page=page,
+        per_page=per_page,
+        total_pages=total_pages
+    )
 
 
 def get_leaderboard_reviews(limit: int = 10) -> List[Review]:

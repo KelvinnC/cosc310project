@@ -9,9 +9,10 @@ import './reviews.css';
 // TODO: Use environment variable for production: process.env.NEXT_PUBLIC_API_URL
 const FASTAPI_URL = "http://127.0.0.1:8000";
 
-interface Review {
+interface ReviewWithMovie {
   id: number;
   movieId: string;
+  movieTitle: string;
   authorId: string;
   rating: number;
   reviewTitle: string;
@@ -22,40 +23,30 @@ interface Review {
   visible: boolean;
 }
 
-interface Movie {
-  id: string;
-  title: string;
+interface PaginatedReviews {
+  reviews: ReviewWithMovie[];
+  total: number;
+  page: number;
+  per_page: number;
+  total_pages: number;
 }
 
 const ReviewsPage = () => {
   const { accessToken } = useData();
   const [mounted, setMounted] = useState(false);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [movies, setMovies] = useState<Map<string, Movie>>(new Map());
+  const [reviews, setReviews] = useState<ReviewWithMovie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [ratingFilter, setRatingFilter] = useState<string>("");
-  const [sortBy, setSortBy] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("movie");
   const [sortOrder, setSortOrder] = useState<string>("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalReviews, setTotalReviews] = useState(0);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  const fetchMovieTitle = useCallback(async (movieId: string): Promise<Movie | null> => {
-    try {
-      const res = await apiFetch(`${FASTAPI_URL}/movies/${movieId}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.length > 0) {
-          return { id: data[0].id, title: data[0].title };
-        }
-      }
-    } catch {
-      // Silently fail
-    }
-    return null;
   }, []);
 
   const fetchReviews = useCallback(async () => {
@@ -63,8 +54,9 @@ const ReviewsPage = () => {
     setError("");
 
     try {
-      let url = `${FASTAPI_URL}/reviews`;
       const params = new URLSearchParams();
+      params.append('page', currentPage.toString());
+      params.append('per_page', '100');
       
       if (ratingFilter) {
         params.append('rating', ratingFilter);
@@ -74,10 +66,7 @@ const ReviewsPage = () => {
         params.append('order', sortOrder);
       }
       
-      if (params.toString()) {
-        url += `?${params.toString()}`;
-      }
-
+      const url = `${FASTAPI_URL}/reviews?${params.toString()}`;
       const response = await apiFetch(url);
       
       if (!response.ok) {
@@ -86,47 +75,37 @@ const ReviewsPage = () => {
         return;
       }
 
-      const reviewsData: Review[] = await response.json();
+      const data: PaginatedReviews = await response.json();
       
       // Filter visible reviews only
-      const visibleReviews = reviewsData.filter(r => r.visible);
+      const visibleReviews = data.reviews.filter(r => r.visible);
       setReviews(visibleReviews);
-
-      // Fetch movie titles for all unique movieIds
-      const uniqueMovieIds = [...new Set(visibleReviews.map(r => r.movieId))];
-      const moviePromises = uniqueMovieIds.map(async (movieId) => {
-        const movie = await fetchMovieTitle(movieId);
-        return { movieId, movie };
-      });
-
-      const movieResults = await Promise.all(moviePromises);
-      const movieMap = new Map<string, Movie>();
-      movieResults.forEach(({ movieId, movie }) => {
-        if (movie) {
-          movieMap.set(movieId, movie);
-        }
-      });
-      setMovies(movieMap);
+      setTotalPages(data.total_pages);
+      setTotalReviews(data.total);
     } catch (err) {
       console.error("Failed to fetch reviews:", err);
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [ratingFilter, sortBy, sortOrder, fetchMovieTitle]);
+  }, [ratingFilter, sortBy, sortOrder, currentPage]);
 
   useEffect(() => {
     fetchReviews();
   }, [fetchReviews]);
 
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [ratingFilter, sortBy, sortOrder]);
+
   const filteredReviews = reviews.filter(review => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
-    const movie = movies.get(review.movieId);
     return (
       review.reviewTitle.toLowerCase().includes(query) ||
       review.reviewBody.toLowerCase().includes(query) ||
-      (movie && movie.title.toLowerCase().includes(query))
+      review.movieTitle.toLowerCase().includes(query)
     );
   });
 
@@ -136,6 +115,16 @@ const ReviewsPage = () => {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  const renderStars = (rating: number) => {
+    return (
+      <span className="star-display">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span key={star} className={`star ${rating >= star ? 'filled' : ''}`}>★</span>
+        ))}
+      </span>
+    );
   };
 
   return (
@@ -168,9 +157,8 @@ const ReviewsPage = () => {
               onChange={(e) => setSortBy(e.target.value)}
               className="filter-select"
             >
-              <option value="">Sort By</option>
-              <option value="rating">Rating</option>
-              <option value="movie">Movie</option>
+              <option value="movie">Sort: Movie</option>
+              <option value="rating">Sort: Rating</option>
             </select>
             <select
               value={sortOrder}
@@ -212,24 +200,21 @@ const ReviewsPage = () => {
                     : "Login to write the first review!"}
               </p>
               {mounted && accessToken && (
-                <Link href="/reviews/new" className="action-button" style={{ marginTop: '16px' }}>
+                <Link href="/reviews/new" className="action-button back-link-margin">
                   Write a Review
                 </Link>
               )}
             </div>
           ) : (
             filteredReviews.map((review) => {
-              const movie = movies.get(review.movieId);
               return (
                 <div key={review.id} className="review-card">
                   <div className="review-card-header">
                     <div>
-                      {movie && (
-                        <p className="review-card-movie">{movie.title}</p>
-                      )}
+                      <p className="review-card-movie">{review.movieTitle}</p>
                       <h3 className="review-card-title">{review.reviewTitle}</h3>
                     </div>
-                    <span className="review-card-rating">{review.rating}/5</span>
+                    <span className="review-card-rating">{renderStars(review.rating)}</span>
                   </div>
                   <p className="review-card-body">{review.reviewBody}</p>
                   <div className="review-card-footer">
@@ -246,8 +231,8 @@ const ReviewsPage = () => {
           )}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '24px' }}>
-          <Link href="/" className="form-link" style={{ color: '#4292c6' }}>
+        <div className="page-footer">
+          <Link href="/" className="form-link">
             ← Back to Home
           </Link>
         </div>

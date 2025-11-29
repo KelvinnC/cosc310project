@@ -190,7 +190,7 @@ const EditReviewPage = () => {
     return (
       <div className="review-form-page">
         <div className="review-form-box">
-          <h1>Review Battle</h1>
+          <h1>Edit Review</h1>
           <p>Loading...</p>
         </div>
       </div>
@@ -201,7 +201,7 @@ const EditReviewPage = () => {
     return (
       <div className="review-form-page">
         <div className="review-form-box">
-          <h1>Review Battle</h1>
+          <h1>Edit Review</h1>
           <p>Please <Link href="/login">login</Link> to edit reviews.</p>
         </div>
       </div>
@@ -214,7 +214,7 @@ const EditReviewPage = () => {
         <div className="error-container">
           <p className="error-message">Error: {error}</p>
         </div>
-        <Link href="/reviews" className="action-button" style={{ marginTop: '16px' }}>
+        <Link href="/reviews" className="action-button back-link-margin">
           ← Back to Reviews
         </Link>
       </div>
@@ -227,7 +227,7 @@ const EditReviewPage = () => {
         <div className="error-container">
           <p className="error-message">Error: You can only edit your own reviews</p>
         </div>
-        <Link href={`/reviews/${reviewId}`} className="action-button" style={{ marginTop: '16px' }}>
+        <Link href={`/reviews/${reviewId}`} className="action-button back-link-margin">
           ← Back to Review
         </Link>
       </div>
@@ -242,8 +242,7 @@ const EditReviewPage = () => {
         </div>
       )}
       <form className="review-form-box" onSubmit={handleSubmit}>
-        <h1>Review Battle</h1>
-        <h2>Edit Review</h2>
+        <h1>Edit Review</h1>
 
         <div className="form-group">
           <label>Movie</label>
@@ -252,24 +251,25 @@ const EditReviewPage = () => {
             value={movie?.title || "Loading..."}
             className="form-input"
             disabled
-            style={{ backgroundColor: '#e0e0e0' }}
           />
-          <span style={{ fontSize: '12px', opacity: 0.8 }}>Movie cannot be changed</span>
+          <span className="helper-text">Movie cannot be changed</span>
         </div>
 
         <div className="form-group">
-          <label htmlFor="rating">Rating</label>
-          <div className="rating-input">
-            <input
-              id="rating"
-              type="range"
-              min="1"
-              max="5"
-              step="0.5"
-              value={rating}
-              onChange={(e) => setRating(parseFloat(e.target.value))}
-              disabled={submitting}
-            />
+          <label>Rating</label>
+          <div className="star-rating">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                className={`star-button ${rating >= star ? 'filled' : ''}`}
+                onClick={() => setRating(star)}
+                disabled={submitting}
+                aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+              >
+                ★
+              </button>
+            ))}
             <span className="rating-value">{rating}/5</span>
           </div>
         </div>
@@ -303,26 +303,17 @@ const EditReviewPage = () => {
           <span className="char-count">{reviewBody.length}/1000</span>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+        <div className="button-row">
           <button
             type="submit"
             className="submit-button"
             disabled={submitting}
-            style={{ flex: 1 }}
           >
             {submitting ? "Saving..." : "Save Changes"}
           </button>
           <Link 
             href={`/reviews/${reviewId}`} 
             className="action-button secondary"
-            style={{ 
-              flex: 1, 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              height: '2.5rem',
-              textDecoration: 'none'
-            }}
           >
             Cancel
           </Link>

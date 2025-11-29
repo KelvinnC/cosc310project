@@ -55,6 +55,10 @@
     border-color: #2171b5;
 }
 
+.search-input:hover {
+    border-color: #ccc;
+}
+
 .filter-select {
     background-color: white;
     padding: 8px 12px;
@@ -65,6 +69,16 @@
     border: 2px solid transparent;
     font-size: 14px;
     cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #2171b5;
+}
+
+.filter-select:hover {
+    border-color: #ccc;
 }
 
 .action-button {
@@ -93,6 +107,17 @@
 
 .action-button.secondary:hover {
     background-color: #545b62;
+}
+
+.action-button.flag {
+    background-color: transparent;
+    color: #6c757d;
+    border: 2px solid #6c757d;
+}
+
+.action-button.flag:hover {
+    background-color: #6c757d;
+    color: white;
 }
 
 .action-button.danger {
@@ -137,12 +162,23 @@
 }
 
 .review-card-rating {
-    background-color: #4292c6;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 14px;
-    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+/* Star display (read-only) */
+.star-display {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.star-display .star {
+    font-size: 16px;
+    color: #ccc;
+}
+
+.star-display .star.filled {
+    color: #FFD700;
 }
 
 .review-card-movie {
@@ -254,6 +290,10 @@
     border-color: #2171b5;
 }
 
+.form-input:hover:not(:disabled) {
+    border-color: #ccc;
+}
+
 .form-input:disabled {
     background-color: #e0e0e0;
     cursor: not-allowed;
@@ -279,6 +319,10 @@
     border-color: #2171b5;
 }
 
+.form-textarea:hover:not(:disabled) {
+    border-color: #ccc;
+}
+
 .form-select {
     background-color: white;
     padding: 8px 12px;
@@ -297,15 +341,35 @@
     border-color: #2171b5;
 }
 
-.rating-input {
+/* Star rating (interactive) */
+.star-rating {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
 }
 
-.rating-input input[type="range"] {
-    flex: 1;
-    accent-color: #2171b5;
+.star-button {
+    background: none;
+    border: none;
+    font-size: 32px;
+    cursor: pointer;
+    color: #ccc;
+    transition: color 0.2s ease, transform 0.1s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.star-button:hover:not(:disabled) {
+    transform: scale(1.1);
+}
+
+.star-button.filled {
+    color: #FFD700;
+}
+
+.star-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 .rating-value {
@@ -395,12 +459,12 @@
 }
 
 .review-detail-rating {
-    background-color: #4292c6;
-    color: white;
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-size: 18px;
-    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.review-detail-rating .star-display .star {
+    font-size: 24px;
 }
 
 .review-detail-movie {
@@ -526,4 +590,107 @@
     .action-button {
         width: 100%;
     }
+}
+
+/* Movie search dropdown */
+.movie-search-container {
+    position: relative;
+}
+
+.movie-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.movie-dropdown-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.15s ease;
+}
+
+.movie-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.movie-dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+
+/* Helper text */
+.helper-text {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.helper-text.success {
+    color: #90EE90;
+}
+
+.helper-text.warning {
+    color: #ff9800;
+    font-weight: 500;
+}
+
+/* Flagged badge */
+.flagged-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: #fff3e0;
+    color: #e65100;
+    border: 2px solid #ffb74d;
+}
+
+/* Page navigation footer */
+.page-footer {
+    text-align: center;
+    margin-top: 24px;
+}
+
+.page-footer .form-link {
+    color: #4292c6;
+}
+
+/* Button row for forms */
+.button-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.button-row .submit-button {
+    flex: 1;
+    margin-top: 0;
+}
+
+.button-row .action-button {
+    flex: 1;
+    height: 2.5rem;
+}
+
+/* Detail page specific */
+.skeleton-detail {
+    height: 400px;
+}
+
+.detail-message {
+    max-width: 700px;
+}
+
+.back-link-margin {
+    margin-top: 16px;
 }

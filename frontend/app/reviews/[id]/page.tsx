@@ -40,6 +40,7 @@ const ReviewDetailPage = () => {
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [flagging, setFlagging] = useState(false);
+  const [userHasFlagged, setUserHasFlagged] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -55,6 +56,20 @@ const ReviewDetailPage = () => {
       }
     }
   }, [accessToken]);
+
+  const fetchFlagStatus = useCallback(async () => {
+    if (!accessToken) return;
+    
+    try {
+      const response = await apiFetch(`${FASTAPI_URL}/reviews/${reviewId}/flag/status`);
+      if (response.ok) {
+        const data = await response.json();
+        setUserHasFlagged(data.has_flagged);
+      }
+    } catch {
+      // Silently fail - flag status is not critical
+    }
+  }, [reviewId, accessToken]);
 
   const fetchReview = useCallback(async () => {
     setLoading(true);
@@ -86,13 +101,16 @@ const ReviewDetailPage = () => {
           }
         }
       }
+      
+      // Fetch flag status after review loads
+      fetchFlagStatus();
     } catch (err) {
       console.error("Failed to fetch review:", err);
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [reviewId]);
+  }, [reviewId, fetchFlagStatus]);
 
   useEffect(() => {
     if (reviewId) {
@@ -145,10 +163,18 @@ const ReviewDetailPage = () => {
 
       if (!response.ok) {
         const data = await response.json();
-        setError(data.detail || "Failed to flag review");
+        const errorMessage = data.detail || "Failed to flag review";
+        
+        // Check if user has already flagged this review
+        if (errorMessage.toLowerCase().includes("already flagged")) {
+          setUserHasFlagged(true);
+        } else {
+          setError(errorMessage);
+        }
         return;
       }
 
+      setUserHasFlagged(true);
       setSuccessMessage("Review flagged successfully. Thank you for your report.");
       // Refresh review data
       fetchReview();
@@ -168,12 +194,22 @@ const ReviewDetailPage = () => {
     });
   };
 
+  const renderStars = (rating: number) => {
+    return (
+      <span className="star-display">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <span key={star} className={`star ${rating >= star ? 'filled' : ''}`}>★</span>
+        ))}
+      </span>
+    );
+  };
+
   const isAuthor = currentUserId && review && review.authorId === currentUserId;
 
   if (loading) {
     return (
       <div className="review-detail-page">
-        <div className="review-detail-box skeleton" style={{ height: '400px' }}></div>
+        <div className="review-detail-box skeleton skeleton-detail"></div>
       </div>
     );
   }
@@ -181,10 +217,10 @@ const ReviewDetailPage = () => {
   if (error && !review) {
     return (
       <div className="review-detail-page">
-        <div className="error-container" style={{ maxWidth: '700px' }}>
+        <div className="error-container detail-message">
           <p className="error-message">Error: {error}</p>
         </div>
-        <Link href="/reviews" className="action-button" style={{ marginTop: '16px' }}>
+        <Link href="/reviews" className="action-button back-link-margin">
           ← Back to Reviews
         </Link>
       </div>
@@ -196,7 +232,7 @@ const ReviewDetailPage = () => {
       <div className="review-detail-page">
         <div className="empty-state">
           <h3>Review not found</h3>
-          <Link href="/reviews" className="action-button" style={{ marginTop: '16px' }}>
+          <Link href="/reviews" className="action-button back-link-margin">
             ← Back to Reviews
           </Link>
         </div>
@@ -207,12 +243,12 @@ const ReviewDetailPage = () => {
   return (
     <div className="review-detail-page">
       {error && (
-        <div className="error-container" style={{ maxWidth: '700px' }}>
+        <div className="error-container detail-message">
           <p className="error-message">Error: {error}</p>
         </div>
       )}
       {successMessage && (
-        <div className="success-container" style={{ maxWidth: '700px' }}>
+        <div className="success-container detail-message">
           <p className="success-message">{successMessage}</p>
         </div>
       )}
@@ -225,7 +261,7 @@ const ReviewDetailPage = () => {
             )}
             <h1 className="review-detail-title">{review.reviewTitle}</h1>
           </div>
-          <span className="review-detail-rating">{review.rating}/5</span>
+          <span className="review-detail-rating">{renderStars(review.rating)}</span>
         </div>
 
         <p className="review-detail-body">{review.reviewBody}</p>
@@ -250,25 +286,25 @@ const ReviewDetailPage = () => {
               </button>
             </>
           )}
-          {accessToken && !isAuthor && !review.flagged && (
+          {accessToken && !isAuthor && !userHasFlagged && (
             <button
               onClick={handleFlag}
-              className="action-button secondary"
+              className="action-button flag"
               disabled={flagging}
             >
-              {flagging ? "Flagging..." : "🚩 Flag as Inappropriate"}
+              {flagging ? "Flagging..." : "Flag as Inappropriate"}
             </button>
           )}
-          {review.flagged && (
-            <span style={{ color: '#ff9800', fontWeight: 500 }}>
-              ⚠️ This review has been flagged
+          {accessToken && !isAuthor && userHasFlagged && (
+            <span className="flagged-badge">
+              You have flagged this review
             </span>
           )}
         </div>
       </div>
 
-      <div style={{ marginTop: '24px' }}>
-        <Link href="/reviews" className="form-link" style={{ color: '#4292c6' }}>
+      <div className="page-footer">
+        <Link href="/reviews" className="form-link">
           ← Back to Reviews
         </Link>
       </div>
