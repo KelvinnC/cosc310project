@@ -38,6 +38,7 @@ const ReviewsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [ratingFilter, setRatingFilter] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("movie");
   const [sortOrder, setSortOrder] = useState<string>("desc");
@@ -49,6 +50,14 @@ const ReviewsPage = () => {
     setMounted(true);
   }, []);
 
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const fetchReviews = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -58,6 +67,9 @@ const ReviewsPage = () => {
       params.append('page', currentPage.toString());
       params.append('per_page', '50');
       
+      if (debouncedSearch) {
+        params.append('search', debouncedSearch);
+      }
       if (ratingFilter) {
         params.append('rating', ratingFilter);
       }
@@ -86,7 +98,7 @@ const ReviewsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [ratingFilter, sortBy, sortOrder, currentPage]);
+  }, [debouncedSearch, ratingFilter, sortBy, sortOrder, currentPage]);
 
   useEffect(() => {
     fetchReviews();
@@ -95,17 +107,7 @@ const ReviewsPage = () => {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [ratingFilter, sortBy, sortOrder]);
-
-  const filteredReviews = reviews.filter(review => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      review.reviewTitle.toLowerCase().includes(query) ||
-      review.reviewBody.toLowerCase().includes(query) ||
-      review.movieTitle.toLowerCase().includes(query)
-    );
-  });
+  }, [debouncedSearch, ratingFilter, sortBy, sortOrder]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -187,7 +189,7 @@ const ReviewsPage = () => {
               <div className="skeleton skeleton-card"></div>
               <div className="skeleton skeleton-card"></div>
             </>
-          ) : filteredReviews.length === 0 ? (
+          ) : reviews.length === 0 ? (
             <div className="empty-state">
               <h3>No reviews found</h3>
               <p>
@@ -204,7 +206,7 @@ const ReviewsPage = () => {
               )}
             </div>
           ) : (
-            filteredReviews.map((review) => {
+            reviews.map((review: ReviewWithMovie) => {
               return (
                 <div key={review.id} className="review-card">
                   <div className="review-card-header">

@@ -31,6 +31,30 @@ def _filter_by_rating_dicts(
     target = _to_float(rating)
     return [rv for rv in reviews if _to_float(rv.get("rating")) == target]
 
+def _filter_by_search(
+    reviews: List[Dict[str, Any]],
+    search: Optional[str],
+    id_to_title: Dict[str, str],
+    idx_to_uuid: Dict[int, str],
+) -> List[Dict[str, Any]]:
+    """Filter reviews by search query (title, body, movie title)."""
+    if not search:
+        return reviews
+    query = search.lower()
+    result = []
+    for rv in reviews:
+        if query in rv.get("reviewTitle", "").lower():
+            result.append(rv)
+            continue
+        if query in rv.get("reviewBody", "").lower():
+            result.append(rv)
+            continue
+        movie_id = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
+        movie_title = id_to_title.get(movie_id, "") if movie_id else ""
+        if query in movie_title.lower():
+            result.append(rv)
+    return result
+
 def _make_rating_sort_key(descending: bool = False):
     def _key(rv: Dict[str, Any]):
         val = _to_float(rv.get("rating"))
@@ -137,6 +161,7 @@ def filter_and_sort_reviews(
 def list_reviews_paginated(
     *,
     rating: Optional[float] = None,
+    search: Optional[str] = None,
     sort_by: Optional[str] = None,
     order: str = "asc",
     page: int = 1,
@@ -146,6 +171,7 @@ def list_reviews_paginated(
     reviews_raw = load_all()
     filtered = _filter_by_rating_dicts(reviews_raw, rating)
     idx_to_uuid, id_to_title = _build_movie_indexes()
+    filtered = _filter_by_search(filtered, search, id_to_title, idx_to_uuid)
     sorted_reviews = _sort_reviews(filtered, sort_by, order, idx_to_uuid, id_to_title)
     paginated, total, total_pages = _paginate(sorted_reviews, page, per_page)
     reviews_with_movies = _enrich_with_movie_titles(paginated, idx_to_uuid, id_to_title)

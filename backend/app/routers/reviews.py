@@ -39,6 +39,7 @@ def search_reviews_slash(title: str = Query(..., min_length=1)):
 @router.get("", response_model=PaginatedReviews)
 def list_or_filter_reviews(
     rating: Optional[float] = Query(None, ge=1, le=5),
+    search: Optional[str] = Query(None, min_length=1),
     sort_by: Optional[Literal["rating", "movie"]] = Query(None),
     order: Literal["asc", "desc"] = Query("asc"),
     page: int = Query(1, ge=1),
@@ -52,6 +53,7 @@ def list_or_filter_reviews(
 
     return list_reviews_paginated(
         rating=rating,
+        search=search,
         sort_by=service_sort,
         order=order,
         page=page,
@@ -62,12 +64,13 @@ def list_or_filter_reviews(
 @router.get("/filter", include_in_schema=False)
 def filter_reviews(
     rating: Optional[float] = Query(None, ge=1, le=5),
+    search: Optional[str] = Query(None, min_length=1),
     sort_by: Optional[Literal["rating", "movie"]] = Query(None),
     order: Literal["asc", "desc"] = Query("asc"),
     page: int = Query(1, ge=1),
     per_page: int = Query(50, ge=1, le=500),
 ):
-    return list_or_filter_reviews(rating=rating, sort_by=sort_by, order=order, page=page, per_page=per_page)
+    return list_or_filter_reviews(rating=rating, search=search, sort_by=sort_by, order=order, page=page, per_page=per_page)
 
 @router.get("/{review_id}", response_model=Review)
 def get_review(review_id: int):
