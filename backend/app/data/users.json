@@ -33,6 +33,24 @@
     "role": "user",
     "created_at": "2025-11-11T18:59:51.175257",
     "active": false,
-    "warnings": 3
+    "warnings": 2
+  },
+  {
+    "id": "5aeb8b82-68ce-4e81-937e-84fb1187b9d6",
+    "username": "ethan",
+    "hashed_password": "$2b$12$s6X/o1mP1s3KBuYaShkC2OKE/dMCmMJ86lEQ4qzX3AJPE4MUtOlsK",
+    "role": "user",
+    "created_at": "2025-11-25T21:20:02.168596",
+    "active": true,
+    "warnings": 0
+  },
+  {
+    "id": "dc9c10b7-1970-4bda-bc18-ed0fcec1eb94",
+    "username": "helloworld",
+    "hashed_password": "$2b$12$PxGw59WCzDSnKiJNWkm3qOjwKaI1spw2OOhllklsG3EirwVtVrFGS",
+    "role": "user",
+    "created_at": "2025-11-26T01:15:08.320047",
+    "active": true,
+    "warnings": 0
   }
 ]
