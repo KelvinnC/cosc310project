@@ -19,7 +19,6 @@ const NewReviewPage = () => {
   const { accessToken } = useData();
   const [mounted, setMounted] = useState(false);
   
-  // Form state
   const [movieId, setMovieId] = useState("");
   const [movieSearch, setMovieSearch] = useState("");
   const [movieResults, setMovieResults] = useState<MovieSummary[]>([]);
@@ -28,7 +27,6 @@ const NewReviewPage = () => {
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewBody, setReviewBody] = useState("");
   
-  // UI state
   const [loading, setLoading] = useState(false);
   const [searchingMovies, setSearchingMovies] = useState(false);
   const [error, setError] = useState("");
@@ -44,10 +42,8 @@ const NewReviewPage = () => {
     }
   }, [mounted, accessToken, router]);
 
-  // Search movies when user types
   useEffect(() => {
     const searchMovies = async () => {
-      // Don't search if a movie is already selected
       if (selectedMovie) {
         setMovieResults([]);
         setShowMovieDropdown(false);
@@ -70,7 +66,6 @@ const NewReviewPage = () => {
           setShowMovieDropdown(true);
         }
       } catch {
-        // Silently fail
       } finally {
         setSearchingMovies(false);
       }
@@ -135,6 +130,10 @@ const NewReviewPage = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         setError(data.detail || "Failed to create review");
         return;
