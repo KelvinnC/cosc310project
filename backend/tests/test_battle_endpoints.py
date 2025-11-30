@@ -138,7 +138,6 @@ def test_create_battle_file_error(mocker, mock_user, mock_jwt_payload, mock_resp
     assert exc_info.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
-# POST /battles/{battle_id}/votes tests
 def test_submit_vote_success(mocker, mock_user, mock_jwt_payload, mock_battle, sample_reviews):
     """Test successful vote submission."""
     mocker.patch("app.routers.battles.jwt_auth_dependency", return_value=mock_jwt_payload)
