@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Annotated, Literal, Optional
+from typing import List, Any, Annotated, Literal, Optional
 from datetime import datetime
 from .review import Review
 
@@ -25,3 +25,9 @@ class UserUpdate(BaseModel):
     """Schema for user update"""
     username: Optional[UsernameStr] = None
     password: Optional[PasswordStr] = None
+
+class UserSummaryResponse(BaseModel):
+    """Schema for user dashboard"""
+    battles: List[Any]
+    reviews: List[Review]
+    user: User

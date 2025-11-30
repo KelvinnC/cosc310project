@@ -35,23 +35,16 @@ def create_user(payload: UserCreate) -> User:
     save_all(users)
     return new_user
 
-def get_user_by_id(user_id: str) -> User:
-    """Get a user object by user_id"""
+def get_user_by_id(user_id: str, show_password=False) -> User:
+    """Get a user object by user_id. show_password determines whether hashed password is shown or not"""
     users = load_all()
     index = find_dict_by_id(users, "id", user_id)
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
     user_instance = User(**users[index])
-    user_instance.hashed_password = None  # prevent exposing user passwords
+    if not show_password:
+        user_instance.hashed_password = None  # prevent exposing user passwords
     return user_instance
-
-def get_user_by_id_unsafe(user_id: str) -> User:
-    """Get a user object by user_id, including hashed_password"""
-    users = load_all()
-    index = find_dict_by_id(users, "id", user_id)
-    if index == NOT_FOUND:
-        raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
-    return User(**users[index])
 
 def update_user(user_id: str, payload: UserUpdate) -> User:
     """Update a user's username or password by user_id"""

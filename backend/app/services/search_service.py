@@ -1,8 +1,10 @@
-from typing import List, Dict, Set
+from typing import Dict, List, Set
+
 from app.schemas.search import MovieSearch, MovieWithReviews
 from app.schemas.review import Review
 from app.repositories.movie_repo import load_all as load_movies
 from app.repositories.review_repo import load_all as load_reviews
+
 
 def _matching_movie_ids(search: MovieSearch) -> Set[str]:
     movies = load_movies()
