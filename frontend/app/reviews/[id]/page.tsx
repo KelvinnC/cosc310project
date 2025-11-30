@@ -120,6 +120,10 @@ const ReviewDetailPage = () => {
       });
 
       if (!response.ok && response.status !== 204) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         setError(data.detail || "Failed to delete review");
         return;
@@ -136,7 +140,7 @@ const ReviewDetailPage = () => {
 
   const handleFlag = async () => {
     if (!accessToken) {
-      setError("Please login to flag reviews");
+      router.push('/login');
       return;
     }
 
@@ -150,6 +154,10 @@ const ReviewDetailPage = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         const errorMessage = data.detail || "Failed to flag review";
         

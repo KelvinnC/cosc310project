@@ -155,6 +155,10 @@ const EditReviewPage = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         setError(data.detail || "Failed to update review");
         return;
