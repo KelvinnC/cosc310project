@@ -24,7 +24,11 @@ def test_list_reviews(mocker, client):
     response = client.get("/reviews")
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
+    # Response is now paginated
+    assert "reviews" in data
+    assert len(data["reviews"]) == 1
+    assert data["total"] == 1
+    assert data["page"] == 1
 
 def test_get_review_by_id_valid_id(mocker, client):
     mocker.patch("app.services.review_service.load_all", return_value=[

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Union
+from typing import Union, List
 from datetime import date
 try:
     from pydantic import field_validator as _field_validator  # v2
@@ -69,4 +69,28 @@ class ReviewUpdate(BaseModel):
         @_validator("reviewTitle", "reviewBody", pre=True)
         def _strip_text_v1(cls, v):
             return v.strip() if isinstance(v, str) else v
+
+
+class ReviewWithMovie(BaseModel):
+    """Review with movie title included for efficient list display."""
+    id: int
+    movieId: str
+    movieTitle: str
+    authorId: Union[int, str]
+    rating: float
+    reviewTitle: str
+    reviewBody: str
+    flagged: bool = False
+    votes: int = 0
+    date: date
+    visible: bool = True
+
+
+class PaginatedReviews(BaseModel):
+    """Paginated response for reviews list."""
+    reviews: List[ReviewWithMovie]
+    total: int
+    page: int
+    per_page: int
+    total_pages: int
 
