@@ -7,7 +7,6 @@ import { useData } from '../../context';
 import { apiFetch } from '../../../lib/api';
 import '../reviews.css';
 
-// TODO: Use environment variable for production: process.env.NEXT_PUBLIC_API_URL
 const FASTAPI_URL = "http://127.0.0.1:8000";
 
 interface MovieResult {
@@ -36,7 +35,6 @@ const NewReviewPage = () => {
   const { accessToken } = useData();
   const [mounted, setMounted] = useState(false);
   
-  // Form state
   const [movieId, setMovieId] = useState("");
   const [movieSearch, setMovieSearch] = useState("");
   const [movieResults, setMovieResults] = useState<MovieResult[]>([]);
@@ -45,7 +43,6 @@ const NewReviewPage = () => {
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewBody, setReviewBody] = useState("");
   
-  // UI state
   const [loading, setLoading] = useState(false);
   const [searchingMovies, setSearchingMovies] = useState(false);
   const [error, setError] = useState("");
@@ -64,7 +61,6 @@ const NewReviewPage = () => {
   // Search movies when user types (using smart search with TMDb fallback)
   useEffect(() => {
     const searchMovies = async () => {
-      // Don't search if a movie is already selected
       if (selectedMovie) {
         setMovieResults([]);
         setShowMovieDropdown(false);
@@ -89,7 +85,6 @@ const NewReviewPage = () => {
           setShowMovieDropdown(combinedResults.length > 0);
         }
       } catch {
-        // Silently fail
       } finally {
         setSearchingMovies(false);
       }
@@ -154,6 +149,10 @@ const NewReviewPage = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         setError(data.detail || "Failed to create review");
         return;

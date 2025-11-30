@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useData } from '../../context';
 import { apiFetch } from '../../../lib/api';
+import { getUserIdFromToken } from '../../../lib/auth';
 import '../reviews.css';
 
-// TODO: Use environment variable for production: process.env.NEXT_PUBLIC_API_URL
 const FASTAPI_URL = "http://127.0.0.1:8000";
 
 interface Review {
@@ -44,17 +44,8 @@ const ReviewDetailPage = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Decode JWT to get current user ID
   useEffect(() => {
-    const token = accessToken as string | null;
-    if (token && typeof token === 'string') {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setCurrentUserId(payload.user_id || payload.sub);
-      } catch {
-        // Invalid token
-      }
-    }
+    setCurrentUserId(getUserIdFromToken(accessToken as string | null));
   }, [accessToken]);
 
   const fetchFlagStatus = useCallback(async () => {
@@ -67,7 +58,6 @@ const ReviewDetailPage = () => {
         setUserHasFlagged(data.has_flagged);
       }
     } catch {
-      // Silently fail - flag status is not critical
     }
   }, [reviewId, accessToken]);
 
@@ -91,7 +81,6 @@ const ReviewDetailPage = () => {
       const reviewData: Review = await response.json();
       setReview(reviewData);
 
-      // Fetch movie info
       if (reviewData.movieId) {
         const movieRes = await apiFetch(`${FASTAPI_URL}/movies/${reviewData.movieId}`);
         if (movieRes.ok) {
@@ -102,7 +91,6 @@ const ReviewDetailPage = () => {
         }
       }
       
-      // Fetch flag status after review loads
       fetchFlagStatus();
     } catch (err) {
       console.error("Failed to fetch review:", err);
@@ -132,6 +120,10 @@ const ReviewDetailPage = () => {
       });
 
       if (!response.ok && response.status !== 204) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         setError(data.detail || "Failed to delete review");
         return;
@@ -148,7 +140,7 @@ const ReviewDetailPage = () => {
 
   const handleFlag = async () => {
     if (!accessToken) {
-      setError("Please login to flag reviews");
+      router.push('/login');
       return;
     }
 
@@ -162,10 +154,13 @@ const ReviewDetailPage = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         const errorMessage = data.detail || "Failed to flag review";
         
-        // Check if user has already flagged this review
         if (errorMessage.toLowerCase().includes("already flagged")) {
           setUserHasFlagged(true);
         } else {
@@ -176,7 +171,6 @@ const ReviewDetailPage = () => {
 
       setUserHasFlagged(true);
       setSuccessMessage("Review flagged successfully. Thank you for your report.");
-      // Refresh review data
       fetchReview();
     } catch (err) {
       console.error("Failed to flag review:", err);

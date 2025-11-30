@@ -7,8 +7,6 @@ import { useRouter } from 'next/navigation';
 import { useData } from '../context';
 import { apiFetch } from '../../lib/api';
 
-// TODO: Replace hardcoded URL with environment variable for production
-// Use: const FASTAPI_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 const FASTAPI_URL = "http://127.0.0.1:8000";
 
 interface Review {
@@ -56,7 +54,6 @@ const Page = () => {
     setMounted(true);
   }, []);
 
-  // Helper function to fetch movie by ID
   const fetchMovie = async (movieId: string): Promise<Movie | null> => {
     try {
       const res = await apiFetch(`${FASTAPI_URL}/movies/${movieId}`);
@@ -67,7 +64,6 @@ const Page = () => {
         }
       }
     } catch {
-      // Silently fail for movie fetch
     }
     return null;
   };
@@ -90,6 +86,10 @@ const Page = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         const errorMessage = data.detail || "Failed to create battle";
         setError(errorMessage);
@@ -99,7 +99,6 @@ const Page = () => {
       const battleData: Battle = await response.json();
       setBattle(battleData);
 
-      // Fetch both reviews in parallel
       const [res1, res2] = await Promise.all([
         apiFetch(`${FASTAPI_URL}/reviews/${battleData.review1Id}`),
         apiFetch(`${FASTAPI_URL}/reviews/${battleData.review2Id}`)
@@ -111,7 +110,6 @@ const Page = () => {
       setReview1(r1);
       setReview2(r2);
 
-      // Fetch both movies in parallel
       const [m1, m2] = await Promise.all([
         r1?.movieId ? fetchMovie(r1.movieId) : Promise.resolve(null),
         r2?.movieId ? fetchMovie(r2.movieId) : Promise.resolve(null)
@@ -125,7 +123,7 @@ const Page = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -158,6 +156,10 @@ const Page = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         const errorMessage = data.detail || "Failed to submit vote";
         setError(errorMessage);
@@ -190,7 +192,7 @@ const Page = () => {
     return (
       <div className="battles-page">
         <div className="battles-box">
-          <h1>Review Battle</h1>
+          <h1>ReviewBattle</h1>
           <h2>Choose the Better Review</h2>
           <div className="reviews-container">
             <div className="review-card skeleton">
@@ -218,7 +220,7 @@ const Page = () => {
     return (
       <div className="battles-page">
         <div className="battles-box">
-          <h1>Review Battle</h1>
+          <h1>ReviewBattle</h1>
           <p>Please <Link href="/login">login</Link> to participate in battles.</p>
         </div>
       </div>
@@ -229,7 +231,7 @@ const Page = () => {
     return (
       <div className="battles-page">
         <div className="battles-box result-box">
-          <h1>Review Battle</h1>
+          <h1>ReviewBattle</h1>
           <h2>Winner!</h2>
           <div className="winner-card">
             {winnerMovie && <p className="review-movie">Movie: {winnerMovie.title}</p>}
@@ -255,7 +257,7 @@ const Page = () => {
         </div>
       )}
       <div className="battles-box">
-        <h1>Review Battle</h1>
+        <h1>ReviewBattle</h1>
         <h2>Choose the Better Review</h2>
         
         {battle && review1 && review2 ? (

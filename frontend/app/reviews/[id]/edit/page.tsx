@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useData } from '../../../context';
 import { apiFetch } from '../../../../lib/api';
+import { getUserIdFromToken } from '../../../../lib/auth';
 import '../../reviews.css';
 
-// TODO: Use environment variable for production: process.env.NEXT_PUBLIC_API_URL
 const FASTAPI_URL = "http://127.0.0.1:8000";
 
 interface Review {
@@ -35,16 +35,13 @@ const EditReviewPage = () => {
   const { accessToken } = useData();
   const [mounted, setMounted] = useState(false);
   
-  // Original review data
   const [originalReview, setOriginalReview] = useState<Review | null>(null);
   const [movie, setMovie] = useState<Movie | null>(null);
   
-  // Form state
   const [rating, setRating] = useState(3);
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewBody, setReviewBody] = useState("");
   
-  // UI state
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -54,17 +51,8 @@ const EditReviewPage = () => {
     setMounted(true);
   }, []);
 
-  // Decode JWT to get current user ID
   useEffect(() => {
-    const token = accessToken as string | null;
-    if (token && typeof token === 'string') {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setCurrentUserId(payload.user_id || payload.sub);
-      } catch {
-        // Invalid token
-      }
-    }
+    setCurrentUserId(getUserIdFromToken(accessToken as string | null));
   }, [accessToken]);
 
   const fetchReview = useCallback(async () => {
@@ -87,12 +75,10 @@ const EditReviewPage = () => {
       const reviewData: Review = await response.json();
       setOriginalReview(reviewData);
       
-      // Populate form with existing values
       setRating(reviewData.rating);
       setReviewTitle(reviewData.reviewTitle);
       setReviewBody(reviewData.reviewBody);
 
-      // Fetch movie info
       if (reviewData.movieId) {
         const movieRes = await apiFetch(`${FASTAPI_URL}/movies/${reviewData.movieId}`);
         if (movieRes.ok) {
@@ -120,7 +106,6 @@ const EditReviewPage = () => {
     }
   }, [reviewId, mounted, accessToken, router, fetchReview]);
 
-  // Check if user is the author
   useEffect(() => {
     if (originalReview && currentUserId && originalReview.authorId !== currentUserId) {
       setError("You can only edit your own reviews");
@@ -170,6 +155,10 @@ const EditReviewPage = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         setError(data.detail || "Failed to update review");
         return;

@@ -1,7 +1,7 @@
 # Review Battle
 
 **Team Name:** Kingfishers  
-**Members:** Will Kwan, Brad Cocar, Kelvin Chen, Duncan Rabenstein  
+**Members:** Brad Cocar, Duncan Rabenstein, Kelvin Chen, Will Kwan
 **Course:** COSC 310 - Software Engineering
 
 A full-stack multiuser system for collaborative movie review management and competitive "review battles." Users post and vote on movie reviews, competing for the top spot on a live leaderboard. Admins moderate content and manage user penalties.
@@ -10,7 +10,7 @@ A full-stack multiuser system for collaborative movie review management and comp
 
 - **Backend:** FastAPI (Python)
 - **Frontend:** Next.js
-- **Data Storage:** JSON files (no database)
+- **Data Storage:** JSON files
 - **Testing:** Pytest (90%+ coverage)
 - **CI/CD:** GitHub Actions
 - **Containerization:** Docker
