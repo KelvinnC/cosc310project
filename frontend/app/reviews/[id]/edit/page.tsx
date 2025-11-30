@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { useData } from '../../../context';
 import { apiFetch } from '../../../../lib/api';
+import { getUserIdFromToken } from '../../../../lib/auth';
 import '../../reviews.css';
 
-// TODO: Use environment variable for production: process.env.NEXT_PUBLIC_API_URL
 const FASTAPI_URL = "http://127.0.0.1:8000";
 
 interface Review {
@@ -54,17 +54,8 @@ const EditReviewPage = () => {
     setMounted(true);
   }, []);
 
-  // Decode JWT to get current user ID
   useEffect(() => {
-    const token = accessToken as string | null;
-    if (token && typeof token === 'string') {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setCurrentUserId(payload.user_id || payload.sub);
-      } catch {
-        // Invalid token
-      }
-    }
+    setCurrentUserId(getUserIdFromToken(accessToken as string | null));
   }, [accessToken]);
 
   const fetchReview = useCallback(async () => {

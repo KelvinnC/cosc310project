@@ -7,7 +7,6 @@ import { useData } from '../../context';
 import { apiFetch } from '../../../lib/api';
 import '../reviews.css';
 
-// TODO: Use environment variable for production: process.env.NEXT_PUBLIC_API_URL
 const FASTAPI_URL = "http://127.0.0.1:8000";
 
 interface MovieSummary {
