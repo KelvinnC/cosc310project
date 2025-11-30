@@ -58,7 +58,6 @@ const ReviewDetailPage = () => {
         setUserHasFlagged(data.has_flagged);
       }
     } catch {
-      // Silently fail - flag status is not critical
     }
   }, [reviewId, accessToken]);
 
@@ -82,7 +81,6 @@ const ReviewDetailPage = () => {
       const reviewData: Review = await response.json();
       setReview(reviewData);
 
-      // Fetch movie info
       if (reviewData.movieId) {
         const movieRes = await apiFetch(`${FASTAPI_URL}/movies/${reviewData.movieId}`);
         if (movieRes.ok) {
@@ -93,7 +91,6 @@ const ReviewDetailPage = () => {
         }
       }
       
-      // Fetch flag status after review loads
       fetchFlagStatus();
     } catch (err) {
       console.error("Failed to fetch review:", err);
@@ -156,7 +153,6 @@ const ReviewDetailPage = () => {
         const data = await response.json();
         const errorMessage = data.detail || "Failed to flag review";
         
-        // Check if user has already flagged this review
         if (errorMessage.toLowerCase().includes("already flagged")) {
           setUserHasFlagged(true);
         } else {
@@ -167,7 +163,6 @@ const ReviewDetailPage = () => {
 
       setUserHasFlagged(true);
       setSuccessMessage("Review flagged successfully. Thank you for your report.");
-      // Refresh review data
       fetchReview();
     } catch (err) {
       console.error("Failed to flag review:", err);

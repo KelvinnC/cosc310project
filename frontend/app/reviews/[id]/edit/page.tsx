@@ -35,16 +35,13 @@ const EditReviewPage = () => {
   const { accessToken } = useData();
   const [mounted, setMounted] = useState(false);
   
-  // Original review data
   const [originalReview, setOriginalReview] = useState<Review | null>(null);
   const [movie, setMovie] = useState<Movie | null>(null);
   
-  // Form state
   const [rating, setRating] = useState(3);
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewBody, setReviewBody] = useState("");
   
-  // UI state
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -78,12 +75,10 @@ const EditReviewPage = () => {
       const reviewData: Review = await response.json();
       setOriginalReview(reviewData);
       
-      // Populate form with existing values
       setRating(reviewData.rating);
       setReviewTitle(reviewData.reviewTitle);
       setReviewBody(reviewData.reviewBody);
 
-      // Fetch movie info
       if (reviewData.movieId) {
         const movieRes = await apiFetch(`${FASTAPI_URL}/movies/${reviewData.movieId}`);
         if (movieRes.ok) {
@@ -111,7 +106,6 @@ const EditReviewPage = () => {
     }
   }, [reviewId, mounted, accessToken, router, fetchReview]);
 
-  // Check if user is the author
   useEffect(() => {
     if (originalReview && currentUserId && originalReview.authorId !== currentUserId) {
       setError("You can only edit your own reviews");
