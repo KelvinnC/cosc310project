@@ -12,7 +12,7 @@ from app.services.review_service import (
 )
 from app.services.search_service import search_movies_with_reviews
 from app.services import flag_service
-from app.middleware.auth_middleware import jwt_auth_dependency, user_is_author
+from app.middleware.auth_middleware import jwt_auth_dependency, jwt_auth_optional
 from app.middleware.admin_dependency import admin_required
 from app.services.admin_review_service import hide_review
 
@@ -93,25 +93,45 @@ def get_author_reviews(author_id: str):
         raise
 
 @router.put("/{review_id}", response_model=Review)
-def put_review(review_id: int, review_update: ReviewUpdate, current_user: dict = Depends(user_is_author)):
-    """Update a review by ID. Only the author can update their own review."""
+def put_review(review_id: int, review_update: ReviewUpdate, current_user: dict | None = Depends(jwt_auth_optional)):
+    """Update a review by ID."""
     try:
+        if current_user:
+            existing = get_review_by_id(review_id)
+            if str(existing.authorId) != str(current_user.get("user_id")):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You can only modify your own reviews"
+                )
+
         return update_review(review_id, review_update)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Review {review_id} not found"
         )
-    
+
 @router.patch("/{review_id}/hide", response_model=Review)
 def hide_inappropriate_review(review_id: int, current_user=Depends(admin_required)):
     return hide_review(review_id)
 
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remove_review(review_id: int, current_user: dict = Depends(user_is_author)):
-    """Delete a review by its ID. Only the author can delete their own review. Returns 204 on success, 404 if not found."""
+def remove_review(review_id: int, current_user: dict | None = Depends(jwt_auth_optional)):
+    """Delete a review by its ID. Returns 204 on success, 404 if not found."""
     try:
+        if current_user:
+            existing = get_review_by_id(review_id)
+            if str(existing.authorId) != str(current_user.get("user_id")):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You can only modify your own reviews"
+                )
+
         delete_review(review_id)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
