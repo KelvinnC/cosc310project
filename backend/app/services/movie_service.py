@@ -191,3 +191,45 @@ def delete_movie(movie_id: str) -> None:
     if len(new_movies) == len(movies):
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
     movie_repo.save_all(new_movies)
+
+
+async def cache_tmdb_movie(movie_id: str) -> Movie:
+    """
+    Fetch a TMDb movie and save it to local movies.json.
+    If movie already exists locally, returns existing movie.
+    Returns the local Movie object.
+    """
+    movies = movie_repo.load_all()
+    
+    # Check if already cached locally
+    existing = next((m for m in movies if m.get("id") == movie_id), None)
+    if existing:
+        return Movie(**existing)
+    
+    # Validate and fetch from TMDb
+    tmdb_id = validate_tmdb_movie_id(movie_id)
+    tmdb_data = await get_tmdb_movie_details(tmdb_id)
+    
+    if not tmdb_data:
+        raise HTTPException(status_code=404, detail=f"TMDb movie '{movie_id}' not found")
+    
+    # Parse release date
+    try:
+        release_date = date_type.fromisoformat(tmdb_data["release"])
+    except (ValueError, KeyError):
+        release_date = date_type(1900, 1, 1)
+    
+    # Create local movie entry with the tmdb_ prefixed ID
+    new_movie = Movie(
+        id=movie_id,
+        title=tmdb_data["title"],
+        description=tmdb_data["description"],
+        duration=tmdb_data["duration"],
+        genre=tmdb_data["genre"],
+        release=release_date
+    )
+    
+    movies.append(new_movie.model_dump(mode="json"))
+    movie_repo.save_all(movies)
+    
+    return new_movie

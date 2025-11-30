@@ -7,6 +7,7 @@ from app.repositories.review_repo import load_all, save_all
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 from app.repositories import movie_repo
 from app.services.tmdb_service import is_tmdb_movie_id, validate_tmdb_movie_id, get_tmdb_movie_details, extract_tmdb_id
+from app.services.movie_service import cache_tmdb_movie
 
 REVIEW_NOT_FOUND = "Review not found"
 DEFAULT_PAGE_SIZE = 20
@@ -260,7 +261,10 @@ def get_review_by_id(review_id: int) -> Review:
     return Review(**reviews[index])
 
 async def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
-    """Create a new review. Validates movie existence (local or TMDb) and assigns author/date."""
+    """Create a new review. Validates movie existence (local or TMDb) and assigns author/date.
+    
+    For TMDb movies: automatically caches the movie to local movies.json so it appears at /movies.
+    """
     reviews = load_all(load_invisible=True)
     new_review_id = max((rev.get("id", 0) for rev in reviews), default=0) + 1
 
@@ -268,9 +272,9 @@ async def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
     
     # Check if it's a TMDb movie or local movie
     if is_tmdb_movie_id(movie_id):
-        tmdb_id = validate_tmdb_movie_id(movie_id)
+        # Cache TMDb movie locally (this also validates it exists)
         try:
-            await get_tmdb_movie_details(tmdb_id)
+            await cache_tmdb_movie(movie_id)
         except HTTPException:
             raise HTTPException(status_code=400, detail="Invalid movieId: TMDb movie does not exist")
     else:
