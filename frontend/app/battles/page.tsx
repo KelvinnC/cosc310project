@@ -64,7 +64,6 @@ const Page = () => {
         }
       }
     } catch (err) {
-      // Silently fail - movie title is optional for display
       console.error("Failed to fetch movie:", err);
     }
     return null;

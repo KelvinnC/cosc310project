@@ -58,7 +58,6 @@ const ReviewDetailPage = () => {
         setUserHasFlagged(data.has_flagged);
       }
     } catch (err) {
-      // Silently fail - flag status is not critical
       console.error("Failed to fetch flag status:", err);
     }
   }, [reviewId, accessToken]);

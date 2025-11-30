@@ -79,13 +79,11 @@ const NewReviewPage = () => {
         );
         if (response.ok) {
           const data: SearchAllResponse = await response.json();
-          // Combine local and external results
           const combinedResults: MovieResult[] = [...data.local, ...data.external];
           setMovieResults(combinedResults);
           setShowMovieDropdown(combinedResults.length > 0);
         }
       } catch (err) {
-        // Silently fail for search - user can retry
         console.error("Movie search failed:", err);
       } finally {
         setSearchingMovies(false);
