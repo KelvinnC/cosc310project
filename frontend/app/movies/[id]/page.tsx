@@ -30,11 +30,6 @@ type Movie = {
   posterUrl?: string | null;
 };
 
-type MovieSummary = {
-  id: string;
-  title: string;
-};
-
 const FRIENDLY_NAMES = [
   "Alex Rivers",
   "Jordan Lee",
@@ -50,10 +45,6 @@ const FRIENDLY_NAMES = [
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
 
-function normalizeTitle(text: string) {
-  return text.trim().toLowerCase();
-}
-
 function friendlyAuthorName(authorId: number | string) {
   if (authorId === -1) return "Community";
   const str = String(authorId);
@@ -64,9 +55,9 @@ function friendlyAuthorName(authorId: number | string) {
   return FRIENDLY_NAMES[hash % FRIENDLY_NAMES.length];
 }
 
-export default function MovieByNamePage({ params }: { params: Promise<{ name: string }> }) {
+export default function MovieByIdPage({ params }: { params: Promise<{ id: string }> }) {
   const resolved = use(params);
-  const decodedTitle = decodeURIComponent(resolved.name.replace(/\+/g, " ")).replace(/-/g, " ").trim();
+  const movieId = decodeURIComponent(resolved.id);
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,23 +70,7 @@ export default function MovieByNamePage({ params }: { params: Promise<{ name: st
       setLoading(true);
       setError(null);
       try {
-        const searchResponse = await apiFetch(
-          `${API_BASE}/movies/search?title=${encodeURIComponent(decodedTitle)}`
-        );
-        const searchPayload = await searchResponse.json();
-        if (!searchResponse.ok) {
-          throw new Error(searchPayload?.detail || "Failed to search movies");
-        }
-
-        const matches: MovieSummary[] = Array.isArray(searchPayload) ? searchPayload : [];
-        const normalizedQuery = normalizeTitle(decodedTitle);
-        const exactMatch = matches.find((m) => normalizeTitle(m.title) === normalizedQuery);
-        const target = exactMatch || matches[0];
-        if (!target) {
-          throw new Error("Movie not found");
-        }
-
-        const movieResponse = await apiFetch(`${API_BASE}/movies/${target.id}`);
+        const movieResponse = await apiFetch(`${API_BASE}/movies/${movieId}`);
         const moviePayload = await movieResponse.json();
         if (!movieResponse.ok) {
           throw new Error(moviePayload?.detail || "Failed to load movie");
@@ -122,7 +97,7 @@ export default function MovieByNamePage({ params }: { params: Promise<{ name: st
     return () => {
       mounted = false;
     };
-  }, [decodedTitle]);
+  }, [movieId]);
 
   const visibleReviews = useMemo(
     () => (movie?.reviews || []).filter((r) => r.visible !== false),
@@ -152,8 +127,8 @@ export default function MovieByNamePage({ params }: { params: Promise<{ name: st
           <div className="movie-card error-card">
             <h1>Unable to load movie</h1>
             <p>{error || "Movie not found."}</p>
-            <Link className="back-link" href="/">
-              Back
+            <Link className="back-link" href="/movies">
+              Back to movies
             </Link>
           </div>
         )}
