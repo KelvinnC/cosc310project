@@ -36,11 +36,7 @@ def _filter_by_rating_dicts(
 
 
 def _build_tmdb_title_cache(reviews: List[Dict[str, Any]]) -> Dict[str, str]:
-    """Build a cache of TMDb movie IDs to titles from local movies.json.
-    
-    Since TMDb movies are cached locally when a review is created,
-    we can look up titles from the local database instead of calling the API.
-    """
+    """Build cache of TMDb movie IDs to titles from local movies.json."""
     movies = movie_repo.load_all()
     id_to_title = {m.get("id"): m.get("title", "") for m in movies}
     
@@ -59,7 +55,7 @@ def _get_movie_title(
     tmdb_cache: Dict[str, str],
     default: str = "",
 ) -> str:
-    """Get movie title from local DB or TMDb cache. Single source of truth for title lookup."""
+    """Get movie title from local DB or TMDb cache."""
     movie_id_str = str(raw_movie_id) if raw_movie_id else ""
     
     if is_tmdb_movie_id(movie_id_str):
@@ -262,10 +258,7 @@ def get_review_by_id(review_id: int) -> Review:
     return Review(**reviews[index])
 
 async def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
-    """Create a new review. Validates movie existence (local or TMDb) and assigns author/date.
-    
-    For TMDb movies: automatically caches the movie to local movies.json so it appears at /movies.
-    """
+    """Create a new review. For TMDb movies, caches to local movies.json."""
     reviews = load_all(load_invisible=True)
     new_review_id = max((rev.get("id", 0) for rev in reviews), default=0) + 1
 

@@ -15,10 +15,7 @@ from app.services.tmdb_service import (
 
 
 def _parse_tmdb_to_movie_dict(movie_id: str, tmdb_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Convert TMDb API response to a local movie dictionary.
-    
-    Centralizes the parsing logic for TMDb data to avoid duplication.
-    """
+    """Convert TMDb API response to local movie dict format."""
     try:
         release_date = date_type.fromisoformat(tmdb_data["release"])
     except (ValueError, KeyError):
@@ -105,10 +102,7 @@ def create_movie(payload: MovieCreate) -> Movie:
     return new_movie
 
 async def get_movie_by_id(movie_id: str) -> MovieWithReviews:
-    """
-    Get movie by ID - supports both local movies and TMDb movies
-    If movie_id starts with 'tmdb_', fetch from TMDb API
-    """
+    """Get movie by ID. Supports local and TMDb movies (tmdb_<id>)."""
     # Check if this is a TMDb movie
     if is_tmdb_movie_id(movie_id):
         tmdb_id = validate_tmdb_movie_id(movie_id)
@@ -197,11 +191,7 @@ def delete_movie(movie_id: str) -> None:
 
 
 async def cache_tmdb_movie(movie_id: str) -> Movie:
-    """
-    Fetch a TMDb movie and save it to local movies.json.
-    If movie already exists locally, returns existing movie.
-    Returns the local Movie object.
-    """
+    """Fetch TMDb movie and cache to local movies.json. Returns existing if cached."""
     movies = movie_repo.load_all()
     
     # Check if already cached locally

@@ -82,13 +82,7 @@ async def filter_reviews(
 @router.get("/{review_id}", response_model=Review)
 def get_review(review_id: int):
     """Retrieve a review by ID."""
-    try:
-        return get_review_by_id(review_id)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Review {review_id} not found"
-        )
+    return get_review_by_id(review_id)
 
 @router.get("/author/{author_id}", response_model=List[Review])
 def get_author_reviews(author_id: str):
@@ -101,14 +95,8 @@ def get_author_reviews(author_id: str):
 
 @router.put("/{review_id}", response_model=Review)
 def put_review(review_id: int, review_update: ReviewUpdate, current_user: dict = Depends(user_is_author)):
-    """Update a review by ID. Only the author can update their own review."""
-    try:
-        return update_review(review_id, review_update)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Review {review_id} not found"
-        )
+    """Update a review. Only the author can update their own review."""
+    return update_review(review_id, review_update)
     
 @router.patch("/{review_id}/hide", response_model=Review)
 def hide_inappropriate_review(review_id: int, current_user=Depends(admin_required)):
@@ -116,15 +104,8 @@ def hide_inappropriate_review(review_id: int, current_user=Depends(admin_require
 
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
 def remove_review(review_id: int, current_user: dict = Depends(user_is_author)):
-    """Delete a review by its ID. Only the author can delete their own review. Returns 204 on success, 404 if not found."""
-    try:
-        delete_review(review_id)
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Review {review_id} not found"
-        )
-    return None
+    """Delete a review. Only the author can delete their own review."""
+    delete_review(review_id)
 
 
 @router.post("/{review_id}/flag", status_code=status.HTTP_201_CREATED)
@@ -141,22 +122,8 @@ def flag_review(review_id: int, current_user: dict = Depends(jwt_auth_dependency
         }
     except ValueError as e:
         error_msg = str(e)
-        if "already flagged" in error_msg.lower():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=error_msg
-            )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=error_msg
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to flag review: {str(e)}"
-        )
+        status_code = status.HTTP_409_CONFLICT if "already flagged" in error_msg.lower() else status.HTTP_400_BAD_REQUEST
+        raise HTTPException(status_code=status_code, detail=error_msg)
 
 @router.get("/{review_id}/flag/status")
 def get_flag_status(review_id: int, current_user: dict = Depends(jwt_auth_dependency)):
@@ -166,6 +133,6 @@ def get_flag_status(review_id: int, current_user: dict = Depends(jwt_auth_depend
     return {"has_flagged": has_flagged}
 
 @router.post("/{review_id}/unflag", status_code=204)
-def flag_review(review_id: int, current_user: dict = Depends(admin_required)):
-    """Unflag a review. Admin only endpoint"""
+def unflag_review_endpoint(review_id: int, current_user: dict = Depends(admin_required)):
+    """Unflag a review. Admin only."""
     flag_service.unflag_review(review_id)
