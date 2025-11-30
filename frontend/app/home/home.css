@@ -1,0 +1,105 @@
+.review {
+    display: flex;
+    flex-direction: column;
+    background-color: #4292c6;
+    padding: 16px;
+    width: 25rem;
+    height: 15rem;
+    border-radius: 8px;
+    user-select: none;
+}
+
+body {
+    padding-bottom: 32px;
+    color: black;
+}
+
+.review:hover {
+    background-color: #50b3f5;
+    transform: scale(1.01)
+}
+
+.review-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+
+.review-body {
+    color: #eeeeee;
+}
+
+.review-votes {
+    text-align: end;
+}
+
+.review-title {
+    font-weight: 700;
+    font-size: 20px;
+    color: rgb(254, 254, 254);
+}
+
+.review-container-title {
+    font-size: 30px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.user-container {
+    background-color: #4292c6;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    color: white;
+    font-size: 18px;
+    padding: 16px;
+    margin-bottom: 32px;
+}
+
+.user-div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.winner-text {
+    color: rgb(246, 247, 247);
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.click-text {
+    text-align: end;
+    color: white;
+    font-size: 18px;
+}
+
+.battle {
+    display: flex;
+    flex-direction: column;
+    background-color: #4292c6;
+    padding: 16px;
+    width: 25rem;
+    border-radius: 8px;
+    user-select: none;
+}
+
+.battle:hover {
+    background-color: #50b3f5;
+    transform: scale(1.01)
+}
+
+.download-button {
+    background-color: #000000;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.download-button:hover {
+    background-color: rgb(39, 38, 38);
+    transition: 0.1s;
+}
