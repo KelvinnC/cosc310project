@@ -96,9 +96,9 @@ const page = () => {
                                 <Link href={`/battles/${battle["id"]}`}>
                                 <div className="battle">
                                     <span>Battle {battle["id"]}</span>
-                                    <span>Date: {(battle["endedAt"] as string).split("T")[0]}</span>
+                                    <span>Date: {battle["endedAt"] ? (battle["endedAt"] as string).split("T")[0] : "In Progress"}</span>
                                     <span>Review {battle["review1Id"]} vs. {battle["review2Id"]}</span>
-                                    <span className="winner-text">Winner: {battle["winnerId"]}</span>
+                                    <span className="winner-text">Winner: {battle["winnerId"] ?? "Pending"}</span>
                                     <span className="click-text">See battle →</span>
                                 </div>
                                 </Link>
