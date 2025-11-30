@@ -58,7 +58,6 @@ const NewReviewPage = () => {
     }
   }, [mounted, accessToken, router]);
 
-  // Search movies when user types (using smart search with TMDb fallback)
   useEffect(() => {
     const searchMovies = async () => {
       if (selectedMovie) {
