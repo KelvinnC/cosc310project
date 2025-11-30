@@ -1,4 +1,5 @@
 from fastapi import Request, HTTPException, Depends
+import inspect
 import jwt
 
 from app.services.validate_access import validate_user_access
@@ -15,6 +16,30 @@ async def jwt_auth_dependency(request: Request):
     try:
         payload = validate_user_access(access_token)
         return payload
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError) as ex:
+        raise HTTPException(status_code=401, detail=str(ex)) from ex
+
+async def jwt_auth_optional(request: Request):
+    """Return decoded JWT payload if present; otherwise None. Honors app overrides for jwt_auth_dependency."""
+    override = request.app.dependency_overrides.get(jwt_auth_dependency)
+    if override:
+        try:
+            result = override()
+            if inspect.isawaitable(result):
+                result = await result
+            return result
+        except HTTPException as ex:
+            if ex.status_code == 401:
+                return None
+            raise
+
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+
+    access_token = auth_header.split(" ")[1]
+    try:
+        return validate_user_access(access_token)
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError) as ex:
         raise HTTPException(status_code=401, detail=str(ex)) from ex
 
