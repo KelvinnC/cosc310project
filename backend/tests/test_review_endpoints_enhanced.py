@@ -3,12 +3,25 @@ from fastapi.testclient import TestClient
 from fastapi import HTTPException
 
 from app.main import app
+from app.middleware.auth_middleware import user_is_author
 
 
 @pytest.fixture
 def client():
     with TestClient(app) as c:
         yield c
+
+
+@pytest.fixture
+def authenticated_client():
+    """Client with auth dependency overridden."""
+    def mock_user_is_author():
+        return {"user_id": "test-user"}
+    
+    app.dependency_overrides[user_is_author] = mock_user_is_author
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
 
 
 def test_post_review_requires_authentication(client):
@@ -70,14 +83,14 @@ def test_get_author_reviews_non_404_http_error_propagates(mocker, client):
     assert resp.json()["detail"] == "db error"
 
 
-def test_put_review_internal_error_returns_404(mocker, client):
+def test_put_review_internal_error_returns_404(mocker, authenticated_client):
     """Any exception from update_review should map to 404."""
     mocker.patch(
         "app.routers.reviews.update_review",
         side_effect=Exception("update failed"),
     )
 
-    resp = client.put(
+    resp = authenticated_client.put(
         "/reviews/1234",
         json={
             "rating": 3.5,
@@ -96,14 +109,14 @@ def test_put_review_internal_error_returns_404(mocker, client):
     assert "Review 1234 not found" in resp.json()["detail"]
 
 
-def test_delete_review_internal_error_returns_404(mocker, client):
+def test_delete_review_internal_error_returns_404(mocker, authenticated_client):
     """Any exception from delete_review should map to 404."""
     mocker.patch(
         "app.routers.reviews.delete_review",
         side_effect=Exception("delete failed"),
     )
 
-    resp = client.delete("/reviews/9999")
+    resp = authenticated_client.delete("/reviews/9999")
 
     assert resp.status_code == 404
     assert "Review 9999 not found" in resp.json()["detail"]
