@@ -63,7 +63,9 @@ const Page = () => {
           return { id: movies[0].id, title: movies[0].title };
         }
       }
-    } catch {
+    } catch (err) {
+      // Silently fail - movie title is optional for display
+      console.error("Failed to fetch movie:", err);
     }
     return null;
   };

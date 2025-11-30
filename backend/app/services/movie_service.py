@@ -13,6 +13,27 @@ from app.services.tmdb_service import (
     validate_tmdb_movie_id
 )
 
+
+def _parse_tmdb_to_movie_dict(movie_id: str, tmdb_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert TMDb API response to a local movie dictionary.
+    
+    Centralizes the parsing logic for TMDb data to avoid duplication.
+    """
+    try:
+        release_date = date_type.fromisoformat(tmdb_data["release"])
+    except (ValueError, KeyError):
+        release_date = date_type(1900, 1, 1)
+    
+    return {
+        "id": movie_id,
+        "title": tmdb_data["title"],
+        "description": tmdb_data["description"],
+        "duration": tmdb_data["duration"],
+        "genre": tmdb_data["genre"],
+        "release": release_date,
+    }
+
+
 def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
     movies: List[Dict[str, Any]] = movie_repo.load_all()
 
@@ -97,20 +118,7 @@ async def get_movie_by_id(movie_id: str) -> MovieWithReviews:
         if not tmdb_data:
             raise HTTPException(status_code=404, detail=f"TMDb movie '{movie_id}' not found")
         
-        # Parse release date
-        try:
-            release_date = date_type.fromisoformat(tmdb_data["release"])
-        except (ValueError, KeyError):
-            release_date = date_type(1900, 1, 1)
-        
-        target = {
-            "id": movie_id,
-            "title": tmdb_data["title"],
-            "description": tmdb_data["description"],
-            "duration": tmdb_data["duration"],
-            "genre": tmdb_data["genre"],
-            "release": release_date,
-        }
+        target = _parse_tmdb_to_movie_dict(movie_id, tmdb_data)
         
         # Get reviews for this TMDb movie (stored locally)
         reviews_data = load_reviews()
@@ -213,21 +221,9 @@ async def cache_tmdb_movie(movie_id: str) -> Movie:
     if not tmdb_data:
         raise HTTPException(status_code=404, detail=f"TMDb movie '{movie_id}' not found")
     
-    # Parse release date
-    try:
-        release_date = date_type.fromisoformat(tmdb_data["release"])
-    except (ValueError, KeyError):
-        release_date = date_type(1900, 1, 1)
-    
-    # Create local movie entry with the tmdb_ prefixed ID
-    new_movie = Movie(
-        id=movie_id,
-        title=tmdb_data["title"],
-        description=tmdb_data["description"],
-        duration=tmdb_data["duration"],
-        genre=tmdb_data["genre"],
-        release=release_date
-    )
+    # Create local movie entry using shared parser
+    movie_dict = _parse_tmdb_to_movie_dict(movie_id, tmdb_data)
+    new_movie = Movie(**movie_dict)
     
     movies.append(new_movie.model_dump(mode="json"))
     movie_repo.save_all(movies)

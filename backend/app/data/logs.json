@@ -384,5 +384,391 @@
     "context": {
       "review_id": 1
     }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:45.022562Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:45.065768Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "Review hidden by admin",
+    "context": {
+      "review_id": 1,
+      "author_id": -1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.479551Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Review flagged by user",
+    "context": {
+      "user_id": "user-123",
+      "review_id": 1,
+      "total_flags": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.484593Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Review flagged by user",
+    "context": {
+      "user_id": "user-999",
+      "review_id": 2,
+      "total_flags": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.486137Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Duplicate flag attempt blocked",
+    "context": {
+      "user_id": "user-999",
+      "review_id": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.489290Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Review flagged by user",
+    "context": {
+      "user_id": "user-123",
+      "review_id": 1,
+      "total_flags": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.491030Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Duplicate flag attempt blocked",
+    "context": {
+      "user_id": "user-123",
+      "review_id": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.492945Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Review flagged by user",
+    "context": {
+      "user_id": "user-456",
+      "review_id": 1,
+      "total_flags": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.495469Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Review flagged by user",
+    "context": {
+      "user_id": "user-123",
+      "review_id": 1,
+      "total_flags": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.501633Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Review flagged by user",
+    "context": {
+      "user_id": "u-1",
+      "review_id": 42,
+      "total_flags": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.678515Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "1234",
+      "old_warning_count": 1,
+      "new_warning_count": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.685453Z",
+    "level": "ERROR",
+    "component": "admin",
+    "message": "User banned by admin",
+    "context": {
+      "user_id": "1234"
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.691440Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User unbanned by admin",
+    "context": {
+      "user_id": "1234"
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.696888Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "User warned by admin",
+    "context": {
+      "user_id": "1234",
+      "new_warning_count": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.699707Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "1234",
+      "old_warning_count": 0,
+      "new_warning_count": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.702184Z",
+    "level": "ERROR",
+    "component": "admin",
+    "message": "User banned by admin",
+    "context": {
+      "user_id": "1234"
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.704596Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User unbanned by admin",
+    "context": {
+      "user_id": "1234"
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.748458Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "Review hidden by admin",
+    "context": {
+      "review_id": 1,
+      "author_id": -1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:08:46.756899Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "Admin attempted to hide non-existent review",
+    "context": {
+      "review_id": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:20.927553Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:20.975617Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "Review hidden by admin",
+    "context": {
+      "review_id": 1,
+      "author_id": -1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.401673Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Review flagged by user",
+    "context": {
+      "user_id": "user-123",
+      "review_id": 1,
+      "total_flags": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.409150Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Review flagged by user",
+    "context": {
+      "user_id": "user-999",
+      "review_id": 2,
+      "total_flags": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.411494Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Duplicate flag attempt blocked",
+    "context": {
+      "user_id": "user-999",
+      "review_id": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.416267Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Review flagged by user",
+    "context": {
+      "user_id": "user-123",
+      "review_id": 1,
+      "total_flags": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.418931Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Duplicate flag attempt blocked",
+    "context": {
+      "user_id": "user-123",
+      "review_id": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.421591Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Review flagged by user",
+    "context": {
+      "user_id": "user-456",
+      "review_id": 1,
+      "total_flags": 2
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.424023Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Review flagged by user",
+    "context": {
+      "user_id": "user-123",
+      "review_id": 1,
+      "total_flags": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.433421Z",
+    "level": "WARNING",
+    "component": "moderation",
+    "message": "Review flagged by user",
+    "context": {
+      "user_id": "u-1",
+      "review_id": 42,
+      "total_flags": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.759098Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "1234",
+      "old_warning_count": 1,
+      "new_warning_count": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.774226Z",
+    "level": "ERROR",
+    "component": "admin",
+    "message": "User banned by admin",
+    "context": {
+      "user_id": "1234"
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.786166Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User unbanned by admin",
+    "context": {
+      "user_id": "1234"
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.795366Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "User warned by admin",
+    "context": {
+      "user_id": "1234",
+      "new_warning_count": 1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.800634Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User warning removed by admin",
+    "context": {
+      "user_id": "1234",
+      "old_warning_count": 0,
+      "new_warning_count": 0
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.805576Z",
+    "level": "ERROR",
+    "component": "admin",
+    "message": "User banned by admin",
+    "context": {
+      "user_id": "1234"
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.810106Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "User unbanned by admin",
+    "context": {
+      "user_id": "1234"
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.879340Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "Review hidden by admin",
+    "context": {
+      "review_id": 1,
+      "author_id": -1
+    }
+  },
+  {
+    "timestamp": "2025-11-30T22:09:22.890780Z",
+    "level": "WARNING",
+    "component": "admin",
+    "message": "Admin attempted to hide non-existent review",
+    "context": {
+      "review_id": 1
+    }
   }
 ]

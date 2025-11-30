@@ -6,7 +6,7 @@ from app.schemas.review import Review, ReviewCreate, ReviewUpdate, ReviewWithMov
 from app.repositories.review_repo import load_all, save_all
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 from app.repositories import movie_repo
-from app.services.tmdb_service import is_tmdb_movie_id, validate_tmdb_movie_id, get_tmdb_movie_details, extract_tmdb_id
+from app.services.tmdb_service import is_tmdb_movie_id
 from app.services.movie_service import cache_tmdb_movie
 
 REVIEW_NOT_FOUND = "Review not found"
@@ -35,19 +35,20 @@ def _filter_by_rating_dicts(
     return [rv for rv in reviews if _to_float(rv.get("rating")) == target]
 
 
-async def _build_tmdb_title_cache(reviews: List[Dict[str, Any]]) -> Dict[str, str]:
-    """Build a cache of TMDb movie IDs to titles for the given reviews."""
+def _build_tmdb_title_cache(reviews: List[Dict[str, Any]]) -> Dict[str, str]:
+    """Build a cache of TMDb movie IDs to titles from local movies.json.
+    
+    Since TMDb movies are cached locally when a review is created,
+    we can look up titles from the local database instead of calling the API.
+    """
+    movies = movie_repo.load_all()
+    id_to_title = {m.get("id"): m.get("title", "") for m in movies}
+    
     tmdb_cache: Dict[str, str] = {}
     for rv in reviews:
         movie_id = str(rv.get("movieId", ""))
         if is_tmdb_movie_id(movie_id) and movie_id not in tmdb_cache:
-            tmdb_id = extract_tmdb_id(movie_id)
-            if tmdb_id:
-                try:
-                    tmdb_data = await get_tmdb_movie_details(tmdb_id)
-                    tmdb_cache[movie_id] = tmdb_data.get("title", "") if tmdb_data else ""
-                except Exception:
-                    tmdb_cache[movie_id] = ""
+            tmdb_cache[movie_id] = id_to_title.get(movie_id, "")
     return tmdb_cache
 
 
@@ -94,7 +95,7 @@ async def _filter_by_search_async(
     if not search:
         return reviews
     
-    tmdb_cache = await _build_tmdb_title_cache(reviews)
+    tmdb_cache = _build_tmdb_title_cache(reviews)
     query = search.lower()
     return [rv for rv in reviews if _matches_search_query(rv, query, idx_to_uuid, id_to_title, tmdb_cache)]
 
@@ -180,7 +181,7 @@ async def _enrich_with_movie_titles_async(
     id_to_title: Dict[str, str],
 ) -> List[ReviewWithMovie]:
     """Convert review dicts to ReviewWithMovie models with titles (supports TMDb movies)."""
-    tmdb_cache = await _build_tmdb_title_cache(reviews)
+    tmdb_cache = _build_tmdb_title_cache(reviews)
     result = []
     for review in reviews:
         title = _get_movie_title(review.get("movieId"), idx_to_uuid, id_to_title, tmdb_cache, "Unknown Movie")

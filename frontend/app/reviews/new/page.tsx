@@ -84,7 +84,9 @@ const NewReviewPage = () => {
           setMovieResults(combinedResults);
           setShowMovieDropdown(combinedResults.length > 0);
         }
-      } catch {
+      } catch (err) {
+        // Silently fail for search - user can retry
+        console.error("Movie search failed:", err);
       } finally {
         setSearchingMovies(false);
       }

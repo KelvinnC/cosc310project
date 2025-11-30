@@ -260,19 +260,13 @@ async def test_search_by_tmdb_movie_title(mocker):
         {"id": 1, "movieId": "tmdb_12345", "authorId": 1, "rating": 5, "reviewTitle": "Great Musical", "reviewBody": "Loved the songs", "date": "2020-01-01", "visible": True},
         {"id": 2, "movieId": "A", "authorId": 2, "rating": 4, "reviewTitle": "Good", "reviewBody": "Nice film", "date": "2020-01-02", "visible": True},
     ]
+    # TMDb movies are now cached locally when reviews are created
     movies = [
         {"id": "A", "title": "The Matrix"},
+        {"id": "tmdb_12345", "title": "Wicked: For Good"},
     ]
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
-    
-    # Mock TMDb API to return movie details
-    async def mock_tmdb_details(tmdb_id):
-        if tmdb_id == 12345:
-            return {"title": "Wicked: For Good", "id": 12345}
-        return None
-    
-    mocker.patch("app.services.review_service.get_tmdb_movie_details", side_effect=mock_tmdb_details)
 
     # Search for "Wicked" should find the TMDb movie review
     result = await list_reviews_paginated(search="Wicked")
@@ -283,19 +277,16 @@ async def test_search_by_tmdb_movie_title(mocker):
 
 @pytest.mark.asyncio
 async def test_search_by_tmdb_movie_partial_title(mocker):
-    """Test partial title search works for TMDb movies."""
+    """Test partial title search works for TMDb movies (now cached locally)."""
     reviews = [
         {"id": 1, "movieId": "tmdb_67890", "authorId": 1, "rating": 5, "reviewTitle": "Amazing", "reviewBody": "Great", "date": "2020-01-01", "visible": True},
     ]
+    # TMDb movies are cached locally when reviews are created
+    movies = [
+        {"id": "tmdb_67890", "title": "Wicked: For Good"},
+    ]
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
-    mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
-    
-    async def mock_tmdb_details(tmdb_id):
-        if tmdb_id == 67890:
-            return {"title": "Wicked: For Good", "id": 67890}
-        return None
-    
-    mocker.patch("app.services.review_service.get_tmdb_movie_details", side_effect=mock_tmdb_details)
+    mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
     # Partial search should work
     result = await list_reviews_paginated(search="For Good")
@@ -307,26 +298,20 @@ async def test_search_by_tmdb_movie_partial_title(mocker):
 
 @pytest.mark.asyncio
 async def test_search_mixed_local_and_tmdb_movies(mocker):
-    """Test search works across both local and TMDb movies."""
+    """Test search works across both local and TMDb movies (TMDb movies now cached locally)."""
     reviews = [
         {"id": 1, "movieId": "tmdb_11111", "authorId": 1, "rating": 5, "reviewTitle": "Great", "reviewBody": "Body", "date": "2020-01-01", "visible": True},
         {"id": 2, "movieId": "A", "authorId": 2, "rating": 4, "reviewTitle": "Nice", "reviewBody": "Body", "date": "2020-01-02", "visible": True},
         {"id": 3, "movieId": "tmdb_22222", "authorId": 3, "rating": 3, "reviewTitle": "Okay", "reviewBody": "Body", "date": "2020-01-03", "visible": True},
     ]
+    # All movies (local and TMDb) are stored locally
     movies = [
         {"id": "A", "title": "The Wizard of Oz"},
+        {"id": "tmdb_11111", "title": "Wicked: Part One"},
+        {"id": "tmdb_22222", "title": "Wicked: For Good"},
     ]
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
-    
-    async def mock_tmdb_details(tmdb_id):
-        if tmdb_id == 11111:
-            return {"title": "Wicked: Part One", "id": 11111}
-        if tmdb_id == 22222:
-            return {"title": "Wicked: For Good", "id": 22222}
-        return None
-    
-    mocker.patch("app.services.review_service.get_tmdb_movie_details", side_effect=mock_tmdb_details)
 
     # Search "Wicked" should find both TMDb movies
     result = await list_reviews_paginated(search="Wicked")
