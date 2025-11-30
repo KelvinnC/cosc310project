@@ -143,11 +143,6 @@ async def get_movie_by_id(movie_id: str) -> MovieWithReviews:
         elif isinstance(mv_id, int) and mv_id == index_1_based:
             reviews_list.append({**rv, "movieId": movie_id})
 
-    wrapped_reviews = [
-        rv
-        for rv in reviews_list
-    ]
-
     return MovieWithReviews(
         id=target.get("id"),
         title=target.get("title"),
@@ -155,7 +150,7 @@ async def get_movie_by_id(movie_id: str) -> MovieWithReviews:
         duration=target.get("duration"),
         genre=target.get("genre"),
         release=target.get("release"),
-        reviews=wrapped_reviews,
+        reviews=reviews_list,
     )
 
 def search_movies_titles(query: str) -> List[MovieSummary]:
