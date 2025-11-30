@@ -31,6 +31,18 @@ def _parse_tmdb_to_movie_dict(movie_id: str, tmdb_data: Dict[str, Any]) -> Dict[
     }
 
 
+def _get_reviews_for_movie(movie_id: str, legacy_index: int | None = None) -> List[Dict[str, Any]]:
+    """Get reviews for a movie. Handles legacy integer movieId references."""
+    reviews = []
+    for rv in load_reviews():
+        mv_id = rv.get("movieId")
+        if mv_id == movie_id:
+            reviews.append(rv)
+        elif legacy_index is not None and mv_id == legacy_index:
+            reviews.append({**rv, "movieId": movie_id})
+    return reviews
+
+
 def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
     movies: List[Dict[str, Any]] = movie_repo.load_all()
 
@@ -101,50 +113,23 @@ def create_movie(payload: MovieCreate) -> Movie:
     movie_repo.save_all(movies)
     return new_movie
 
-async def get_movie_by_id(movie_id: str) -> MovieWithReviews:
-    """Get movie by ID. Supports local and TMDb movies (tmdb_<id>)."""
-    # Check if this is a TMDb movie
-    if is_tmdb_movie_id(movie_id):
-        tmdb_id = validate_tmdb_movie_id(movie_id)
-        
-        # Fetch from TMDb API
-        tmdb_data = await get_tmdb_movie_details(tmdb_id)
-        if not tmdb_data:
-            raise HTTPException(status_code=404, detail=f"TMDb movie '{movie_id}' not found")
-        
-        target = _parse_tmdb_to_movie_dict(movie_id, tmdb_data)
-        
-        # Get reviews for this TMDb movie (stored locally)
-        reviews_data = load_reviews()
-        reviews_list = [rv for rv in reviews_data if rv.get("movieId") == movie_id]
-        
-        return MovieWithReviews(**target, reviews=reviews_list)
-    
-    # Local movie lookup
+def get_movie_by_id(movie_id: str) -> MovieWithReviews:
+    """Get movie by ID (local lookup only - TMDb movies are cached on review creation)."""
     movies = load_all()
-    target_index = find_dict_by_id(movies, "id", movie_id)
-    if target_index == NOT_FOUND:
+    idx = find_dict_by_id(movies, "id", movie_id)
+    if idx == NOT_FOUND:
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
     
-    target = movies[target_index]
-    index_1_based = target_index + 1
-    reviews_data = load_reviews()
-    reviews_list = []
-    for rv in reviews_data:
-        mv_id = rv.get("movieId")
-        if isinstance(mv_id, str) and mv_id == movie_id:
-            reviews_list.append(rv)
-        elif isinstance(mv_id, int) and mv_id == index_1_based:
-            reviews_list.append({**rv, "movieId": movie_id})
-
+    movie = movies[idx]
+    legacy_index = None if is_tmdb_movie_id(movie_id) else idx + 1
     return MovieWithReviews(
-        id=target.get("id"),
-        title=target.get("title"),
-        description=target.get("description"),
-        duration=target.get("duration"),
-        genre=target.get("genre"),
-        release=target.get("release"),
-        reviews=reviews_list,
+        id=movie.get("id"),
+        title=movie.get("title"),
+        description=movie.get("description"),
+        duration=movie.get("duration"),
+        genre=movie.get("genre"),
+        release=movie.get("release"),
+        reviews=_get_reviews_for_movie(movie_id, legacy_index),
     )
 
 def search_movies_titles(query: str) -> List[MovieSummary]:
@@ -194,19 +179,16 @@ async def cache_tmdb_movie(movie_id: str) -> Movie:
     """Fetch TMDb movie and cache to local movies.json. Returns existing if cached."""
     movies = movie_repo.load_all()
     
-    # Check if already cached locally
     existing = next((m for m in movies if m.get("id") == movie_id), None)
     if existing:
         return Movie(**existing)
     
-    # Validate and fetch from TMDb
     tmdb_id = validate_tmdb_movie_id(movie_id)
     tmdb_data = await get_tmdb_movie_details(tmdb_id)
     
     if not tmdb_data:
         raise HTTPException(status_code=404, detail=f"TMDb movie '{movie_id}' not found")
     
-    # Create local movie entry using shared parser
     movie_dict = _parse_tmdb_to_movie_dict(movie_id, tmdb_data)
     new_movie = Movie(**movie_dict)
     

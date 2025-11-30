@@ -80,8 +80,7 @@ def test_create_movie_strips_whitespace(mocker):
     assert movie.description == "Testing Description"
     assert mock_save.called
 
-@pytest.mark.asyncio
-async def test_get_movie_by_id_valid_id(mocker):
+def test_get_movie_by_id_valid_id(mocker):
     mocker.patch("app.services.movie_service.load_all", return_value=[
     {
         "id": "1234",
@@ -92,16 +91,15 @@ async def test_get_movie_by_id_valid_id(mocker):
         "duration": 90
     }])
     mocker.patch("app.services.movie_service.load_reviews", return_value=[])
-    movie = await get_movie_by_id("1234")
+    movie = get_movie_by_id("1234")
     assert movie.id == "1234"
     assert movie.title == "Test"
     assert isinstance(movie, MovieWithReviews)
 
-@pytest.mark.asyncio
-async def test_get_movie_by_id_invalid_id(mocker):
+def test_get_movie_by_id_invalid_id(mocker):
     mocker.patch("app.services.movie_service.load_all", return_value=[])
     with pytest.raises(HTTPException) as ex:
-        await get_movie_by_id("1234")
+        get_movie_by_id("1234")
     assert ex.value.status_code == 404
     assert "not found" in ex.value.detail
 
