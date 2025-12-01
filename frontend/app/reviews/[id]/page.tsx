@@ -315,7 +315,10 @@ const ReviewDetailPage = () => {
               <div>
                 {comments.map((comment: any, idx: any) => (
                   <div key={idx} className="comment">
-                    <span>{comment["date"].split("T")[0]}</span>
+                    <div className="comment-header">
+                      <span>{comment["authorUsername"]}</span>
+                      <span>{comment["date"].split("T")[0]}</span>
+                    </div>
                     <span>{comment["commentBody"]}</span>
                   </div>
                 ))}
