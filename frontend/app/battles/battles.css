@@ -1,0 +1,246 @@
+.battles-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.battles-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #4292c6;
+    color: white;
+    font-weight: 500;
+    border-radius: 16px;
+    padding: 24px;
+    gap: 16px;
+    max-width: 800px;
+    width: 100%;
+}
+
+.battles-box h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.battles-box h2 {
+    font-size: 20px;
+    margin: 0;
+}
+
+.reviews-container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 16px;
+    width: 100%;
+}
+
+.review-card {
+    flex: 1;
+    background-color: white;
+    color: #333;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.review-card:hover {
+    border-color: #2171b5;
+    transform: scale(1.02);
+}
+
+.review-card.selected {
+    border-color: #08306b;
+    background-color: #e3f2fd;
+}
+
+.review-card h3 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #2171b5;
+}
+
+.review-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #2171b5;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+}
+
+.review-movie {
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+    margin: 0 0 6px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.review-rating {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4292c6;
+    margin: 0 0 8px 0;
+}
+
+.review-body {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.review-votes {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2171b5;
+    margin: 8px 0 0 0;
+}
+
+.vs-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+    min-width: 50px;
+}
+
+.battle-button {
+    background-color: #2171b5;
+    color: white;
+    width: 10rem;
+    height: 2.5rem;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.battle-button:hover:not(:disabled) {
+    background-color: #08306b;
+}
+
+.battle-button:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.home-link {
+    color: rgb(71, 232, 240);
+    font-size: 14px;
+}
+
+.home-link:hover {
+    text-decoration: underline;
+}
+
+.error-container {
+    margin-bottom: 16px;
+    padding: 12px;
+    background-color: #ffebee;
+    border-radius: 8px;
+    border-left: 4px solid #d32f2f;
+}
+
+.error-message {
+    color: #d32f2f;
+    font-size: 14px;
+    margin: 0;
+}
+
+.result-box {
+    min-height: 300px;
+}
+
+.winner-card {
+    background-color: white;
+    color: #333;
+    border-radius: 12px;
+    padding: 20px;
+    width: 100%;
+    max-width: 400px;
+    border: 3px solid #ffd700;
+}
+
+.winner-card .review-rating {
+    font-size: 16px;
+}
+
+.winner-card .review-body {
+    font-size: 14px;
+    max-height: 200px;
+}
+
+@media (max-width: 600px) {
+    .reviews-container {
+        flex-direction: column;
+    }
+    
+    .vs-divider {
+        min-width: auto;
+        padding: 8px 0;
+    }
+}
+
+/* Skeleton loading styles */
+.review-card.skeleton {
+    cursor: default;
+    pointer-events: none;
+}
+
+.skeleton-line {
+    background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+    height: 14px;
+    margin-bottom: 10px;
+}
+
+.skeleton-title {
+    height: 18px;
+    width: 60%;
+}
+
+.skeleton-subtitle {
+    height: 12px;
+    width: 40%;
+}
+
+.skeleton-short {
+    width: 50%;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Focus styles for accessibility */
+.review-card:focus {
+    outline: 3px solid #08306b;
+    outline-offset: 2px;
+}
+
+.review-card:focus:not(:focus-visible) {
+    outline: none;
+}

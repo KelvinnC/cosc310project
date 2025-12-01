@@ -17,5 +17,9 @@ export async function apiFetch(input, init = {}) {
     headers,
   }
 
-  return fetch(input, finalInit)
+  let res = await fetch(input, finalInit)
+  if (res.status == 401) {
+    localStorage.removeItem('accessToken')
+  }
+  return res
 }

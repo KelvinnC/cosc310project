@@ -1,11 +1,10 @@
 from typing import List, Optional, Literal
 from fastapi import APIRouter, status, Query, HTTPException, Depends
-from app.schemas.review import Review, ReviewCreate, ReviewUpdate
+from app.schemas.review import Review, ReviewCreate, ReviewUpdate, PaginatedReviews
 from app.schemas.search import MovieSearch, MovieWithReviews
 from app.schemas.comment import Comment, CommentCreate
 from app.services.review_service import (
-    list_reviews,
-    filter_and_sort_reviews,
+    list_reviews_paginated,
     create_review,
     delete_review,
     update_review,
@@ -39,34 +38,41 @@ def search_reviews_slash(title: str = Query(..., min_length=1)):
     return search_movies_with_reviews(search)
 
 
-@router.get("", response_model=List[Review])
+@router.get("", response_model=PaginatedReviews)
 def list_or_filter_reviews(
     rating: Optional[float] = Query(None, ge=1, le=5),
+    search: Optional[str] = Query(None, min_length=1),
     sort_by: Optional[Literal["rating", "movie"]] = Query(None),
     order: Literal["asc", "desc"] = Query("asc"),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(50, ge=1, le=500),
 ):
-    if rating is None and sort_by is None:
-        return list_reviews()
-
     service_sort = None
     if sort_by == "rating":
         service_sort = "rating"
     elif sort_by == "movie":
         service_sort = "movieTitle"
 
-    return filter_and_sort_reviews(rating=rating, sort_by=service_sort, order=order)
+    return list_reviews_paginated(
+        rating=rating,
+        search=search,
+        sort_by=service_sort,
+        order=order,
+        page=page,
+        per_page=per_page
+    )
 
 
 @router.get("/filter", include_in_schema=False)
 def filter_reviews(
     rating: Optional[float] = Query(None, ge=1, le=5),
+    search: Optional[str] = Query(None, min_length=1),
     sort_by: Optional[Literal["rating", "movie"]] = Query(None),
     order: Literal["asc", "desc"] = Query("asc"),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(50, ge=1, le=500),
 ):
-    return list_or_filter_reviews(rating=rating, sort_by=sort_by, order=order)
-    """Search for movies with reviews by title."""
-    search = MovieSearch(query=title)
-    return search_movies_with_reviews(search)
+    return list_or_filter_reviews(rating=rating, search=search, sort_by=sort_by, order=order, page=page, per_page=per_page)
 
 @router.get("/{review_id}", response_model=Review)
 def get_review(review_id: int):
@@ -157,7 +163,14 @@ def flag_review(review_id: int, current_user: dict = Depends(jwt_auth_dependency
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to flag review: {str(e)}"
         )
-    
+
+@router.get("/{review_id}/flag/status")
+def get_flag_status(review_id: int, current_user: dict = Depends(jwt_auth_dependency)):
+    """Check if the current user has flagged this review."""
+    user_id = current_user.get("user_id")
+    has_flagged = flag_service.has_user_flagged_review(user_id, review_id)
+    return {"has_flagged": has_flagged}
+
 @router.post("/{review_id}/unflag", status_code=204)
 def flag_review(review_id: int, current_user: dict = Depends(admin_required)):
     """Unflag a review. Admin only endpoint"""
