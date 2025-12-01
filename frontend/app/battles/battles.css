@@ -33,7 +33,7 @@
     margin: 0;
 }
 
-.reviews-container {
+.battle-reviews-container {
     display: flex;
     flex-direction: row;
     align-items: stretch;
@@ -41,7 +41,7 @@
     width: 100%;
 }
 
-.review-card {
+.battle-review-card {
     flex: 1;
     background-color: white;
     color: #333;
@@ -52,23 +52,23 @@
     transition: border-color 0.2s ease, transform 0.2s ease;
 }
 
-.review-card:hover {
+.battle-review-card:hover {
     border-color: #2171b5;
     transform: scale(1.02);
 }
 
-.review-card.selected {
+.battle-review-card.selected {
     border-color: #08306b;
     background-color: #e3f2fd;
 }
 
-.review-card h3 {
+.battle-review-card h3 {
     margin: 0 0 8px 0;
     font-size: 16px;
     color: #2171b5;
 }
 
-.review-title {
+.battle-review-title {
     font-size: 15px;
     font-weight: 600;
     color: #2171b5;
@@ -92,7 +92,7 @@
     margin: 0 0 8px 0;
 }
 
-.review-body {
+.battle-review-body {
     font-size: 14px;
     line-height: 1.5;
     margin: 0;
@@ -100,7 +100,7 @@
     overflow-y: auto;
 }
 
-.review-votes {
+.battle-review-votes {
     font-size: 14px;
     font-weight: 600;
     color: #2171b5;
@@ -198,7 +198,7 @@
 }
 
 /* Skeleton loading styles */
-.review-card.skeleton {
+.battle-review-card.skeleton {
     cursor: default;
     pointer-events: none;
 }
@@ -236,11 +236,11 @@
 }
 
 /* Focus styles for accessibility */
-.review-card:focus {
+.battle-review-card:focus {
     outline: 3px solid #08306b;
     outline-offset: 2px;
 }
 
-.review-card:focus:not(:focus-visible) {
+.battle-review-card:focus:not(:focus-visible) {
     outline: none;
 }

@@ -27,15 +27,15 @@ body {
     margin-bottom: 32px;
 }
 
-.review-body {
+.home-review-body {
     color: #eeeeee;
 }
 
-.review-votes {
+.home-review-votes {
     text-align: end;
 }
 
-.review-title {
+.home-review-title {
     font-weight: 700;
     font-size: 20px;
     color: rgb(254, 254, 254);
