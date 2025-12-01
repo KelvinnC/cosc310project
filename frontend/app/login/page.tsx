@@ -3,7 +3,7 @@
 import React from 'react'
 import './login.css'
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useData } from '../context';
 import { apiFetch } from '../../lib/api';
@@ -17,6 +17,13 @@ const Page = () => {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const {accessToken} = useData()
+
+  useEffect(() => {
+    if (accessToken) {
+      router.replace('/')
+    }
+  })
 
   const validateForm = () => {
     if (!username.trim()) {

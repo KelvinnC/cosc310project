@@ -10,10 +10,8 @@ from app.routers.reviews import router as reviews_router
 from app.routers.admin_endpoints import router as admin_router
 from app.routers.user_home import router as home_router
 from app.routers.leaderboard import router as leaderboard_router
-try:
-    from app.routers.login import router as login_router
-except Exception:
-    login_router = None
+from app.routers.login import router as login_router
+from app.routers.tmdb import router as tmdb_router
 
 app = FastAPI()
 
@@ -37,8 +35,8 @@ app.include_router(movies_router)
 app.include_router(users_router)
 app.include_router(reviews_router)
 app.include_router(admin_router)
-if login_router is not None:
-    app.include_router(login_router)
+app.include_router(login_router)
 app.include_router(battles_router)
 app.include_router(home_router)
 app.include_router(leaderboard_router)
+app.include_router(tmdb_router)

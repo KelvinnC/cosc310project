@@ -17,5 +17,10 @@ export async function apiFetch(input, init = {}) {
     headers,
   }
 
-  return fetch(input, finalInit)
+  let res = await fetch(input, finalInit)
+  if (res.status == 401) {
+    localStorage.removeItem('accessToken')
+    window.location.href = '/login'
+  }
+  return res
 }
