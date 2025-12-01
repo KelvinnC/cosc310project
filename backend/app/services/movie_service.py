@@ -9,7 +9,6 @@ from app.repositories.review_repo import load_all as load_reviews
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 from app.services.tmdb_service import (
     get_tmdb_movie_details, 
-    is_tmdb_movie_id, 
     validate_tmdb_movie_id
 )
 
@@ -31,16 +30,9 @@ def _parse_tmdb_to_movie_dict(movie_id: str, tmdb_data: Dict[str, Any]) -> Dict[
     }
 
 
-def _get_reviews_for_movie(movie_id: str, legacy_index: int | None = None) -> List[Dict[str, Any]]:
-    """Get reviews for a movie. Handles legacy integer movieId references."""
-    reviews = []
-    for rv in load_reviews():
-        mv_id = rv.get("movieId")
-        if mv_id == movie_id:
-            reviews.append(rv)
-        elif legacy_index is not None and mv_id == legacy_index:
-            reviews.append({**rv, "movieId": movie_id})
-    return reviews
+def _get_reviews_for_movie(movie_id: str) -> List[Dict[str, Any]]:
+    """Get reviews for a movie by its ID."""
+    return [rv for rv in load_reviews() if rv.get("movieId") == movie_id]
 
 
 def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
@@ -121,7 +113,6 @@ def get_movie_by_id(movie_id: str) -> MovieWithReviews:
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
     
     movie = movies[idx]
-    legacy_index = None if is_tmdb_movie_id(movie_id) else idx + 1
     return MovieWithReviews(
         id=movie.get("id"),
         title=movie.get("title"),
@@ -129,7 +120,7 @@ def get_movie_by_id(movie_id: str) -> MovieWithReviews:
         duration=movie.get("duration"),
         genre=movie.get("genre"),
         release=movie.get("release"),
-        reviews=_get_reviews_for_movie(movie_id, legacy_index),
+        reviews=_get_reviews_for_movie(movie_id),
     )
 
 def search_movies_titles(query: str) -> List[MovieSummary]:
