@@ -127,3 +127,57 @@ def test_delete_movie_invalid_movie(mocker, client):
     mocker.patch("app.repositories.movie_repo.save_all")
     response = client.delete("/movies/invalidid")
     assert response.status_code == 404
+
+def test_search_all_movies_local_only(mocker, client):
+    """When 3+ local results exist, don't query TMDb."""
+    from app.schemas.movie import MovieSummary
+    mocker.patch(
+        "app.services.unified_search_service.search_movies_titles",
+        return_value=[
+            MovieSummary(id="1", title="Inception Documentary"),
+            MovieSummary(id="2", title="Inception Behind the Scenes"),
+            MovieSummary(id="3", title="Inception Explained"),
+        ]
+    )
+    mock_tmdb = mocker.patch("app.services.unified_search_service.search_tmdb_movies")
+    
+    response = client.get("/movies/search/all", params={"title": "inception"})
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["local"]) == 3
+    assert len(data["external"]) == 0
+    assert data["source"] == "local"
+    mock_tmdb.assert_not_called()
+
+
+def test_search_all_movies_with_tmdb_fallback(mocker, client):
+    """When < 3 local results, also query TMDb."""
+    from app.schemas.movie import MovieSummary
+    from unittest.mock import AsyncMock
+    
+    mocker.patch(
+        "app.services.unified_search_service.search_movies_titles",
+        return_value=[MovieSummary(id="1", title="Inception Documentary")]
+    )
+    mocker.patch(
+        "app.services.unified_search_service.search_tmdb_movies",
+        new=AsyncMock(return_value=[
+            {"tmdb_id": 27205, "title": "Inception", "overview": "A thief...", "release_date": "2010-07-15", "poster_path": "/poster.jpg"}
+        ])
+    )
+    
+    response = client.get("/movies/search/all", params={"title": "inception"})
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["local"]) == 1
+    assert len(data["external"]) == 1
+    assert data["external"][0]["movie_id"] == "tmdb_27205"
+    assert data["source"] == "both"
+
+
+def test_search_all_movies_empty_query(client):
+    """Empty query returns 422 validation error."""
+    response = client.get("/movies/search/all", params={"title": ""})
+    assert response.status_code == 422

@@ -6,6 +6,8 @@ from app.schemas.review import Review, ReviewCreate, ReviewUpdate, ReviewWithMov
 from app.repositories.review_repo import load_all, save_all
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 from app.repositories import movie_repo
+from app.services.tmdb_service import is_tmdb_movie_id
+from app.services.movie_service import cache_tmdb_movie
 
 REVIEW_NOT_FOUND = "Review not found"
 DEFAULT_PAGE_SIZE = 20
@@ -32,29 +34,46 @@ def _filter_by_rating_dicts(
     target = _to_float(rating)
     return [rv for rv in reviews if _to_float(rv.get("rating")) == target]
 
+
+def _get_movie_title(
+    raw_movie_id: Any,
+    idx_to_uuid: Dict[int, str],
+    id_to_title: Dict[str, str],
+    default: str = "",
+) -> str:
+    """Get movie title from local DB (includes cached TMDb movies)."""
+    movie_id = _normalize_movie_id(raw_movie_id, idx_to_uuid)
+    if movie_id:
+        return id_to_title.get(movie_id, default)
+    return default
+
+
+def _matches_search_query(
+    rv: Dict[str, Any],
+    query: str,
+    idx_to_uuid: Dict[int, str],
+    id_to_title: Dict[str, str],
+) -> bool:
+    """Check if a review matches a search query (title, body, or movie title)."""
+    if query in rv.get("reviewTitle", "").lower():
+        return True
+    if query in rv.get("reviewBody", "").lower():
+        return True
+    movie_title = _get_movie_title(rv.get("movieId"), idx_to_uuid, id_to_title)
+    return query in movie_title.lower()
+
+
 def _filter_by_search(
     reviews: List[Dict[str, Any]],
     search: Optional[str],
     id_to_title: Dict[str, str],
     idx_to_uuid: Dict[int, str],
 ) -> List[Dict[str, Any]]:
-    """Filter reviews by search query (title, body, movie title)."""
+    """Filter reviews by search query (title, body, or movie title)."""
     if not search:
         return reviews
     query = search.lower()
-    result = []
-    for rv in reviews:
-        if query in rv.get("reviewTitle", "").lower():
-            result.append(rv)
-            continue
-        if query in rv.get("reviewBody", "").lower():
-            result.append(rv)
-            continue
-        movie_id = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
-        movie_title = id_to_title.get(movie_id, "") if movie_id else ""
-        if query in movie_title.lower():
-            result.append(rv)
-    return result
+    return [rv for rv in reviews if _matches_search_query(rv, query, idx_to_uuid, id_to_title)]
 
 def _make_rating_sort_key(descending: bool = False):
     def _key(rv: Dict[str, Any]):
@@ -140,8 +159,7 @@ def _enrich_with_movie_titles(
     """Convert review dicts to ReviewWithMovie models with titles."""
     result = []
     for review in reviews:
-        movie_id = _normalize_movie_id(review.get("movieId"), idx_to_uuid)
-        title = id_to_title.get(movie_id, "Unknown Movie") if movie_id else "Unknown Movie"
+        title = _get_movie_title(review.get("movieId"), idx_to_uuid, id_to_title, "Unknown Movie")
         review_data = {**review, "movieId": str(review.get("movieId", ""))}
         result.append(ReviewWithMovie(**review_data, movieTitle=title))
     return result
@@ -217,15 +235,22 @@ def get_review_by_id(review_id: int) -> Review:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     return Review(**reviews[index])
 
-def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
-    """Create a new review. Validates movie existence and assigns author/date."""
+async def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
+    """Create a new review. For TMDb movies, caches to local movies.json."""
     reviews = load_all(load_invisible=True)
     new_review_id = max((rev.get("id", 0) for rev in reviews), default=0) + 1
 
     movie_id = payload.movieId.strip()
-    movies = movie_repo.load_all()
-    if not any(m.get("id") == movie_id for m in movies):
-        raise HTTPException(status_code=400, detail="Invalid movieId: movie does not exist")
+    
+    if is_tmdb_movie_id(movie_id):
+        try:
+            await cache_tmdb_movie(movie_id)
+        except HTTPException:
+            raise HTTPException(status_code=400, detail="Invalid movieId: TMDb movie does not exist")
+    else:
+        movies = movie_repo.load_all()
+        if not any(m.get("id") == movie_id for m in movies):
+            raise HTTPException(status_code=400, detail="Invalid movieId: movie does not exist")
     
     new_review = Review(
         id=new_review_id,

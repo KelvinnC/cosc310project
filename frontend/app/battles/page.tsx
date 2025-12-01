@@ -63,7 +63,8 @@ const Page = () => {
           return { id: movies[0].id, title: movies[0].title };
         }
       }
-    } catch {
+    } catch (err) {
+      console.error("Failed to fetch movie:", err);
     }
     return null;
   };
