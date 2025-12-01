@@ -8,14 +8,14 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.movie-page .movie-layout {
+.movie-layout {
   width: min(960px, 100%);
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.movie-page .movie-detail-card {
+.movie-detail-card {
   display: grid;
   grid-template-columns: 240px 1fr;
   gap: 20px;
@@ -26,12 +26,12 @@
   position: relative;
 }
 
-.movie-page .movie-detail-card.loading {
+.movie-detail-card.loading {
   grid-template-columns: 1fr;
   background: #3a7cb0;
 }
 
-.movie-page .poster {
+.poster {
   position: relative;
   width: 100%;
   height: 340px;
@@ -40,11 +40,11 @@
   background: rgba(0, 0, 0, 0.2);
 }
 
-.movie-page .poster-img {
+.poster-img {
   object-fit: cover;
 }
 
-.movie-page .poster-fallback {
+.poster-fallback {
   width: 100%;
   height: 100%;
   display: grid;
@@ -56,32 +56,32 @@
   padding: 12px;
 }
 
-.movie-page .movie-content h1 {
+.movie-content h1 {
   margin: 8px 0;
   font-size: 28px;
   font-weight: 700;
   color: #fff;
 }
 
-.movie-page .movie-content {
+.movie-content {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.movie-page .movie-desc {
+.movie-desc {
   font-size: 16px;
   line-height: 1.4;
   color: #eef6ff;
 }
 
-.movie-page .chips {
+.chips {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.movie-page .chip {
+.chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -91,29 +91,29 @@
   font-weight: 600;
 }
 
-.movie-page .chip-genre {
+.chip-genre {
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
 }
 
-.movie-page .chip-muted {
+.chip-muted {
   background: rgba(0, 0, 0, 0.18);
   color: #e4f1ff;
 }
 
-.movie-page .chip-rating {
+.chip-rating {
   background: rgba(255, 255, 255, 0.2);
   color: #fff;
 }
 
-.movie-page .status-row {
+.status-row {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
 }
 
-.movie-page .live-pill {
+.live-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -125,7 +125,7 @@
   color: #eaf4ff;
 }
 
-.movie-page .dot {
+.dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -139,13 +139,13 @@
   100% { opacity: 1; }
 }
 
-.movie-page .hint {
+.hint {
   font-size: 12px;
   color: #d9e9ff;
   opacity: 0.85;
 }
 
-.movie-page .reviews {
+.reviews {
   background: #f5f7fb;
   color: #1e2a3a;
   border-radius: 16px;
@@ -153,25 +153,25 @@
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
 }
 
-.movie-page .reviews-header {
+.reviews-header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
 }
 
-.movie-page .reviews-header h2 {
+.reviews-header h2 {
   margin: 0;
   font-size: 22px;
   color: #0f1f36;
 }
 
-.movie-page .muted {
+.movie-detail-muted {
   color: #6b7b90;
   font-size: 14px;
 }
 
-.movie-page .empty-reviews {
+.empty-reviews {
   margin-top: 12px;
   padding: 16px;
   border-radius: 12px;
@@ -181,14 +181,14 @@
   font-weight: 600;
 }
 
-.movie-page .reviews-list {
+.reviews-list {
   margin-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.movie-page .review-card {
+.movie-detail-review-card {
   display: flex;
   gap: 12px;
   background: #fff;
@@ -197,7 +197,7 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
-.movie-page .avatar {
+.avatar {
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -209,95 +209,94 @@
   font-size: 14px;
 }
 
-.movie-page .review-body {
+.review-body {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.movie-page .review-head {
+.review-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.movie-page .title-row {
+.title-row {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.movie-page .review-title {
+.review-title {
   font-weight: 700;
   color: #0f1f36;
 }
 
-.movie-page .review-text {
+.review-text {
   margin: 0;
   color: #2c3646;
   line-height: 1.4;
   font-size: 14px;
 }
 
-.movie-page .review-meta {
+.review-meta {
   display: flex;
   gap: 12px;
   font-size: 12px;
   color: #6b7b90;
 }
 
-/* Corrected selectors to match .movie-detail-card usage */
-.movie-page .movie-detail-card.loading .poster-skeleton,
-.movie-page .movie-detail-card.loading .line {
+.movie-detail-card.loading .poster-skeleton,
+.movie-detail-card.loading .line {
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.15));
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 12px;
 }
 
-.movie-page .poster-skeleton {
+.poster-skeleton {
   height: 220px;
 }
 
-.movie-page .content-skeleton {
+.content-skeleton {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-top: 10px;
 }
 
-.movie-page .line {
+.line {
   height: 14px;
 }
 
-.movie-page .line.short { width: 40%; }
-.movie-page .line.medium { width: 65%; }
-.movie-page .line.full { width: 90%; }
+.line.short { width: 40%; }
+.line.medium { width: 65%; }
+.line.full { width: 90%; }
 
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-.movie-page .movie-detail-card.error-card {
+.movie-detail-card.error-card {
   grid-template-columns: 1fr;
   align-items: center;
   text-align: center;
 }
 
-.movie-page .movie-detail-card.error-card h1 {
+.movie-detail-card.error-card h1 {
   margin: 0;
   font-size: 24px;
 }
 
-.movie-page .movie-detail-card.error-card p {
+.movie-detail-card.error-card p {
   margin: 8px 0 16px;
 }
 
-.movie-page .back-link {
+.back-link {
   color: #e2f0ff;
   font-weight: 600;
   text-decoration: none;
@@ -307,16 +306,16 @@
   display: inline-block;
 }
 
-.movie-page .back-link:hover {
+.back-link:hover {
   background: rgba(0, 0, 0, 0.28);
 }
 
 @media (max-width: 720px) {
-  .movie-page .movie-detail-card {
+  .movie-detail-card {
     grid-template-columns: 1fr;
   }
 
-  .movie-page .poster {
+  .poster {
     height: 300px;
   }
 }
