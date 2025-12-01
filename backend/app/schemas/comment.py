@@ -8,5 +8,8 @@ class Comment(BaseModel):
     commentBody: str
     date: datetime
 
+class CommentWithAuthor(Comment):
+    authorUsername: str
+
 class CommentCreate(BaseModel):
     commentBody: str

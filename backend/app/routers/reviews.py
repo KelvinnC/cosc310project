@@ -2,7 +2,7 @@ from typing import List, Optional, Literal
 from fastapi import APIRouter, status, Query, HTTPException, Depends
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate, PaginatedReviews
 from app.schemas.search import MovieSearch, MovieWithReviews
-from app.schemas.comment import Comment, CommentCreate
+from app.schemas.comment import CommentWithAuthor, CommentCreate
 from app.services.review_service import (
     list_reviews_paginated,
     create_review,
@@ -85,7 +85,7 @@ def get_review(review_id: int):
             detail=f"Review {review_id} not found"
         )
     
-@router.get("/{review_id}/comments", response_model=List[Comment], status_code=200)
+@router.get("/{review_id}/comments", response_model=List[CommentWithAuthor], status_code=200)
 def get_comments(review_id: int):
     """Retrieve a comment by review id."""
     return get_comments_by_movie_id(review_id)
