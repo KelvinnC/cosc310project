@@ -45,9 +45,6 @@ def _get_movie_title(
     movie_id = _normalize_movie_id(raw_movie_id, idx_to_uuid)
     if movie_id:
         return id_to_title.get(movie_id, default)
-    # Direct string lookup for TMDb IDs (tmdb_...) or other string IDs
-    if isinstance(raw_movie_id, str):
-        return id_to_title.get(raw_movie_id, default)
     return default
 
 
