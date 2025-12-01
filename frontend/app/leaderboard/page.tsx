@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import "./leaderboard.css";
 
@@ -107,14 +108,18 @@ export default function LeaderboardPage() {
                   <div key={review.id} className="entry">
                     <div className="rank-badge">#{idx + 1}</div>
                     <div className="entry-main">
-                      <div className="entry-title">{review.reviewTitle}</div>
+                      <div className="entry-title">
+                        <Link href={`/reviews/${review.id}`}>
+                          {review.reviewTitle}
+                        </Link>
+                      </div>
                       <div className="entry-meta">
                         <span className="pill">★ {review.rating.toFixed(1)}</span>
                         <span className="pill">Movie: {movieNameById.get(review.movieId) || "Unknown"}</span>
                         <span className="pill">By {String(review.authorId)}</span>
                         <span className="pill">{new Date(review.date).toLocaleDateString()}</span>
                       </div>
-                      <div className="entry-text">{review.reviewBody}</div>
+                      {}
                     </div>
                     <div className="entry-votes">
                       <div className="score">{review.votes ?? 0}</div>
