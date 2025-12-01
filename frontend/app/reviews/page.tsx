@@ -50,7 +50,6 @@ const ReviewsPage = () => {
     setMounted(true);
   }, []);
 
-  // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
@@ -104,7 +103,6 @@ const ReviewsPage = () => {
     fetchReviews();
   }, [fetchReviews]);
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearch, ratingFilter, sortBy, sortOrder]);

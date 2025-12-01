@@ -43,6 +43,44 @@ const ReviewDetailPage = () => {
   const [userHasFlagged, setUserHasFlagged] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
+  const [comments, setComments] = useState<any>([])
+  const [currentPost, setCurrentPost] = useState<string>("")
+  const [refresh, setRefresh] = useState(false)
+
+  const submitComment = async (e: any) => {
+    e.preventDefault()
+    if (currentPost == "") {
+      alert("Comment cannot be empty")
+      return
+    }
+    const response = await apiFetch(`${FASTAPI_URL}/reviews/${reviewId}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        "commentBody": currentPost
+      })
+    })
+    if (response.ok) {
+      setCurrentPost("")
+      setRefresh(r => !r)
+    }
+  }
+
+  useEffect(() => {
+    const fetchAllComments = async () => {
+      const response = await apiFetch(`${FASTAPI_URL}/reviews/${reviewId}/comments`,{
+        method: 'GET'
+      })
+      if (!response.ok) {
+        console.error("Error: Could not fetch comments")
+      }
+      const data = await response.json()
+      setComments(data)
+  }
+  fetchAllComments()
+  }, [refresh])
 
   useEffect(() => {
     setCurrentUserId(getUserIdFromToken(accessToken as string | null));
@@ -57,8 +95,8 @@ const ReviewDetailPage = () => {
         const data = await response.json();
         setUserHasFlagged(data.has_flagged);
       }
-    } catch {
-      // Silently fail - flag status is not critical
+    } catch (err) {
+      console.error("Failed to fetch flag status:", err);
     }
   }, [reviewId, accessToken]);
 
@@ -82,7 +120,6 @@ const ReviewDetailPage = () => {
       const reviewData: Review = await response.json();
       setReview(reviewData);
 
-      // Fetch movie info
       if (reviewData.movieId) {
         const movieRes = await apiFetch(`${FASTAPI_URL}/movies/${reviewData.movieId}`);
         if (movieRes.ok) {
@@ -93,7 +130,6 @@ const ReviewDetailPage = () => {
         }
       }
       
-      // Fetch flag status after review loads
       fetchFlagStatus();
     } catch (err) {
       console.error("Failed to fetch review:", err);
@@ -123,6 +159,10 @@ const ReviewDetailPage = () => {
       });
 
       if (!response.ok && response.status !== 204) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         setError(data.detail || "Failed to delete review");
         return;
@@ -139,7 +179,7 @@ const ReviewDetailPage = () => {
 
   const handleFlag = async () => {
     if (!accessToken) {
-      setError("Please login to flag reviews");
+      router.push('/login');
       return;
     }
 
@@ -153,10 +193,13 @@ const ReviewDetailPage = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         const errorMessage = data.detail || "Failed to flag review";
         
-        // Check if user has already flagged this review
         if (errorMessage.toLowerCase().includes("already flagged")) {
           setUserHasFlagged(true);
         } else {
@@ -167,7 +210,6 @@ const ReviewDetailPage = () => {
 
       setUserHasFlagged(true);
       setSuccessMessage("Review flagged successfully. Thank you for your report.");
-      // Refresh review data
       fetchReview();
     } catch (err) {
       console.error("Failed to flag review:", err);
@@ -256,12 +298,42 @@ const ReviewDetailPage = () => {
         </div>
 
         <p className="review-detail-body">{review.reviewBody}</p>
-
+                        <div className="comments-section">
+          <h2>Leave a Comment</h2>
+          <form 
+          className="comments-post"
+          onSubmit={(e) => submitComment(e)}>
+            <textarea className="comment-body"
+            placeholder="What do you think of this review?"
+            onChange={(e) => setCurrentPost(e.target.value)}
+            value={currentPost}>
+            </textarea>
+            <button 
+            className="submit-comment-btn">Submit Comment</button>
+          </form>
+          <h2>Comments</h2>
+          <div className="comments-show">
+            {comments.length > 0 ? (
+              <div>
+                {comments.map((comment: any, idx: any) => (
+                  <div key={idx} className="comment">
+                    <div className="comment-header">
+                      <span>{comment["authorUsername"]}</span>
+                      <span>{comment["date"].split("T")[0]}</span>
+                    </div>
+                    <span>{comment["commentBody"]}</span>
+                  </div>
+                ))}
+             </div>
+            ) : (
+              <p>No comments to show</p>
+            )}
+          </div>
+        </div>
         <div className="review-detail-meta">
           <span>{formatDate(review.date)}</span>
           <span>{review.votes} votes</span>
         </div>
-
         <div className="review-detail-actions">
           {isAuthor && (
             <>

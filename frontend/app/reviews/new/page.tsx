@@ -9,26 +9,40 @@ import '../reviews.css';
 
 const FASTAPI_URL = "http://127.0.0.1:8000";
 
-interface MovieSummary {
-  id: string;
+interface MovieResult {
+  movie_id: string;
   title: string;
+  source: "local" | "tmdb";
+  overview?: string;
+  release_date?: string;
+  poster_path?: string | null;
 }
+
+interface SearchAllResponse {
+  local: MovieResult[];
+  external: MovieResult[];
+  source: "local" | "both" | "tmdb";
+}
+
+const getYear = (releaseDate?: string): string => {
+  if (!releaseDate) return "";
+  const year = releaseDate.split("-")[0];
+  return year && year.length === 4 ? year : "";
+};
 
 const NewReviewPage = () => {
   const router = useRouter();
   const { accessToken } = useData();
   const [mounted, setMounted] = useState(false);
   
-  // Form state
   const [movieId, setMovieId] = useState("");
   const [movieSearch, setMovieSearch] = useState("");
-  const [movieResults, setMovieResults] = useState<MovieSummary[]>([]);
-  const [selectedMovie, setSelectedMovie] = useState<MovieSummary | null>(null);
+  const [movieResults, setMovieResults] = useState<MovieResult[]>([]);
+  const [selectedMovie, setSelectedMovie] = useState<MovieResult | null>(null);
   const [rating, setRating] = useState(3);
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewBody, setReviewBody] = useState("");
   
-  // UI state
   const [loading, setLoading] = useState(false);
   const [searchingMovies, setSearchingMovies] = useState(false);
   const [error, setError] = useState("");
@@ -44,10 +58,8 @@ const NewReviewPage = () => {
     }
   }, [mounted, accessToken, router]);
 
-  // Search movies when user types
   useEffect(() => {
     const searchMovies = async () => {
-      // Don't search if a movie is already selected
       if (selectedMovie) {
         setMovieResults([]);
         setShowMovieDropdown(false);
@@ -62,15 +74,16 @@ const NewReviewPage = () => {
       setSearchingMovies(true);
       try {
         const response = await apiFetch(
-          `${FASTAPI_URL}/movies/search?title=${encodeURIComponent(movieSearch)}`
+          `${FASTAPI_URL}/movies/search/all?title=${encodeURIComponent(movieSearch)}`
         );
         if (response.ok) {
-          const data = await response.json();
-          setMovieResults(data);
-          setShowMovieDropdown(true);
+          const data: SearchAllResponse = await response.json();
+          const combinedResults: MovieResult[] = [...data.local, ...data.external];
+          setMovieResults(combinedResults);
+          setShowMovieDropdown(combinedResults.length > 0);
         }
-      } catch {
-        // Silently fail
+      } catch (err) {
+        console.error("Movie search failed:", err);
       } finally {
         setSearchingMovies(false);
       }
@@ -80,9 +93,9 @@ const NewReviewPage = () => {
     return () => clearTimeout(debounce);
   }, [movieSearch, selectedMovie]);
 
-  const selectMovie = (movie: MovieSummary) => {
+  const selectMovie = (movie: MovieResult) => {
     setSelectedMovie(movie);
-    setMovieId(movie.id);
+    setMovieId(movie.movie_id);
     setMovieSearch(movie.title);
     setShowMovieDropdown(false);
   };
@@ -135,6 +148,10 @@ const NewReviewPage = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
         const data = await response.json();
         setError(data.detail || "Failed to create review");
         return;
@@ -203,21 +220,31 @@ const NewReviewPage = () => {
             <div className="movie-dropdown">
               {movieResults.map((movie) => (
                 <div
-                  key={movie.id}
+                  key={movie.movie_id}
                   onClick={() => selectMovie(movie)}
                   className="movie-dropdown-item"
                 >
-                  {movie.title}
+                  <span className="movie-title">
+                    {movie.title}
+                    {getYear(movie.release_date) && (
+                      <span className="movie-year"> ({getYear(movie.release_date)})</span>
+                    )}
+                  </span>
+                  {movie.source === "tmdb" && (
+                    <span className="movie-source-badge">TMDb</span>
+                  )}
                 </div>
               ))}
             </div>
           )}
-          {searchingMovies && (
-            <span className="helper-text">Searching...</span>
-          )}
-          {selectedMovie && (
-            <span className="helper-text success">✓ {selectedMovie.title}</span>
-          )}
+          <div className="helper-text-container">
+            {searchingMovies && (
+              <span className="helper-text">Searching...</span>
+            )}
+            {selectedMovie && (
+              <span className="helper-text success">✓ {selectedMovie.title}</span>
+            )}
+          </div>
         </div>
 
         <div className="form-group">

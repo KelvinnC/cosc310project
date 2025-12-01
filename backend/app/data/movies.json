@@ -78,5 +78,14 @@
     "duration": 130,
     "genre": "Action, Adventure, Comedy",
     "release": "2017-11-03"
+  },
+  {
+    "id": "tmdb_701387",
+    "title": "Bugonia",
+    "description": "Two conspiracy obsessed young men kidnap the high-powered CEO of a major company, convinced that she is an alien intent on destroying planet Earth.",
+    "duration": 119,
+    "genre": "Crime, Science Fiction",
+    "release": "2025-10-23",
+    "rating": null
   }
 ]
