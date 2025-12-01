@@ -292,7 +292,7 @@ def test_hide_review_not_found(mocker, client, mock_admin_user):
 def test_get_comments_endpoint_returns_list(mocker, client):
     from app.schemas.comment import CommentWithAuthor
     mocker.patch(
-        "app.routers.reviews.get_comments_by_movie_id",
+        "app.routers.reviews.get_comments_by_review_id",
         return_value=[CommentWithAuthor(**{"id": 1, "reviewId": 10, "authorId": "u1", "commentBody": "Hi", "date": "2024-05-02", "authorUsername": "bob"})],
     )
     res = client.get("/reviews/10/comments")
@@ -304,7 +304,7 @@ def test_get_comments_endpoint_returns_list(mocker, client):
 
 def test_get_comments_returns_empty_list(mocker, client):
     mocker.patch(
-        "app.routers.reviews.get_comments_by_movie_id",
+        "app.routers.reviews.get_comments_by_review_id",
         return_value=[],
     )
     res = client.get("/reviews/999/comments")

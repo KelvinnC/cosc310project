@@ -11,7 +11,7 @@ from app.services.review_service import (
     get_review_by_id,
     get_reviews_by_author,
 )
-from app.services.comment_service import get_comments_by_movie_id, create_comment
+from app.services.comment_service import get_comments_by_review_id, create_comment
 from app.services.search_service import search_movies_with_reviews
 from app.services import flag_service
 from app.middleware.auth_middleware import jwt_auth_dependency, user_is_author
@@ -140,7 +140,7 @@ def unflag_review_endpoint(review_id: int, current_user: dict = Depends(admin_re
 @router.get("/{review_id}/comments", response_model=List[CommentWithAuthor], status_code=200)
 def get_comments(review_id: int):
     """Retrieve a comment by review id."""
-    return get_comments_by_movie_id(review_id)
+    return get_comments_by_review_id(review_id)
 
 @router.post("/{review_id}/comments", status_code=204)
 def post_comment(payload: CommentCreate, review_id: int, current_user: dict = Depends(jwt_auth_dependency)):

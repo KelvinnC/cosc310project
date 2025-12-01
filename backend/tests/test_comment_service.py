@@ -1,8 +1,8 @@
-from app.services.comment_service import get_comments_by_movie_id, create_comment
+from app.services.comment_service import get_comments_by_review_id, create_comment
 from app.schemas.comment import CommentCreate, Comment
 
 
-def test_get_comments_by_movie_id_returns_comments_with_usernames(mocker):
+def test_get_comments_by_review_id_returns_comments_with_usernames(mocker):
     mocker.patch(
         "app.services.comment_service.load_all",
         return_value=[
@@ -12,15 +12,15 @@ def test_get_comments_by_movie_id_returns_comments_with_usernames(mocker):
     mock_user = mocker.MagicMock()
     mock_user.username = "bob"
     mocker.patch("app.services.comment_service.get_user_by_id", return_value=mock_user)
-    result = get_comments_by_movie_id(10)
+    result = get_comments_by_review_id(10)
     assert len(result) == 1
     assert result[0]["authorUsername"] == "bob"
     assert result[0]["commentBody"] == "Hello"
 
 
-def test_get_comments_by_movie_id_returns_empty_list_when_no_comments(mocker):
+def test_get_comments_by_review_id_returns_empty_list_when_no_comments(mocker):
     mocker.patch("app.services.comment_service.load_all", return_value=[])
-    result = get_comments_by_movie_id(99)
+    result = get_comments_by_review_id(99)
     assert result == []
 
 
