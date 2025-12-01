@@ -136,3 +136,13 @@ def get_flag_status(review_id: int, current_user: dict = Depends(jwt_auth_depend
 def unflag_review_endpoint(review_id: int, current_user: dict = Depends(admin_required)):
     """Unflag a review. Admin only."""
     flag_service.unflag_review(review_id)
+
+@router.get("/{review_id}/comments", response_model=List[CommentWithAuthor], status_code=200)
+def get_comments(review_id: int):
+    """Retrieve a comment by review id."""
+    return get_comments_by_movie_id(review_id)
+
+@router.post("/{review_id}/comments", status_code=204)
+def post_comment(payload: CommentCreate, review_id: int, current_user: dict = Depends(jwt_auth_dependency)):
+    """Creates a comment for a review"""
+    return create_comment(payload, review_id, current_user["user_id"])
