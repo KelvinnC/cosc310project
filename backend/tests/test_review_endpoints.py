@@ -288,3 +288,37 @@ def test_hide_review_not_found(mocker, client, mock_admin_user):
     response = client.patch("/reviews/1/hide")
     app.dependency_overrides.clear()
     assert response.status_code == 404
+
+def test_get_comments_endpoint_returns_list(mocker, client):
+    from app.schemas.comment import CommentWithAuthor
+    mocker.patch(
+        "app.routers.reviews.get_comments_by_review_id",
+        return_value=[CommentWithAuthor(**{"id": 1, "reviewId": 10, "authorId": "u1", "commentBody": "Hi", "date": "2024-05-02", "authorUsername": "bob"})],
+    )
+    res = client.get("/reviews/10/comments")
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data) == 1
+    assert data[0]["authorUsername"] == "bob"
+
+
+def test_get_comments_returns_empty_list(mocker, client):
+    mocker.patch(
+        "app.routers.reviews.get_comments_by_review_id",
+        return_value=[],
+    )
+    res = client.get("/reviews/999/comments")
+    assert res.status_code == 200
+    assert res.json() == []
+
+
+def test_post_comment_creates_comment(mocker, client, mock_admin_user):
+    mocker.patch(
+        "app.routers.reviews.create_comment",
+        return_value=None,
+    )
+    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
+    payload = {"commentBody": "Nice!"}
+    res = client.post("/reviews/10/comments", json=payload)
+    app.dependency_overrides.clear()
+    assert res.status_code == 204

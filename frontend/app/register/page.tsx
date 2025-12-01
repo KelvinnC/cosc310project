@@ -3,8 +3,9 @@
 import React from 'react'
 import './register.css'
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useData } from '../context';
 
 const FASTAPI_URL = "http://127.0.0.1:8000"
 
@@ -14,6 +15,13 @@ const Page = () => {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const {accessToken} = useData()
+
+  useEffect(() => {
+    if (accessToken) {
+      router.replace('/')
+    }
+  })
 
   const validateForm = () => {
     if (!username.trim()) {
