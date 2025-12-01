@@ -6,7 +6,7 @@ from app.services.review_service import get_review_by_id
 from app.services.user_service import get_user_by_id
 import datetime
 
-def get_comments_by_movie_id(reviewId: int) -> List[CommentWithAuthor]:
+def get_comments_by_review_id(reviewId: int) -> List[CommentWithAuthor]:
     """Get all comments for a certain review"""
     comments_for_id = [comment for comment in load_all() if comment["reviewId"] == reviewId]
     for comment in comments_for_id:
