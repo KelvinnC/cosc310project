@@ -63,6 +63,7 @@ const ReviewDetailPage = () => {
       })
     })
     if (response.ok) {
+      setCurrentPost("")
       setRefresh(r => !r)
     }
   }
