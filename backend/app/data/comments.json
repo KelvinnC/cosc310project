@@ -12,5 +12,26 @@
     "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
     "commentBody": "Great review!",
     "date": "2025-11-28T17:41:01.441055"
+  },
+  {
+    "id": 3,
+    "reviewId": 45210,
+    "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
+    "commentBody": "Great movie! This is a test comment for front end testing. I haven't actually seen this movie.",
+    "date": "2025-12-01T18:22:37.057613"
+  },
+  {
+    "id": 4,
+    "reviewId": 45210,
+    "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
+    "commentBody": "test comment",
+    "date": "2025-12-01T10:51:57.370254"
+  },
+  {
+    "id": 5,
+    "reviewId": 45210,
+    "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
+    "commentBody": "Awesome!",
+    "date": "2025-12-01T10:55:07.122968"
   }
 ]

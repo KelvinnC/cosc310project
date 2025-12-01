@@ -730,3 +730,41 @@
 .back-link-margin {
     margin-top: 16px;
 }
+
+.comment {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(223, 220, 220);
+    margin: 12px;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.comment-body {
+    width: 100%;
+    height: 8rem;
+    background-color: rgb(223, 220, 220);
+    border-radius: 8px;
+    padding: 8px;
+    color: black;
+    font-weight: 600;
+    resize: none;
+}
+
+.submit-comment-btn {
+    padding: 8px;
+    background-color:#2171b5;
+    color: white;
+    border-radius: 8px;
+    margin: 8px;
+}
+
+.submit-comment-btn:hover {
+    background-color: #2992ed;
+}
+
+.comments-post {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+}
