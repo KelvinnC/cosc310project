@@ -246,6 +246,7 @@
     gap: 16px;
     width: 100%;
     max-width: 500px;
+    min-height: 520px;
 }
 
 .review-form-box h1 {
@@ -373,13 +374,10 @@
 }
 
 .rating-value {
-    background-color: white;
-    color: #333;
-    padding: 4px 12px;
-    border-radius: 8px;
-    font-weight: 600;
-    min-width: 40px;
-    text-align: center;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    font-weight: 500;
+    margin-left: 8px;
 }
 
 .char-count {
@@ -595,11 +593,12 @@
 /* Movie search dropdown */
 .movie-search-container {
     position: relative;
+    z-index: 10;
 }
 
 .movie-dropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% - 18px);
     left: 0;
     right: 0;
     background: white;
@@ -607,7 +606,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     max-height: 200px;
     overflow-y: auto;
-    z-index: 10;
+    z-index: 100;
 }
 
 .movie-dropdown-item {
@@ -616,6 +615,33 @@
     color: #333;
     border-bottom: 1px solid #eee;
     transition: background-color 0.15s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.movie-dropdown-item .movie-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.movie-dropdown-item .movie-year {
+    color: #888;
+    font-weight: normal;
+}
+
+.movie-dropdown-item .movie-source-badge {
+    background-color: #01b4e4;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    text-transform: uppercase;
 }
 
 .movie-dropdown-item:last-child {
@@ -627,6 +653,12 @@
 }
 
 /* Helper text */
+.helper-text-container {
+    min-height: 18px;
+    display: flex;
+    align-items: center;
+}
+
 .helper-text {
     font-size: 12px;
     opacity: 0.8;

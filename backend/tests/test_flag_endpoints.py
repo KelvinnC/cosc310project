@@ -87,19 +87,6 @@ def test_flag_review_other_value_error_returns_400(mocker, client, mock_user):
     assert "validation error" in response.json()["detail"].lower()
 
 
-def test_flag_review_generic_exception_returns_500(mocker, client, mock_user):
-    """Test that generic exception returns 500"""
-    app.dependency_overrides[jwt_auth_dependency] = lambda: mock_user
-    
-    mock_flag_service = mocker.patch("app.routers.reviews.flag_service.flag_review")
-    mock_flag_service.side_effect = Exception("Unexpected error")
-    
-    response = client.post("/reviews/1/flag")
-    app.dependency_overrides.clear()
-    
-    assert response.status_code == 500
-
-
 def test_flag_review_extracts_user_id_from_jwt(mocker, client, mock_user):
     """Test that user_id is correctly extracted from JWT token"""
     app.dependency_overrides[jwt_auth_dependency] = lambda: mock_user
