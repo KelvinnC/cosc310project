@@ -113,7 +113,7 @@ export default function MovieByIdPage({ params }: { params: Promise<{ id: string
     <div className="movie-page">
       <div className="movie-layout">
         {isLoading && (
-          <div className="movie-card loading">
+          <div className="movie-detail-card loading">
             <div className="poster-skeleton" />
             <div className="content-skeleton">
               <div className="line short" />
@@ -124,7 +124,7 @@ export default function MovieByIdPage({ params }: { params: Promise<{ id: string
         )}
 
         {isError && !isLoading && (
-          <div className="movie-card error-card">
+          <div className="movie-detail-card error-card">
             <h1>Unable to load movie</h1>
             <p>{error || "Movie not found."}</p>
             <Link className="back-link" href="/movies">
@@ -135,7 +135,7 @@ export default function MovieByIdPage({ params }: { params: Promise<{ id: string
 
         {!isLoading && !isError && movie && (
           <>
-            <div className="movie-card">
+            <div className="movie-detail-card">
               <div className="poster">
                 {movie.posterUrl ? (
                   <Image
