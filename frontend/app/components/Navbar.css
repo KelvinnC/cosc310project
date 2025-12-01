@@ -1,18 +1,21 @@
 .navbar nav {
     display: flex;
     justify-content: center;
+    align-items: center;
+    height: 3rem;
     gap: 24px;
     background-color: #045f9b;
     color: white;
     user-select: none;
 }
 
-.navbar ul {
+.navbar span {
     padding: 10px;
     width: 6rem;
     text-align: center;
+    height: 100%;
 }
 
-.navbar ul:hover {
+.navbar span:hover {
     background-color: #2171b5;
 }
