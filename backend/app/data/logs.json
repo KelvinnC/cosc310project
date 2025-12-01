@@ -384,5 +384,85 @@
     "context": {
       "review_id": 1
     }
+  },
+  {
+    "timestamp": "2025-11-29T22:10:34.551555Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-29T22:10:34.551787Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-29T22:10:37.558894Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-29T22:10:37.637913Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-29T22:10:49.730406Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-29T22:10:49.803045Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-29T22:11:44.537512Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
+  },
+  {
+    "timestamp": "2025-11-29T22:11:44.868630Z",
+    "level": "INFO",
+    "component": "admin",
+    "message": "Admin dashboard accessed",
+    "context": {
+      "admin_id": null,
+      "admin_username": "admin"
+    }
   }
 ]
