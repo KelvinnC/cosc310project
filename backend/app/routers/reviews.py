@@ -25,8 +25,6 @@ async def post_review(review: ReviewCreate, current_user: dict = Depends(jwt_aut
     
     Supports both local movies and external TMDb movies.
     For TMDb movies, use movieId format: tmdb_<id> (e.g., tmdb_12345)
-    
-    Note: authorId and date are server-assigned and cannot be set by the client.
     """
     author_id = current_user.get("user_id")
     return await create_review(review, author_id=author_id)
