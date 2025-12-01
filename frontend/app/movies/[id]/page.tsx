@@ -166,7 +166,7 @@ export default function MovieByIdPage({ params }: { params: Promise<{ id: string
             <section className="reviews">
               <div className="reviews-header">
                 <h2>Reviews</h2>
-                <span className="muted">
+                <span className="movie-detail-muted">
                   {visibleReviews.length ? `${visibleReviews.length} comments` : "No comments yet"}
                 </span>
               </div>
@@ -181,13 +181,13 @@ export default function MovieByIdPage({ params }: { params: Promise<{ id: string
                         ? review.authorId.slice(0, 2).toUpperCase()
                         : `U${review.authorId}`;
                     return (
-                      <article key={review.id} className="review-card">
+                      <article key={review.id} className="movie-detail-review-card">
                         <div className="avatar">{initials}</div>
                         <div className="review-body">
                           <div className="review-head">
                             <div className="title-row">
                               <span className="review-title">{review.reviewTitle}</span>
-                              <span className="muted">
+                              <span className="movie-detail-muted">
                                 {new Date(review.date).toLocaleDateString()}
                               </span>
                             </div>
