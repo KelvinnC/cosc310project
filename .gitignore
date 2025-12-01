@@ -219,3 +219,5 @@ backend/app/data/logs.json
 backend/app/data/battles.json
 backend/app/data/flags.json
 backend/app/data/*.bak
+
+package-lock.json

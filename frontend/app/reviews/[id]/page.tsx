@@ -57,7 +57,8 @@ const ReviewDetailPage = () => {
         const data = await response.json();
         setUserHasFlagged(data.has_flagged);
       }
-    } catch {
+    } catch (err) {
+      console.error("Failed to fetch flag status:", err);
     }
   }, [reviewId, accessToken]);
 

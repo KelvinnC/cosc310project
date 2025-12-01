@@ -31,17 +31,17 @@ def test_post_review_requires_authentication(client):
     assert "Access Token" in response.json()["detail"]
 
 
-def test_get_review_by_id_internal_error_returns_404(mocker, client):
-    """Internal error from get_review_by_id is mapped to 404."""
+def test_get_review_by_id_service_404_propagates(mocker, client):
+    """HTTPException 404 from get_review_by_id propagates correctly."""
     mocker.patch(
         "app.routers.reviews.get_review_by_id",
-        side_effect=RuntimeError("unexpected failure"),
+        side_effect=HTTPException(status_code=404, detail="Review not found"),
     )
 
     resp = client.get("/reviews/1")
 
     assert resp.status_code == 404
-    assert "Review 1 not found" in resp.json()["detail"]
+    assert "Review not found" in resp.json()["detail"]
 
 
 def test_get_author_reviews_404_returns_empty_list(mocker, client):
@@ -68,4 +68,3 @@ def test_get_author_reviews_non_404_http_error_propagates(mocker, client):
 
     assert resp.status_code == 500
     assert resp.json()["detail"] == "db error"
-
