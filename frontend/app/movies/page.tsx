@@ -35,6 +35,33 @@ const MoviesPage = () => {
     };
     fetchMovies();
   }, []);
+  
+const addToWatchlist = async (movieId: string, e: React.MouseEvent) => {
+  e.preventDefault(); // prevent Link redirect
+  e.stopPropagation();
+
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      `${FASTAPI_URL}/watchlist/add?movieId=${movieId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to add movie to watchlist");
+    }
+
+    alert("Added to watchlist ✅");
+  } catch (err: any) {
+    alert(err.message || "Error adding to watchlist");
+  }
+};
 
   return (
     <div className="movies-page">
@@ -54,6 +81,12 @@ const MoviesPage = () => {
                   {new Date(movie.release).getFullYear()} • {movie.genre}
                   {movie.rating != null && ` • ⭐ ${movie.rating.toFixed(1)}`}
                 </div>
+                <button
+                  className="watchlist-btn"
+                  onClick={(e) => addToWatchlist(movie.id, e)}
+                  >
+                  + Add to Watchlist
+                  </button>
               </Link>
             ))
           ) : (
@@ -66,3 +99,5 @@ const MoviesPage = () => {
 };
 
 export default MoviesPage;
+
+        

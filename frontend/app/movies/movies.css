@@ -61,3 +61,19 @@
     font-size: 14px;
     color: #555;
 }
+
+.watchlist-btn {
+    margin-top: auto;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: none;
+    background-color: #4292c6;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.watchlist-btn:hover {
+    background-color: #2f6fa0;
+}
