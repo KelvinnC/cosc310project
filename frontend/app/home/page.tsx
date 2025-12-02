@@ -8,7 +8,7 @@ import './home.css'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-const FASTAPI_URL = "http://127.0.0.1:8000"
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000"
 
 const page = () => {
     const [userData, setUserData] = useState(null)
@@ -20,7 +20,7 @@ const page = () => {
 
     useEffect(() => {
         const fetchUserData = async () => {
-            const response = await apiFetch(`${FASTAPI_URL}/home`)
+            const response = await apiFetch(`${API_BASE}/home`)
             if (response.status == 401) {
                 router.push('/login')
                 return
@@ -36,7 +36,7 @@ const page = () => {
     }, [])
 
     const downloadData = async () => {
-        const response = await apiFetch(`${FASTAPI_URL}/home/download`, {
+        const response = await apiFetch(`${API_BASE}/home/download`, {
             method: "GET"
         }
         )

@@ -7,5 +7,23 @@
     "userId": "d035d2c4-237d-428c-953a-ee89650638c6",
     "startedAt": "2025-12-02T06:53:51.337914",
     "endedAt": null
+  },
+  {
+    "id": "7279b4ef-1005-484a-9962-787b785d4711",
+    "review1Id": 1015,
+    "review2Id": 1019,
+    "winnerId": null,
+    "userId": "d035d2c4-237d-428c-953a-ee89650638c6",
+    "startedAt": "2025-12-02T00:49:05.948194",
+    "endedAt": null
+  },
+  {
+    "id": "578d5505-352e-4f95-91b9-66d684a2525a",
+    "review1Id": 1014,
+    "review2Id": 1020,
+    "winnerId": null,
+    "userId": "d035d2c4-237d-428c-953a-ee89650638c6",
+    "startedAt": "2025-12-02T00:50:04.202729",
+    "endedAt": null
   }
 ]
