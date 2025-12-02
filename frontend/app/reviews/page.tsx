@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useData } from '../context';
 import { apiFetch } from '../../lib/api';
+import { collapseWhitespace } from '@/lib/utils';
 import './reviews.css';
 
 const FASTAPI_URL = "http://127.0.0.1:8000";
@@ -214,7 +215,7 @@ const ReviewsPage = () => {
                     </div>
                     <span className="review-card-rating">{renderStars(review.rating)}</span>
                   </div>
-                  <p className="review-card-body">{review.reviewBody}</p>
+                  <p className="review-card-body">{collapseWhitespace(review.reviewBody)}</p>
                   <div className="review-card-footer">
                     <span>{formatDate(review.date)} • {review.votes} votes</span>
                     <div className="review-card-actions">

@@ -13,6 +13,7 @@ const Navbar = () => {
           <Link href="/"><span>Home</span></Link>
           <Link href="/movies"><span>Movies</span></Link>
           <Link href="/reviews"><span>Reviews</span></Link>
+          <Link href="/leaderboard"><span>Leaderboard</span></Link>
           <Link href="/battles"><span>Battles</span></Link>
           {role && role === 'admin' && <Link href="/admin"><span>Admin</span></Link>}
           {accessToken && <Link href="/logout"><span>Logout</span></Link>}

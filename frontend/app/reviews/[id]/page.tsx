@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useData } from '../../context';
 import { apiFetch } from '../../../lib/api';
 import { getUserIdFromToken } from '../../../lib/auth';
+import { collapseWhitespace } from '@/lib/utils';
 import '../reviews.css';
 
 const FASTAPI_URL = "http://127.0.0.1:8000";
@@ -297,7 +298,7 @@ const ReviewDetailPage = () => {
           <span className="review-detail-rating">{renderStars(review.rating)}</span>
         </div>
 
-        <p className="review-detail-body">{review.reviewBody}</p>
+        <p className="review-detail-body">{collapseWhitespace(review.reviewBody)}</p>
                         <div className="comments-section">
           <h2>Leave a Comment</h2>
           <form 
