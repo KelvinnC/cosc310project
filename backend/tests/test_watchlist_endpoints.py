@@ -35,7 +35,7 @@ def test_get_watchlist(mocker, client):
     assert data["authorId"] == 101
     assert len(data["movieIds"]) == 2
 
-def test_post_watchlist_add(mocker, client):
+def test_post_watchlis(mocker, client):
     mock_user_id = 101
     new_movie_id = "movie-99"
 
@@ -66,6 +66,6 @@ def test_post_watchlist_add(mocker, client):
     assert new_movie_id in data["movieIds"]
     
     mock_service.assert_called_once_with(
-        authorid=mock_user_id, 
+        author_id=mock_user_id, 
         movie_id=new_movie_id
     )
