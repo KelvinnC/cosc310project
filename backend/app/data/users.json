@@ -52,5 +52,14 @@
     "created_at": "2025-11-26T01:15:08.320047",
     "active": true,
     "warnings": 0
+  },
+  {
+    "id": "d035d2c4-237d-428c-953a-ee89650638c6",
+    "username": "THE_KCHEN_SUPER",
+    "hashed_password": "$2b$12$Co5zMg.uNhR/fZPEwgsPp.eGf4Eu1fDTya4d/MtSa6gaQ.1AT9gwu",
+    "role": "user",
+    "created_at": "2025-12-02T06:27:01.573061",
+    "active": true,
+    "warnings": 0
   }
 ]

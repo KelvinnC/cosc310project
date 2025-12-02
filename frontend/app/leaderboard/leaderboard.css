@@ -172,6 +172,70 @@
   100% { background-position: -200% 0; }
 }
 
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.achievement {
+  border: 1px solid #d7e6f5;
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: center;
+  background: linear-gradient(135deg, #eef5ff, #dce9fa);
+}
+
+.medal {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  background: linear-gradient(145deg, #4292c6, #2a6da1);
+  color: #ffffff;
+}
+
+.medal.gold {
+  background: linear-gradient(145deg, #f6d365, #fda085);
+  color: #4a2a00;
+}
+
+.medal.silver {
+  background: linear-gradient(145deg, #e0e5ec, #b8c2cc);
+  color: #2f3640;
+}
+
+.medal.bronze {
+  background: linear-gradient(145deg, #e0b687, #b97a57);
+  color: #3d2514;
+}
+
+.achievement-body .title {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.achievement-body .winner {
+  font-size: 14px;
+  color: #2a4469;
+}
+
+.achievement-body .value {
+  font-weight: 700;
+  font-size: 18px;
+  margin-top: 2px;
+}
+
+.achievement-body .muted {
+  color: #4c5c72;
+  font-size: 12px;
+}
+
 @media (max-width: 640px) {
   .entry {
     grid-template-columns: 1fr;

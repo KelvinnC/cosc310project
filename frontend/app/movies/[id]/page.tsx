@@ -153,14 +153,18 @@ const ReviewCard = ({ review }: { review: Review }) => {
       <div className="review-body">
         <div className="review-head">
           <div className="title-row">
-            <span className="review-title">{review.reviewTitle}</span>
+            <Link href={`/reviews/${review.id}`} className="review-title">
+              {review.reviewTitle}
+            </Link>
             <span className="muted">
               {new Date(review.date).toLocaleDateString()}
             </span>
           </div>
           <span className="chip chip-rating">* {review.rating.toFixed(1)}</span>
         </div>
-        <p className="review-text">{review.reviewBody}</p>
+        <Link href={`/reviews/${review.id}`} className="review-text">
+          {review.reviewBody}
+        </Link>
         <div className="review-meta">
           <span>Helpful votes: {review.votes}</span>
           <span>Author: {friendlyAuthorName(review.authorId)}</span>

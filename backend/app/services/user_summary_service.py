@@ -5,6 +5,7 @@ from app.services.battle_pair_selector import load_user_battles
 from app.services.user_service import get_user_by_id
 from app.schemas.user import User
 from app.schemas.user import UserSummaryResponse
+from app.services.achievement_service import get_user_badges
 
 def get_users_reviews(current_user_id: str) -> List[Review]:
     """Gets the current user's reviews"""
@@ -22,5 +23,6 @@ def get_user_summary(current_user_id: str) -> UserSummaryResponse:
     return UserSummaryResponse(
         battles=get_users_battles(current_user_id),
         reviews=get_users_reviews(current_user_id),
-        user=get_user_object(current_user_id)
+        user=get_user_object(current_user_id),
+        badges=get_user_badges(current_user_id),
     )

@@ -43,9 +43,9 @@ def search_movies_slash(title: str = Query(..., min_length=1)):
     return search_movies_titles(title)
 
 @router.get("/{movie_id}", response_model=List[MovieWithReviews])
-def get_movie(movie_id: str):
+async def get_movie(movie_id: str):
     try:
-        return [get_movie_by_id(movie_id)]
+        return [await get_movie_by_id(movie_id)]
     except HTTPException as exc:
         if getattr(exc, "status_code", None) == 404:
             return []

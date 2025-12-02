@@ -9,7 +9,8 @@ from app.repositories.review_repo import load_all as load_reviews
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 from app.services.tmdb_service import (
     get_tmdb_movie_details, 
-    validate_tmdb_movie_id
+    validate_tmdb_movie_id,
+    is_tmdb_movie_id,
 )
 
 
@@ -27,6 +28,7 @@ def _parse_tmdb_to_movie_dict(movie_id: str, tmdb_data: Dict[str, Any]) -> Dict[
         "duration": tmdb_data["duration"],
         "genre": tmdb_data["genre"],
         "release": release_date,
+        "posterUrl": tmdb_data.get("poster_url"),
     }
 
 
@@ -105,7 +107,7 @@ def create_movie(payload: MovieCreate) -> Movie:
     movie_repo.save_all(movies)
     return new_movie
 
-def get_movie_by_id(movie_id: str) -> MovieWithReviews:
+async def get_movie_by_id(movie_id: str) -> MovieWithReviews:
     """Get movie by ID (local lookup only - TMDb movies are cached on review creation)."""
     movies = load_all()
     idx = find_dict_by_id(movies, "id", movie_id)
@@ -113,6 +115,18 @@ def get_movie_by_id(movie_id: str) -> MovieWithReviews:
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
     
     movie = movies[idx]
+
+    # If TMDb-sourced and missing poster/fields, refresh from TMDb and persist
+    if is_tmdb_movie_id(movie_id) and not movie.get("posterUrl"):
+        tmdb_id = validate_tmdb_movie_id(movie_id)
+        tmdb_data = await get_tmdb_movie_details(tmdb_id)
+        if tmdb_data:
+            movie["posterUrl"] = tmdb_data.get("poster_url") or movie.get("posterUrl")
+            movie["description"] = movie.get("description") or tmdb_data.get("description")
+            movie["genre"] = movie.get("genre") or tmdb_data.get("genre")
+            movies[idx] = movie
+            movie_repo.save_all(movies)
+
     return MovieWithReviews(
         id=movie.get("id"),
         title=movie.get("title"),
@@ -121,6 +135,7 @@ def get_movie_by_id(movie_id: str) -> MovieWithReviews:
         genre=movie.get("genre"),
         release=movie.get("release"),
         reviews=_get_reviews_for_movie(movie_id),
+        posterUrl=movie.get("posterUrl"),
     )
 
 def search_movies_titles(query: str) -> List[MovieSummary]:
