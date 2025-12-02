@@ -56,8 +56,8 @@ def test_search_reviews_by_title_legacy_integer_ids(mocker):
         _movie("uuid-b", "Beta"),
     ]
     reviews = [
-        _review(10, 1),
-        _review(11, 2),
+        _review(10, "uuid-a"),
+        _review(11, "uuid-b"),
     ]
     mocker.patch("app.services.search_service.load_movies", return_value=movies)
     mocker.patch("app.services.search_service.load_reviews", return_value=reviews)
@@ -84,7 +84,7 @@ def test_search_movies_with_reviews_groups_and_shapes(mocker):
     ]
     reviews = [
         _review(1, "uuid-joker"),
-        _review(2, 1),
+        _review(2, "uuid-joker"),
         _review(3, "uuid-thor"),
     ]
     mocker.patch("app.services.search_service.load_movies", return_value=movies)
