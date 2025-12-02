@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import {useEffect} from 'react'
 import { apiFetch } from '@/lib/api'
+import { collapseWhitespace } from '@/lib/utils'
 import './home.css'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -80,7 +81,7 @@ const page = () => {
                                     <h2 className="review-title">{review["reviewTitle"]}</h2>
                                     <span>Posted on {review["date"]}</span>
                                     <span>Rating {review["rating"]} / 5</span>
-                                    <span className="review-body">{review["reviewBody"]}</span>
+                                    <span className="review-body">{collapseWhitespace(review["reviewBody"])}</span>
                                     <span className="review-votes">{review["votes"]} votes</span>
                                 </div>
                                 </Link>

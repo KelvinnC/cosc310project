@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useData } from '../context';
 import { apiFetch } from '../../lib/api';
+import { collapseWhitespace } from '@/lib/utils';
 
 const FASTAPI_URL = "http://127.0.0.1:8000";
 
@@ -238,7 +239,7 @@ const Page = () => {
             {winnerMovie && <p className="review-movie">Movie: {winnerMovie.title}</p>}
             <h3 className="review-title">{winningReview.reviewTitle}</h3>
             <p className="review-rating">Rating: {winningReview.rating}/10</p>
-            <p className="review-body">{winningReview.reviewBody}</p>
+            <p className="review-body">{collapseWhitespace(winningReview.reviewBody)}</p>
             <p className="review-votes">Total Votes: {winningReview.votes}</p>
           </div>
           <button className="battle-button" onClick={createBattle}>
@@ -276,7 +277,7 @@ const Page = () => {
                 {movie1 && <p className="review-movie">{movie1.title}</p>}
                 <h3 className="review-title">{review1.reviewTitle}</h3>
                 <p className="review-rating">Rating: {review1.rating}/10</p>
-                <p className="review-body">{review1.reviewBody}</p>
+                <p className="review-body">{collapseWhitespace(review1.reviewBody)}</p>
               </div>
               
               <div className="vs-divider">VS</div>
@@ -293,7 +294,7 @@ const Page = () => {
                 {movie2 && <p className="review-movie">{movie2.title}</p>}
                 <h3 className="review-title">{review2.reviewTitle}</h3>
                 <p className="review-rating">Rating: {review2.rating}/10</p>
-                <p className="review-body">{review2.reviewBody}</p>
+                <p className="review-body">{collapseWhitespace(review2.reviewBody)}</p>
               </div>
             </div>
             

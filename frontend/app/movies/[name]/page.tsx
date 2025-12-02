@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { use, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/lib/api";
+import { collapseWhitespace } from "@/lib/utils";
 import "./movie.css";
 
 type Review = {
@@ -218,7 +219,7 @@ export default function MovieByNamePage({ params }: { params: Promise<{ name: st
                             </div>
                             <span className="chip chip-rating">* {review.rating.toFixed(1)}</span>
                           </div>
-                          <p className="review-text">{review.reviewBody}</p>
+                          <p className="review-text">{collapseWhitespace(review.reviewBody)}</p>
                           <div className="review-meta">
                             <span>Helpful votes: {review.votes}</span>
                             <span>Author: {friendlyAuthorName(review.authorId)}</span>
