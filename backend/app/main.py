@@ -12,6 +12,7 @@ from app.routers.user_home import router as home_router
 from app.routers.leaderboard import router as leaderboard_router
 from app.routers.login import router as login_router
 from app.routers.tmdb import router as tmdb_router
+from app.routers.watchlist_endpoints import router as watchlist_router
 
 app = FastAPI()
 
@@ -40,3 +41,4 @@ app.include_router(battles_router)
 app.include_router(home_router)
 app.include_router(leaderboard_router)
 app.include_router(tmdb_router)
+app.include_router(watchlist_router)
