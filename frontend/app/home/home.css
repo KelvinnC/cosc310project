@@ -103,3 +103,30 @@ body {
     background-color: rgb(39, 38, 38);
     transition: 0.1s;
 }
+
+.badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0;
+}
+
+.badge-pill {
+    background: linear-gradient(135deg, #f6d365, #fda085);
+    color: #0f1f36;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.badge-pill.silver {
+    background: linear-gradient(135deg, #e0e5ec, #b8c2cc);
+    color: #2f3640;
+}
+
+.badge-pill.bronze {
+    background: linear-gradient(135deg, #e0b687, #b97a57);
+    color: #3d2514;
+}

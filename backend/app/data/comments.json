@@ -1,51 +1,30 @@
 [
   {
     "id": 1,
-    "reviewId": 1946,
-    "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
-    "commentBody": "Nice job!",
-    "date": "2025-11-28T17:40:45.116407"
+    "reviewId": 1001,
+    "authorId": "dc9c10b7-1970-4bda-bc18-ed0fcec1eb94",
+    "commentBody": "That subway scene rattled me too. Phoenix went all in.",
+    "date": "2024-06-02T14:22:10"
   },
   {
     "id": 2,
-    "reviewId": 1946,
+    "reviewId": 1003,
     "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
-    "commentBody": "Great review!",
-    "date": "2025-11-28T17:41:01.441055"
+    "commentBody": "Cap with the hammer still rules. I cheer every time.",
+    "date": "2024-05-10T09:11:00"
   },
   {
     "id": 3,
-    "reviewId": 45210,
-    "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
-    "commentBody": "Great movie! This is a test comment for front end testing. I haven't actually seen this movie.",
-    "date": "2025-12-01T18:22:37.057613"
+    "reviewId": 1017,
+    "authorId": "5aeb8b82-68ce-4e81-937e-84fb1187b9d6",
+    "commentBody": "Ledger's laugh is burned into my brain. Great writeup.",
+    "date": "2024-08-20T18:05:44"
   },
   {
     "id": 4,
-    "reviewId": 45210,
-    "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
-    "commentBody": "test comment",
-    "date": "2025-12-01T10:51:57.370254"
-  },
-  {
-    "id": 5,
-    "reviewId": 45210,
-    "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
-    "commentBody": "Awesome!",
-    "date": "2025-12-01T10:55:07.122968"
-  },
-  {
-    "id": 6,
-    "reviewId": 45686,
-    "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
-    "commentBody": "Test final comment",
-    "date": "2025-12-01T11:22:59.361115"
-  },
-  {
-    "id": 7,
-    "reviewId": 45686,
-    "authorId": "91fac92f-c25e-4299-b317-9f389b8be6f9",
-    "commentBody": "Testing comment refresh",
-    "date": "2025-12-01T11:23:27.118189"
+    "reviewId": 1021,
+    "authorId": "1d1fe53f-8092-4d40-bf2d-21facabd3953",
+    "commentBody": "Bugonia sounds wild. Adding it to the queue.",
+    "date": "2025-01-25T10:45:12"
   }
 ]

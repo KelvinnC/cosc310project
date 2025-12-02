@@ -15,6 +15,7 @@ const page = () => {
     const [battles, setBattles] = useState([])
     const [reviews, setReviews] = useState([])
     const [user, setUser] = useState(null)
+    const [badges, setBadges] = useState([])
     const router = useRouter()
 
     useEffect(() => {
@@ -29,6 +30,7 @@ const page = () => {
             setBattles(data["battles"])
             setReviews(data["reviews"])
             setUser(data["user"])
+            setBadges(data["badges"] || [])
         }
         fetchUserData();
     }, [])
@@ -65,6 +67,19 @@ const page = () => {
                         <span>Role: {user["role"]}</span>
                         <span>Warnings: {user['warnings']}</span>
                         <span>Account created on {(user["created_at"] as string).split("T")[0]}</span>
+                        {badges.length > 0 &&
+                        <div className="badge-row">
+                            {badges.map((badge, idx) => (
+                                <span
+                                  key={idx}
+                                  className={`badge-pill ${badge["medalColor"] || ""}`}
+                                  title={badge["description"] || ""}
+                                >
+                                  {badge["title"]}
+                                </span>
+                            ))}
+                        </div>
+                        }
                         <button type="submit" 
                         className="download-button"
                         onClick={downloadData}>Download my Data</button>
@@ -97,7 +112,9 @@ const page = () => {
                                 <Link href={`/battles/${battle["id"]}`}>
                                 <div className="battle">
                                     <span>Battle {battle["id"]}</span>
-                                    <span>Date: {(battle["endedAt"] as string).split("T")[0]}</span>
+                                    <span>
+                                      Date: {battle["endedAt"] ? (battle["endedAt"] as string).split("T")[0] : "In progress"}
+                                    </span>
                                     <span>Review {battle["review1Id"]} vs. {battle["review2Id"]}</span>
                                     <span className="winner-text">Winner: {battle["winnerId"]}</span>
                                     <span className="click-text">See battle →</span>

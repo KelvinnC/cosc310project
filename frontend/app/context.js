@@ -6,24 +6,22 @@ import decodeToken from "../lib/decodeToken"
 const DataContext = createContext(null)
 
 export function DataProvider({ children }) {
-    const [accessToken, setAccessToken] = useState(() => {
+    const [accessToken, setAccessToken] = useState("")
+    const [role, setRole] = useState(null)
+
+    useEffect(() => {
         try {
-            return localStorage.getItem("accessToken") || ""
-        } catch (err) {
-            return ""
-        }
-    })
-    const [role, setRole] = useState(() => {
-        try {
-            const token = localStorage.getItem("accessToken")
+            const token = localStorage.getItem("accessToken") || ""
+            setAccessToken(token)
             if (token) {
                 const payload = decodeToken(token)
-                return payload?.role || null
+                setRole(payload?.role || null)
             }
         } catch (err) {
-                return null
+            setAccessToken("")
+            setRole(null)
         }
-    })
+    }, [])
 
     useEffect(() => {
         try {
