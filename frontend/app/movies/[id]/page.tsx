@@ -181,7 +181,7 @@ const ReviewsSection = ({ reviews }: { reviews: Review[] }) => {
       <div className="reviews-header">
         <h2>Reviews</h2>
         <span className="muted">
-          {visibleReviews.length ? `${visibleReviews.length} comments` : "No comments yet"}
+          {visibleReviews.length ? `${visibleReviews.length} reviews` : "No reviews yet"}
         </span>
       </div>
 
