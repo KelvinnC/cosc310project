@@ -1,6 +1,7 @@
 from typing import List, Optional, Literal
 from fastapi import APIRouter, status, Query, HTTPException, Depends
 from app.schemas.review import Review, ReviewCreate, ReviewUpdate, PaginatedReviews
+from app.schemas.comment import CommentWithAuthor, CommentCreate
 from app.schemas.search import MovieSearch, MovieWithReviews
 from app.services.review_service import (
     list_reviews_paginated,
@@ -12,6 +13,7 @@ from app.services.review_service import (
 )
 from app.services.search_service import search_movies_with_reviews
 from app.services import flag_service
+from app.services.comment_service import get_comments_by_review_id, create_comment
 from app.middleware.auth_middleware import jwt_auth_dependency, jwt_auth_optional
 from app.middleware.admin_dependency import admin_required
 from app.services.admin_review_service import hide_review
@@ -19,10 +21,10 @@ from app.services.admin_review_service import hide_review
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
 @router.post("", response_model=Review, status_code=201)
-def post_review(review: ReviewCreate, current_user: dict = Depends(jwt_auth_dependency)):
+async def post_review(review: ReviewCreate, current_user: dict = Depends(jwt_auth_dependency)):
     """Create a new review."""
     author_id = current_user.get("user_id")
-    return create_review(review, author_id=author_id)
+    return await create_review(review, author_id=author_id)
 
 @router.get("/search", response_model=List[MovieWithReviews])
 def search_reviews(title: str = Query(..., min_length=1)):
@@ -77,7 +79,9 @@ def get_review(review_id: int):
     """Retrieve a review by ID."""
     try:
         return get_review_by_id(review_id)
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Review {review_id} not found"
@@ -182,3 +186,20 @@ def get_flag_status(review_id: int, current_user: dict = Depends(jwt_auth_depend
 def flag_review(review_id: int, current_user: dict = Depends(admin_required)):
     """Unflag a review. Admin only endpoint"""
     flag_service.unflag_review(review_id)
+
+
+@router.get("/{review_id}/comments", response_model=List[CommentWithAuthor])
+def list_comments(review_id: int):
+    """List comments for a review."""
+    return get_comments_by_review_id(review_id)
+
+
+@router.post("/{review_id}/comments", status_code=status.HTTP_204_NO_CONTENT)
+def post_comment(
+    review_id: int,
+    payload: CommentCreate,
+    current_user: dict = Depends(jwt_auth_dependency),
+):
+    """Create a new comment on a review."""
+    create_comment(payload, review_id=review_id, user_id=current_user.get("user_id"))
+    return None

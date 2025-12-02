@@ -1,4 +1,5 @@
 import uuid
+import asyncio
 from typing import List, Dict, Any, Optional
 from fastapi import HTTPException
 from datetime import date as date_type
@@ -107,25 +108,38 @@ def create_movie(payload: MovieCreate) -> Movie:
     movie_repo.save_all(movies)
     return new_movie
 
-async def get_movie_by_id(movie_id: str) -> MovieWithReviews:
+def _refresh_tmdb_fields_if_missing(
+    movie_id: str, movie: Dict[str, Any], movies: List[Dict[str, Any]], idx: int
+) -> Dict[str, Any]:
+    """Populate missing TMDb-backed fields synchronously when possible."""
+    if not (is_tmdb_movie_id(movie_id) and not movie.get("posterUrl")):
+        return movie
+
+    tmdb_id = validate_tmdb_movie_id(movie_id)
+    try:
+        tmdb_data = asyncio.run(get_tmdb_movie_details(tmdb_id))
+    except RuntimeError:
+        # If an event loop is already running, skip the refresh instead of crashing.
+        tmdb_data = None
+
+    if tmdb_data:
+        movie["posterUrl"] = tmdb_data.get("poster_url") or movie.get("posterUrl")
+        movie["description"] = movie.get("description") or tmdb_data.get("description")
+        movie["genre"] = movie.get("genre") or tmdb_data.get("genre")
+        movies[idx] = movie
+        movie_repo.save_all(movies)
+
+    return movie
+
+
+def get_movie_by_id(movie_id: str) -> MovieWithReviews:
     """Get movie by ID (local lookup only - TMDb movies are cached on review creation)."""
     movies = load_all()
     idx = find_dict_by_id(movies, "id", movie_id)
     if idx == NOT_FOUND:
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
-    
-    movie = movies[idx]
 
-    # If TMDb-sourced and missing poster/fields, refresh from TMDb and persist
-    if is_tmdb_movie_id(movie_id) and not movie.get("posterUrl"):
-        tmdb_id = validate_tmdb_movie_id(movie_id)
-        tmdb_data = await get_tmdb_movie_details(tmdb_id)
-        if tmdb_data:
-            movie["posterUrl"] = tmdb_data.get("poster_url") or movie.get("posterUrl")
-            movie["description"] = movie.get("description") or tmdb_data.get("description")
-            movie["genre"] = movie.get("genre") or tmdb_data.get("genre")
-            movies[idx] = movie
-            movie_repo.save_all(movies)
+    movie = _refresh_tmdb_fields_if_missing(movie_id, movies[idx], movies, idx)
 
     return MovieWithReviews(
         id=movie.get("id"),
