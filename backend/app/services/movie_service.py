@@ -1,4 +1,5 @@
 import uuid
+from datetime import date as date_type
 from typing import Any, Dict, List
 
 from fastapi import HTTPException
@@ -7,6 +8,32 @@ from app.schemas.movie import Movie, MovieCreate, MovieUpdate, MovieSummary, Mov
 import app.repositories.movie_repo as movie_repo
 from app.repositories.review_repo import load_all as load_reviews
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
+from app.services.tmdb_service import (
+    get_tmdb_movie_details,
+    validate_tmdb_movie_id,
+)
+
+
+def _parse_tmdb_to_movie_dict(movie_id: str, tmdb_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert TMDb API response to local movie dict format."""
+    try:
+        release_date = date_type.fromisoformat(tmdb_data["release"])
+    except (ValueError, KeyError):
+        release_date = date_type(1900, 1, 1)
+    
+    return {
+        "id": movie_id,
+        "title": tmdb_data["title"],
+        "description": tmdb_data["description"],
+        "duration": tmdb_data["duration"],
+        "genre": tmdb_data["genre"],
+        "release": release_date,
+    }
+
+
+def _get_reviews_for_movie(movie_id: str) -> List[Dict[str, Any]]:
+    """Get reviews for a movie by its ID."""
+    return [rv for rv in load_reviews() if rv.get("movieId") == movie_id]
 
 
 def load_all() -> List[Dict[str, Any]]:
@@ -86,29 +113,21 @@ def create_movie(payload: MovieCreate) -> Movie:
 
 
 def get_movie_by_id(movie_id: str) -> MovieWithReviews:
+    """Get movie by ID (local lookup only - TMDb movies are cached on review creation)."""
     movies = load_all()
-    target_index = find_dict_by_id(movies, "id", movie_id)
-    if target_index == NOT_FOUND:
+    idx = find_dict_by_id(movies, "id", movie_id)
+    if idx == NOT_FOUND:
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
-
-    target = movies[target_index]
-    reviews_data = load_reviews()
-    reviews_list = []
-    for rv in reviews_data:
-        mv_id = rv.get("movieId")
-        if isinstance(mv_id, str) and mv_id == movie_id:
-            reviews_list.append(rv)
-
-    wrapped_reviews = [rv for rv in reviews_list]
-
+    
+    movie = movies[idx]
     return MovieWithReviews(
-        id=target.get("id"),
-        title=target.get("title"),
-        description=target.get("description"),
-        duration=target.get("duration"),
-        genre=target.get("genre"),
-        release=target.get("release"),
-        reviews=wrapped_reviews,
+        id=movie.get("id"),
+        title=movie.get("title"),
+        description=movie.get("description"),
+        duration=movie.get("duration"),
+        genre=movie.get("genre"),
+        release=movie.get("release"),
+        reviews=_get_reviews_for_movie(movie_id),
     )
 
 
@@ -121,7 +140,11 @@ def search_movies_titles(query: str) -> List[MovieSummary]:
     for mv in movies:
         title = (mv.get("title") or "").lower()
         if q in title:
-            results.append(MovieSummary(id=mv.get("id"), title=mv.get("title")))
+            results.append(MovieSummary(
+                id=mv.get("id"),
+                title=mv.get("title"),
+                release=mv.get("release"),
+            ))
     return results
 
 
@@ -158,3 +181,26 @@ def delete_movie(movie_id: str) -> None:
     if len(new_movies) == len(movies):
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
     save_all(new_movies)
+
+
+async def cache_tmdb_movie(movie_id: str) -> Movie:
+    """Fetch TMDb movie and cache to local movies.json. Returns existing if cached."""
+    movies = load_all()
+    
+    existing = next((m for m in movies if m.get("id") == movie_id), None)
+    if existing:
+        return Movie(**existing)
+    
+    tmdb_id = validate_tmdb_movie_id(movie_id)
+    tmdb_data = await get_tmdb_movie_details(tmdb_id)
+    
+    if not tmdb_data:
+        raise HTTPException(status_code=404, detail=f"TMDb movie '{movie_id}' not found")
+    
+    movie_dict = _parse_tmdb_to_movie_dict(movie_id, tmdb_data)
+    new_movie = Movie(**movie_dict)
+    
+    movies.append(new_movie.model_dump(mode="json"))
+    save_all(movies)
+    
+    return new_movie
