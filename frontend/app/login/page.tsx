@@ -78,7 +78,6 @@ const Page = () => {
 
       if (token) {
         ;(setAccessToken as any)(token)
-        localStorage.setItem("token", token)
       }
 
       router.push('/')
