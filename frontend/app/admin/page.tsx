@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 
 const FASTAPI_URL = "http://127.0.0.1:8000"
 
-const page = () => {
+const Page = () => {
     const [adminData, setAdminData] = useState(null)
     const [totalUsers, setTotalUsers] = useState(0)
     const [warnedUsers, setWarnedUsers] = useState<any[]>([])
@@ -168,4 +168,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

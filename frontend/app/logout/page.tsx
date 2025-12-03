@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useData } from '../context'
 
-const page = () => {
+const Page = () => {
     const router = useRouter()
     const {clearAccessToken} = useData() as any
 
@@ -21,4 +21,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page
