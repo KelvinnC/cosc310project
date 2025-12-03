@@ -35,7 +35,7 @@ def test_get_watchlist(mocker, client):
     assert data["authorId"] == 101
     assert len(data["movieIds"]) == 2
 
-def test_post_watchlis(mocker, client):
+def test_post_watchlist(mocker, client):
     mock_user_id = 101
     new_movie_id = "movie-99"
 
@@ -48,24 +48,26 @@ def test_post_watchlis(mocker, client):
     app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": mock_user_id}
 
     mock_service = mocker.patch(
-        "app.routers.watchlist_endpoints.add_movie_to_user_watchlist", 
+        "app.routers.watchlist_endpoints.add_movie_to_user_watchlist",
         return_value=mock_updated_watchlist
     )
 
     response = client.post(
-        "/watchlist/add", 
-        params={"movieId": new_movie_id}
+        "/watchlist/add",
+        json={"movie_id": new_movie_id}   
     )
 
     app.dependency_overrides = {}
 
     assert response.status_code == 201
+
     data = response.json()
     assert data["id"] == 50
     assert data["authorId"] == mock_user_id
     assert new_movie_id in data["movieIds"]
-    
+
     mock_service.assert_called_once_with(
-        author_id=mock_user_id, 
+        author_id=mock_user_id,
         movie_id=new_movie_id
     )
+
