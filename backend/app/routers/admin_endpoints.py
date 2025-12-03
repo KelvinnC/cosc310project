@@ -14,7 +14,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 def get_admin_summary(current_user: dict = Depends(admin_required)):
     """
     Retrieve admin dashboard summary data.
-    
+
     Includes user counts, flagged reviews, warned/banned users, and system statistics.
     Requires admin privileges.
     """

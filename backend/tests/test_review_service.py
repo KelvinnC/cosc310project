@@ -4,10 +4,12 @@ from fastapi import HTTPException
 from app.services.review_service import create_review, update_review, get_review_by_id, list_reviews, delete_review, increment_vote, get_reviews_by_author
 from app.schemas.review import ReviewCreate, Review
 
+
 def test_list_review_empty_list(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[])
     reviews = list_reviews()
     assert reviews == []
+
 
 def test_list_review_has_reviews(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[
@@ -34,6 +36,7 @@ def test_list_review_has_reviews(mocker):
     assert reviews[0].date == datetime.date(2022, 1, 1)
     assert len(reviews) == 1
 
+
 @pytest.mark.asyncio
 async def test_create_review_adds_review(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[])
@@ -55,6 +58,7 @@ async def test_create_review_adds_review(mocker):
     assert review.flagged == False
     assert isinstance(review.date, datetime.date)
     assert mock_save.called
+
 
 @pytest.mark.asyncio
 async def test_create_review_collides_id(mocker):
@@ -79,6 +83,7 @@ async def test_create_review_collides_id(mocker):
     assert review.id == 1235
     assert mock_save.called
 
+
 @pytest.mark.asyncio
 async def test_create_review_strips_whitespace(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[])
@@ -93,6 +98,7 @@ async def test_create_review_strips_whitespace(mocker):
     assert review.authorId == "UUID-author-5678"
     assert review.reviewTitle == "good movie"
     assert mock_save.called
+
 
 def test_get_review_by_id_valid_id(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[
@@ -112,12 +118,14 @@ def test_get_review_by_id_valid_id(mocker):
     assert review.movieId == "1234"
     assert isinstance(review, Review)
 
+
 def test_get_review_by_id_invalid_id(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[])
     with pytest.raises(HTTPException) as ex:
         get_review_by_id(1234)
     assert ex.value.status_code == 404
     assert "not found" in ex.value.detail
+
 
 def test_update_review_valid_update(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[
@@ -141,6 +149,7 @@ def test_update_review_valid_update(mocker):
     assert review.reviewBody == "I absolutely hated this movie! The cinematography was terrible and the plot kept me confused throughout."
     assert mock_save.called
 
+
 def test_update_review_invalid_id(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[])
     mock_save = mocker.patch("app.services.review_service.save_all")
@@ -150,6 +159,7 @@ def test_update_review_invalid_id(mocker):
         update_review(1234, payload)
     assert ex.value.status_code == 404
     assert "not found" in ex.value.detail
+
 
 def test_delete_review_valid_review(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[
@@ -170,6 +180,7 @@ def test_delete_review_valid_review(mocker):
     assert all(m['id'] != 1234 for m in saved_reviews)
     assert mock_save.called
 
+
 def test_delete_review_invalid_review(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[])
     mock_save = mocker.patch("app.services.review_service.save_all")
@@ -177,6 +188,7 @@ def test_delete_review_invalid_review(mocker):
         delete_review(1234)
     assert ex.value.status_code == 404
     assert "not found" in ex.value.detail
+
 
 def test_increment_vote_successful(mocker):
     """Test incrementing votes on an existing review."""
@@ -193,14 +205,15 @@ def test_increment_vote_successful(mocker):
     }
     mocker.patch("app.services.review_service.load_all", return_value=[review_data])
     mock_save = mocker.patch("app.services.review_service.save_all")
-    
+
     increment_vote(1234)
-    
+
     # Verify save was called
     assert mock_save.called
     # Verify the vote count was incremented
     saved_reviews = mock_save.call_args[0][0]
     assert saved_reviews[0]["votes"] == 11
+
 
 def test_increment_vote_from_zero(mocker):
     """Test incrementing votes when initial count is 0."""
@@ -217,11 +230,12 @@ def test_increment_vote_from_zero(mocker):
     }
     mocker.patch("app.services.review_service.load_all", return_value=[review_data])
     mock_save = mocker.patch("app.services.review_service.save_all")
-    
+
     increment_vote(5678)
-    
+
     saved_reviews = mock_save.call_args[0][0]
     assert saved_reviews[0]["votes"] == 1
+
 
 def test_increment_vote_missing_votes_field(mocker):
     """Test incrementing votes when votes field is missing (defaults to 0)."""
@@ -238,21 +252,23 @@ def test_increment_vote_missing_votes_field(mocker):
     }
     mocker.patch("app.services.review_service.load_all", return_value=[review_data])
     mock_save = mocker.patch("app.services.review_service.save_all")
-    
+
     increment_vote(9999)
-    
+
     saved_reviews = mock_save.call_args[0][0]
     assert saved_reviews[0]["votes"] == 1
+
 
 def test_increment_vote_review_not_found(mocker):
     """Test incrementing votes for non-existent review raises 404."""
     mocker.patch("app.services.review_service.load_all", return_value=[])
-    
+
     with pytest.raises(HTTPException) as ex:
         increment_vote(99999)
-    
+
     assert ex.value.status_code == 404
     assert "not found" in ex.value.detail.lower()
+
 
 def test_increment_vote_multiple_reviews(mocker):
     """Test incrementing votes only affects the target review."""
@@ -263,14 +279,15 @@ def test_increment_vote_multiple_reviews(mocker):
     ]
     mocker.patch("app.services.review_service.load_all", return_value=reviews)
     mock_save = mocker.patch("app.services.review_service.save_all")
-    
+
     increment_vote(2)
-    
+
     saved_reviews = mock_save.call_args[0][0]
     # Only review 2 should be incremented
     assert saved_reviews[0]["votes"] == 5  # unchanged
     assert saved_reviews[1]["votes"] == 4  # incremented
     assert saved_reviews[2]["votes"] == 15  # unchanged
+
 
 def test_get_review_by_author_id(mocker):
     mocker.patch("app.services.review_service.load_all", return_value=[

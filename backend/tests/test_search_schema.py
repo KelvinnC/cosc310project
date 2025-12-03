@@ -40,4 +40,3 @@ def test_search_result_total_computed():
     ]
     res = MovieSearchResult(query=MovieSearch(query="a"), results=results)
     assert res.total == 2
-

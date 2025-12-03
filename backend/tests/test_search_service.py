@@ -115,4 +115,3 @@ def test_search_reviews_by_title_pagination(mocker):
     ids1 = {r.id for r in page1}
     ids2 = {r.id for r in page2}
     assert ids1.isdisjoint(ids2)
-

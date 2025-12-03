@@ -11,9 +11,9 @@ async def search_all_movies(query: str) -> Dict[str, Any]:
     q = (query or "").strip()
     if not q:
         return {"local": [], "external": [], "source": "local"}
-    
+
     local_results = search_movies_titles(q)
-    
+
     local_movies = [
         {
             "movie_id": movie.id,
@@ -23,10 +23,10 @@ async def search_all_movies(query: str) -> Dict[str, Any]:
         }
         for movie in local_results
     ]
-    
+
     if len(local_movies) >= LOCAL_RESULT_THRESHOLD:
         return {"local": local_movies, "external": [], "source": "local"}
-    
+
     try:
         tmdb_results = await search_tmdb_movies(q)
         external_movies = [

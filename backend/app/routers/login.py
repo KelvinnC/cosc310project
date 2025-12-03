@@ -9,10 +9,10 @@ router = APIRouter(prefix="/login", tags=["login"])
 def login(payload: UserLogin):
     """
     Authenticate a user and return a JWT access token.
-    
+
     - **username**: User's registered username
     - **password**: User's password
-    
+
     Returns a bearer token for authenticated API requests.
     """
     token = user_login(payload)

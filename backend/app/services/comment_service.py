@@ -6,6 +6,7 @@ from app.services.review_service import get_review_by_id
 from app.services.user_service import get_user_by_id
 import datetime
 
+
 def get_comments_by_review_id(reviewId: int) -> List[CommentWithAuthor]:
     """Get all comments for a certain review"""
     comments_for_id = [comment for comment in load_all() if comment["reviewId"] == reviewId]
@@ -14,6 +15,7 @@ def get_comments_by_review_id(reviewId: int) -> List[CommentWithAuthor]:
         comment["authorUsername"] = comment_poster.username
         comment = CommentWithAuthor(**comment)
     return comments_for_id
+
 
 def create_comment(payload: CommentCreate, review_id: int, user_id: str) -> Comment:
     review = get_review_by_id(review_id)

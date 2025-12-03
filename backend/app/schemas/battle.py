@@ -2,15 +2,15 @@ from typing import Optional
 from datetime import datetime
 from pydantic import BaseModel, field_validator, ValidationInfo
 
+
 class Battle(BaseModel):
     """Represents a battle between two reviews from any movie"""
     id: str # UUID
-    review1Id: int 
-    review2Id: int 
+    review1Id: int
+    review2Id: int
     winnerId: Optional[int] = None # No winner until a vote is cast
     startedAt: datetime
     endedAt: Optional[datetime] = None # Ends when a vote is cast
-    
 
     @field_validator('review2Id')
     @classmethod
@@ -20,6 +20,7 @@ class Battle(BaseModel):
         if review1_id is not None and v == review1_id:
             raise ValueError('Battle must have two different reviews')
         return v
+
 
 class VoteRequest(BaseModel):
     """RESTful vote submission payload"""

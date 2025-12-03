@@ -10,6 +10,7 @@ import bcrypt
 DEFAULT_ROLE = "user"
 BCRYPT_ROUNDS = 12
 
+
 def list_users() -> List[User]:
     """List all registered users"""
     users = [User(**usr) for usr in load_all()]
@@ -17,13 +18,14 @@ def list_users() -> List[User]:
         user.hashed_password = None
     return users
 
+
 def create_user(payload: UserCreate) -> User:
     """Create a new user object and save it to the database"""
     users = load_all()
     new_user_id = str(uuid.uuid4())
     if any(usr.get("id") == new_user_id for usr in users):
         raise HTTPException(status_code=409, detail="ID collision; retry")
-    
+
     _validate_username(payload.username, users)
 
     creation_date = datetime.datetime.now()
@@ -35,6 +37,7 @@ def create_user(payload: UserCreate) -> User:
     save_all(users)
     return new_user
 
+
 def get_user_by_id(user_id: str, show_password=False) -> User:
     """Get a user object by user_id. show_password determines whether hashed password is shown or not"""
     users = load_all()
@@ -45,6 +48,7 @@ def get_user_by_id(user_id: str, show_password=False) -> User:
     if not show_password:
         user_instance.hashed_password = None  # prevent exposing user passwords
     return user_instance
+
 
 def update_user(user_id: str, payload: UserUpdate) -> User:
     """Update a user's username or password by user_id"""
@@ -60,12 +64,13 @@ def update_user(user_id: str, payload: UserUpdate) -> User:
         if (payload.password != None):
             password_update = _get_hashed_password(payload.password)
 
-        updated = User(id=user_id, username=username_update.strip(), hashed_password=password_update, 
+        updated = User(id=user_id, username=username_update.strip(), hashed_password=password_update,
                        role=user["role"], created_at=user["created_at"], active=user["active"])
         users[index] = updated.model_dump(mode="json")
         save_all(users)
         return updated
     raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
+
 
 def delete_user(user_id: str) -> None:
     """Deletes a user by user_id"""
@@ -75,11 +80,13 @@ def delete_user(user_id: str) -> None:
         raise HTTPException(status_code=404, detail=f"User '{user_id}' not found")
     save_all(new_users)
 
+
 def _validate_username(username: str, users: List[Dict[str, Any]], current_user_id=None):
     """Validates that a username is unique"""
     if any(usr.get("username") == username for usr in users):
         raise HTTPException(status_code=409, detail="Username collision; select another username")
-    
+
+
 def _get_hashed_password(password):
     """Hashes and salts a password and returns the hashed password"""
     password_in_bytes = password.encode('utf-8')

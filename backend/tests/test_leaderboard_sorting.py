@@ -146,4 +146,3 @@ def test_tie_breaking_by_date_recent_first(mocker, client):
     data = resp.json()
     ids_in_order = [r["id"] for r in data]
     assert ids_in_order == [2, 3, 1]
-

@@ -14,4 +14,3 @@ def validate_user_access(access_token: str) -> Dict[str, Any]:
     Returns the decoded payload on success or lets jwt decode errors propagate.
     """
     return jwt.decode(access_token, JWT_SECRET, algorithms=["HS256"])
-

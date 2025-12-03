@@ -49,16 +49,16 @@ async def test_search_tmdb_movies(mocker):
         ]
     }
     mock_response.raise_for_status = Mock()
-    
+
     mock_client = AsyncMock()
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
-    
+
     mocker.patch("httpx.AsyncClient", return_value=mock_client)
-    
+
     results = await search_tmdb_movies("Inception")
-    
+
     assert len(results) == 1
     assert results[0]["tmdb_id"] == 27205
     assert results[0]["title"] == "Inception"
@@ -79,16 +79,16 @@ async def test_get_tmdb_movie_details(mocker):
         "backdrop_path": "/backdrop.jpg"
     }
     mock_response.raise_for_status = Mock()
-    
+
     mock_client = AsyncMock()
     mock_client.get = AsyncMock(return_value=mock_response)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
-    
+
     mocker.patch("httpx.AsyncClient", return_value=mock_client)
-    
+
     result = await get_tmdb_movie_details(27205)
-    
+
     assert result["tmdb_id"] == 27205
     assert result["title"] == "Inception"
     assert result["duration"] == 148
@@ -135,9 +135,9 @@ async def test_search_tmdb_movies_api_error(mocker):
     mock_client.get = AsyncMock(side_effect=httpx.HTTPError("Network error"))
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
-    
+
     mocker.patch("httpx.AsyncClient", return_value=mock_client)
-    
+
     with pytest.raises(HTTPException) as exc_info:
         await search_tmdb_movies("Inception")
     assert exc_info.value.status_code == 503
@@ -161,9 +161,9 @@ async def test_get_tmdb_movie_details_api_error(mocker):
     mock_client.get = AsyncMock(side_effect=httpx.HTTPError("Not found"))
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
-    
+
     mocker.patch("httpx.AsyncClient", return_value=mock_client)
-    
+
     with pytest.raises(HTTPException) as exc_info:
         await get_tmdb_movie_details(27205)
     assert exc_info.value.status_code == 404

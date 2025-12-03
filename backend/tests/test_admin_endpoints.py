@@ -4,10 +4,12 @@ from app.main import app
 from app.schemas.user import User
 from app.middleware.auth_middleware import jwt_auth_dependency
 
+
 @pytest.fixture
 def client():
     with TestClient(app) as client:
         yield client
+
 
 @pytest.fixture
 def penalized_user():
@@ -20,6 +22,7 @@ def penalized_user():
         active=False,
         warnings=1
     )
+
 
 def test_admin_summary_authorized_user(mocker, client, mock_admin_user, penalized_user):
     app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
@@ -34,6 +37,7 @@ def test_admin_summary_authorized_user(mocker, client, mock_admin_user, penalize
     assert all(user["active"] == False for user in res["banned_users"])
     assert all(user["warnings"] > 0 for user in res["warned_users"])
     assert all(review["flagged"] for review in res["flagged_reviews"])
+
 
 def test_admin_summary_unauthorized_user(mocker, client, mock_unauthorized_user, penalized_user):
     app.dependency_overrides[jwt_auth_dependency] = lambda: mock_unauthorized_user

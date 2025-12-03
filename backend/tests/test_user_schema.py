@@ -3,6 +3,7 @@ from pydantic import ValidationError
 from app.schemas.user import User, UserCreate, UserUpdate
 import datetime
 
+
 @pytest.fixture
 def user_data():
     payload = {
@@ -15,14 +16,17 @@ def user_data():
     }
     return payload
 
+
 def test_missing_required_fields():
     with pytest.raises(ValidationError):
         User()
+
 
 def test_valid_user(user_data):
     user = User(**user_data)
     assert user.username == user_data["username"]
     assert user.active is True
+
 
 def test_username_too_short(user_data):
     with pytest.raises(ValidationError):
@@ -30,17 +34,20 @@ def test_username_too_short(user_data):
         user_copy["username"] = "ab"
         User(**user_copy)
 
+
 def test_username_too_long(user_data):
     with pytest.raises(ValidationError):
         user_copy = user_data.copy()
         user_copy["username"] = "12345678901234567890abcdefghijklmnopqrstuvwxyz"
         User(**user_copy)
 
+
 def test_invalid_role(user_data):
     user_copy = user_data.copy()
     user_copy["role"] = "moviehater"
     with pytest.raises(ValidationError):
         User(**user_copy)
+
 
 def test_user_create_invalid_password():
     new_user = {

@@ -51,14 +51,14 @@ def sample_reviews_for_battle(user_id: str, sample_size: int = 200) -> List[Revi
 
     if len(filtered_reviews) > sample_size:
         return random.sample(filtered_reviews, sample_size)
-    
+
     return filtered_reviews
 
 
 def select_eligible_pair(user: User, reviews: List[Review]) -> Tuple[int, int]:
     """
-    Select an eligible review pair for a battle. 
-    
+    Select an eligible review pair for a battle.
+
     Returns a tuple of (review1_id, review2_id).
     """
     voted_pairs = get_user_voted_pairs(user.id)

@@ -19,6 +19,7 @@ def mock_review():
         date="2023-01-15"
     )
 
+
 @pytest.fixture
 def mock_flagged_review():
     return Review(
@@ -40,9 +41,9 @@ def test_flag_review_success(mocker, mock_review):
     mocker.patch("app.repositories.flag_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.flag_repo.save_all")
     mock_mark = mocker.patch("app.services.flag_service.mark_review_as_flagged")
-    
+
     result = flag_service.flag_review(user_id="user-123", review_id=1)
-    
+
     assert result["user_id"] == "user-123"
     assert result["review_id"] == 1
     assert "timestamp" in result
@@ -58,10 +59,10 @@ def test_flag_review_prevents_duplicate(mocker, mock_review):
     mocker.patch("app.services.flag_service.get_review_by_id", return_value=mock_review)
     mocker.patch("app.repositories.flag_repo.load_all", return_value=existing_flags)
     mock_save = mocker.patch("app.repositories.flag_repo.save_all")
-    
+
     with pytest.raises(ValueError, match="already flagged"):
         flag_service.flag_review(user_id="user-123", review_id=1)
-    
+
     mock_save.assert_not_called()
 
 
@@ -74,9 +75,9 @@ def test_flag_review_different_users_can_flag(mocker, mock_review):
     mocker.patch("app.repositories.flag_repo.load_all", return_value=existing_flags)
     mock_save = mocker.patch("app.repositories.flag_repo.save_all")
     mock_mark = mocker.patch("app.services.flag_service.mark_review_as_flagged")
-    
+
     result = flag_service.flag_review(user_id="user-456", review_id=1)
-    
+
     assert result["user_id"] == "user-456"
     assert result["review_id"] == 1
     mock_save.assert_called_once()
@@ -90,9 +91,9 @@ def test_flag_review_marks_review_as_flagged(mocker, mock_review):
     mocker.patch("app.repositories.flag_repo.load_all", return_value=[])
     mocker.patch("app.repositories.flag_repo.save_all")
     mock_mark = mocker.patch("app.services.flag_service.mark_review_as_flagged")
-    
+
     flag_service.flag_review(user_id="user-123", review_id=1)
-    
+
     mock_mark.assert_called_once_with(mock_review)
 
 
@@ -102,19 +103,19 @@ def test_flag_review_invalid_review(mocker):
         "app.services.flag_service.get_review_by_id",
         side_effect=HTTPException(status_code=404, detail="Review not found")
     )
-    
+
     with pytest.raises(HTTPException) as exc_info:
         flag_service.flag_review(user_id="user-123", review_id=999)
-    
+
     assert exc_info.value.status_code == 404
 
 
 def test_get_flagged_reviews_count_empty(mocker):
     """Test getting flag count when no flags exist"""
     mocker.patch("app.repositories.flag_repo.load_all", return_value=[])
-    
+
     count = flag_service.get_flagged_reviews_count(review_id=1)
-    
+
     assert count == 0
 
 
@@ -124,9 +125,9 @@ def test_get_flagged_reviews_count_single(mocker):
         {"user_id": "user-123", "review_id": 1, "timestamp": "2023-01-15T10:00:00"}
     ]
     mocker.patch("app.repositories.flag_repo.load_all", return_value=flags)
-    
+
     count = flag_service.get_flagged_reviews_count(review_id=1)
-    
+
     assert count == 1
 
 
@@ -138,9 +139,9 @@ def test_get_flagged_reviews_count_multiple(mocker):
         {"user_id": "user-789", "review_id": 2, "timestamp": "2023-01-15T12:00:00"}
     ]
     mocker.patch("app.repositories.flag_repo.load_all", return_value=flags)
-    
+
     count = flag_service.get_flagged_reviews_count(review_id=1)
-    
+
     assert count == 2
 
 
@@ -152,9 +153,9 @@ def test_get_flagged_reviews_count_different_reviews(mocker):
         {"user_id": "user-789", "review_id": 3, "timestamp": "2023-01-15T12:00:00"}
     ]
     mocker.patch("app.repositories.flag_repo.load_all", return_value=flags)
-    
+
     count = flag_service.get_flagged_reviews_count(review_id=2)
-    
+
     assert count == 1
 
 
@@ -187,17 +188,19 @@ def test_get_flagged_reviews_count_cross_review_isolation(mocker):
     assert flag_service.get_flagged_reviews_count(8) == 1
     assert flag_service.get_flagged_reviews_count(99) == 0
 
+
 def test_unflag_review_success(mocker, mock_flagged_review):
     """Test successfully unflagging a review"""
     mocker.patch("app.services.flag_service.get_review_by_id", return_value=mock_flagged_review)
     mocker.patch("app.repositories.flag_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.flag_repo.save_all")
     mock_mark = mocker.patch("app.services.flag_service.mark_review_as_unflagged")
-    
+
     flag_service.unflag_review(review_id=1)
-    
+
     mock_save.assert_called_once()
     mock_mark.assert_called_once_with(mock_flagged_review)
+
 
 def test_unflag_review_not_found(mocker, mock_flagged_review):
     """Test unflagging a review that is not found"""
@@ -205,8 +208,7 @@ def test_unflag_review_not_found(mocker, mock_flagged_review):
     mocker.patch("app.repositories.flag_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.flag_repo.save_all")
     mock_mark = mocker.patch("app.services.flag_service.mark_review_as_unflagged")
-    
+
     with pytest.raises(HTTPException) as ex:
         flag_service.unflag_review(review_id=123)
     assert ex.value.status_code == 404
-

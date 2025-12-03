@@ -1,8 +1,9 @@
 from typing import List, Dict, Any, Optional
 from fastapi import HTTPException
 from app.schemas.watchlist import Watchlist
-from app.repositories.watchlist_repo import load_all, save_all 
+from app.repositories.watchlist_repo import load_all, save_all
 from app.repositories.movie_repo import load_all as load_all_movies
+
 
 def get_watchlist_by_author_id(author_id: int) -> Optional[Watchlist]:
     watchlists = load_all()
@@ -10,6 +11,7 @@ def get_watchlist_by_author_id(author_id: int) -> Optional[Watchlist]:
     if user_watchlist_data is None:
         return None
     return Watchlist(**user_watchlist_data)
+
 
 def add_movie_to_user_watchlist(author_id: int, movie_id: str) -> Watchlist:
     all_movies = load_all_movies()

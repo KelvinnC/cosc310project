@@ -33,7 +33,7 @@ origins = [
 def root():
     """
     Root endpoint providing API status and navigation links.
-    
+
     Use this to verify the API is running and discover available endpoints.
     """
     return {
@@ -56,6 +56,7 @@ def root():
             "tmdb": "/tmdb"
         }
     }
+
 
 app.add_middleware(
     CORSMiddleware,

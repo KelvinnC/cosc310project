@@ -6,13 +6,15 @@ import pytest
 from app.repositories import battle_repo
 from app.repositories.battle_repo import load_all, save_all, DATA_PATH
 
+
 def test_load_all_file_missing(mocker):
     mocker.patch.object(Path, "exists", return_value=False)
     assert load_all() == []
 
+
 def test_load_all_with_data(mocker):
     mocker.patch.object(Path, "exists", return_value=True)
-    
+
     payload = [
         {
             "id": "battle123",
@@ -24,12 +26,13 @@ def test_load_all_with_data(mocker):
             "endedAt": None
         }
     ]
-    
+
     mock_open = mocker.patch.object(Path, "open", mocker.mock_open(read_data=json.dumps(payload)))
-    
+
     result = load_all()
     assert result == payload
     mock_open.assert_called_once_with("r", encoding="utf-8")
+
 
 def test_save_all_saves_data(mocker):
     battles = [

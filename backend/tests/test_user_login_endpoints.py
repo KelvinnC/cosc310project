@@ -3,10 +3,12 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.schemas.user_login import UserLogin
 
+
 @pytest.fixture
 def client():
     with TestClient(app) as client:
         yield client
+
 
 @pytest.fixture
 def user_data():
@@ -20,12 +22,14 @@ def user_data():
   }
     return user
 
+
 def test_user_login_endpoint_valid_login(mocker, client, user_data):
     mocker.patch("app.services.user_login_service.load_all",
                  return_value=[user_data])
     response = client.post("/login", json={"username": "testuser", "password": "testpass"})
     assert response.status_code == 201
     assert response.json().get("access_token") is not None
+
 
 def test_user_login_endpoint_invalid_login(client):
     response = client.post("/login", json={"username": "invaliduser", "password": "invalidpass"})

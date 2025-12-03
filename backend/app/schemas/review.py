@@ -8,6 +8,7 @@ except Exception:
     from pydantic import validator as _validator  # v1 fallback
     _P2 = False
 
+
 class Review(BaseModel):
     id: int
     movieId: str
@@ -30,6 +31,7 @@ class Review(BaseModel):
         def _coerce_movie_id_v1(cls, v):
             return None if v is None else str(v)
 
+
 class ReviewCreate(BaseModel):
     """Create a new review. Note: authorId and date are assigned by the server."""
     movieId: str
@@ -42,6 +44,7 @@ class ReviewCreate(BaseModel):
         @classmethod
         def _coerce_movie_id(cls, v):
             return None if v is None else str(v)
+
         @_field_validator("reviewTitle", "reviewBody", mode="before")
         @classmethod
         def _strip_text(cls, v):
@@ -50,9 +53,11 @@ class ReviewCreate(BaseModel):
         @_validator("movieId", pre=True)
         def _coerce_movie_id_v1(cls, v):
             return None if v is None else str(v)
+
         @_validator("reviewTitle", "reviewBody", pre=True)
         def _strip_text_v1(cls, v):
             return v.strip() if isinstance(v, str) else v
+
 
 class ReviewUpdate(BaseModel):
     """Update a review. Only rating, title, and body are editable. Server manages authorId, date, votes, and flagged."""
@@ -93,4 +98,3 @@ class PaginatedReviews(BaseModel):
     page: int
     per_page: int
     total_pages: int
-

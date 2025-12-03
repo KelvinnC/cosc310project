@@ -22,6 +22,7 @@ def load_all(load_invisible: bool = False) -> List[Dict[str, Any]]:
             return result
         return [review for review in result if review.get("visible", True)]
 
+
 def _to_float(val: Any) -> Optional[float]:
     try:
         return float(val)

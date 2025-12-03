@@ -8,6 +8,7 @@ JWT_SECRET = os.getenv("JWT_SECRET")
 if not JWT_SECRET:
     raise RuntimeError("JWT SECRET could not be found")
 
+
 @pytest.fixture
 def user_data():
     user = {
@@ -20,12 +21,14 @@ def user_data():
   }
     return user
 
+
 def test_user_login_empty_fields(mocker):
     mocker.patch("app.services.user_login_service.load_all",
                  return_value=[])
     with pytest.raises(HTTPException) as ex:
         user_login(payload=None)
     assert ex.value.status_code == 401
+
 
 def test_user_login_username_invalid(mocker):
     mocker.patch("app.services.user_login_service.load_all",
@@ -34,6 +37,7 @@ def test_user_login_username_invalid(mocker):
         user_login(payload="notarealuser")
     assert ex.value.status_code == 401
 
+
 def test_user_login_password_invalid(mocker, user_data):
     mocker.patch("app.services.user_login_service.load_all",
                  return_value=[user_data])
@@ -41,6 +45,7 @@ def test_user_login_password_invalid(mocker, user_data):
         user_login(payload=UserLogin(username="testuser",
                             password="wrongpassword"))
     assert ex.value.status_code == 401
+
 
 def test_user_login_credentials_valid(mocker, user_data):
     mocker.patch("app.services.user_login_service.load_all",
@@ -51,6 +56,7 @@ def test_user_login_credentials_valid(mocker, user_data):
     jwt_decoded = jwt.decode(jwt_response, JWT_SECRET, algorithms=["HS256"])
     assert jwt_decoded["user_id"] == user_data["id"]
     assert jwt_decoded["username"] == user_data["username"]
+
 
 def test_user_login_banned_user(mocker, user_data):
     banned_user = user_data.copy()

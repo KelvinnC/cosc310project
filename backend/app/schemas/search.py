@@ -8,6 +8,7 @@ try:
 except Exception:
     from pydantic import validator as field_validator
     from pydantic import root_validator as model_validator
+
     def computed_field(*args, **kwargs):
         def wrapper(func):
             return property(func)
@@ -73,5 +74,3 @@ class MovieSearchResult(BaseModel):
 
 class MovieWithReviews(Movie):
     reviews: List[Review] = []
-
-

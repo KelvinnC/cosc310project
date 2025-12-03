@@ -6,11 +6,13 @@ from app.utils.logger import get_logger
 
 logger = get_logger()
 
+
 def _save_updated_user(user, user_id):
     """Replace the old user with the updated one and save all users"""
     users = [usr for usr in load_all() if usr.get("id") != user_id]
     users.append(user.model_dump(mode="json"))
     save_all(users)
+
 
 def warn_user(user_id: str) -> User:
     user = get_user_by_id(user_id, show_password=True)
@@ -23,6 +25,7 @@ def warn_user(user_id: str) -> User:
         new_warning_count=user.warnings
     )
     return user
+
 
 def unwarn_user(user_id: str) -> User:
     user = get_user_by_id(user_id, show_password=True)
@@ -38,6 +41,7 @@ def unwarn_user(user_id: str) -> User:
     )
     return user
 
+
 def ban_user(user_id: str) -> User:
     user = get_user_by_id(user_id, show_password=True)
     user.active = False
@@ -48,6 +52,7 @@ def ban_user(user_id: str) -> User:
         user_id=user_id
     )
     return user
+
 
 def unban_user(user_id: str) -> User:
     user = get_user_by_id(user_id, show_password=True)

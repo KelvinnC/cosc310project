@@ -3,10 +3,12 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.middleware.auth_middleware import jwt_auth_dependency
 
+
 @pytest.fixture
 def client():
     with TestClient(app) as client:
         yield client
+
 
 def test_list_reviews(mocker, client):
     mocker.patch("app.services.review_service.load_all",
@@ -30,6 +32,7 @@ def test_list_reviews(mocker, client):
     assert data["total"] == 1
     assert data["page"] == 1
 
+
 def test_get_review_by_id_valid_id(mocker, client):
     mocker.patch("app.services.review_service.load_all", return_value=[
         {
@@ -50,10 +53,12 @@ def test_get_review_by_id_valid_id(mocker, client):
     assert data["id"] == 3
     assert data["reviewTitle"] == "Venice 76 review"
 
+
 def test_get_review_by_id_invalid_id(mocker, client):
     mocker.patch("app.services.review_service.load_all", return_value=[])
     response = client.get('/reviews/99999')
     assert response.status_code == 404
+
 
 def test_post_review_valid_review(mocker, client):
     app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": "UUID-author-1234", "role": "user"}
@@ -77,6 +82,7 @@ def test_post_review_valid_review(mocker, client):
     assert data["movieId"] == 'UUID-movie-1234'
     assert mock_save.called
 
+
 def test_post_review_missing_json(mocker, client):
     app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": "UUID-author-1234", "role": "user"}
     mocker.patch("app.services.review_service.load_all", return_value=[])
@@ -84,6 +90,7 @@ def test_post_review_missing_json(mocker, client):
     response = client.post("/reviews", json={})
     app.dependency_overrides.clear()
     assert response.status_code == 422
+
 
 def test_put_review_valid_put(mocker, client):
     app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": "UUID-author-5678", "role": "user"}
@@ -113,6 +120,7 @@ def test_put_review_valid_put(mocker, client):
     assert data["authorId"] == 'UUID-author-5678'
     assert data["votes"] == 5
 
+
 def test_put_review_invalid_put(mocker, client):
     app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": "1234", "role": "user"}
     mocker.patch("app.services.review_service.load_all",
@@ -136,6 +144,7 @@ def test_put_review_invalid_put(mocker, client):
     app.dependency_overrides.clear()
     assert response.status_code == 404
 
+
 def test_delete_review_valid_review(mocker, client):
     app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": "1234", "role": "user"}
     mocker.patch("app.services.review_service.load_all",
@@ -157,6 +166,7 @@ def test_delete_review_valid_review(mocker, client):
     assert mock_save.called
     assert len(mock_save.call_args[0][0]) == 0
 
+
 def test_delete_review_invalid_review(mocker, client):
     app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": "UUID-author-1234", "role": "user"}
     mocker.patch("app.services.review_service.load_all",
@@ -166,6 +176,7 @@ def test_delete_review_invalid_review(mocker, client):
     response = client.delete("/reviews/99999")
     app.dependency_overrides.clear()
     assert response.status_code == 404
+
 
 def test_put_review_unauthorized_user(mocker, client):
     """Test that a user cannot update another user's review"""
@@ -191,6 +202,7 @@ def test_put_review_unauthorized_user(mocker, client):
     assert response.status_code == 403
     assert "only modify your own reviews" in response.json()["detail"]
 
+
 def test_delete_review_unauthorized_user(mocker, client):
     """Test that a user cannot delete another user's review"""
     app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": "UUID-author-DIFFERENT", "role": "user"}
@@ -213,8 +225,9 @@ def test_delete_review_unauthorized_user(mocker, client):
     assert not mock_save.called
     assert "only modify your own reviews" in response.json()["detail"]
 
+
 def test_get_review_by_author_id(mocker, client):
-    mocker.patch("app.services.review_service.load_all", 
+    mocker.patch("app.services.review_service.load_all",
     return_value=
     [{
         "id":  7777,
@@ -239,7 +252,8 @@ def test_get_review_by_author_id(mocker, client):
     assert data[0]["rating"] == 4.5
     assert data[0]["votes"] == 6
     assert data[0]["flagged"] == False
-    
+
+
 def test_hide_review_success(mocker, client, mock_admin_user):
     app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
     mocker.patch("app.services.admin_review_service.load_all", return_value=[
@@ -261,6 +275,7 @@ def test_hide_review_success(mocker, client, mock_admin_user):
     assert response.status_code == 200
     assert response.json()["visible"] == False
 
+
 def test_hide_review_unauthorized(mocker, client, mock_unauthorized_user):
     app.dependency_overrides[jwt_auth_dependency] = lambda: mock_unauthorized_user
     mocker.patch("app.services.admin_review_service.load_all", return_value=[
@@ -281,6 +296,7 @@ def test_hide_review_unauthorized(mocker, client, mock_unauthorized_user):
     app.dependency_overrides.clear()
     assert response.status_code == 403
 
+
 def test_hide_review_not_found(mocker, client, mock_admin_user):
     app.dependency_overrides[jwt_auth_dependency] = lambda: mock_admin_user
     mocker.patch("app.services.admin_review_service.load_all", return_value=[])
@@ -288,6 +304,7 @@ def test_hide_review_not_found(mocker, client, mock_admin_user):
     response = client.patch("/reviews/1/hide")
     app.dependency_overrides.clear()
     assert response.status_code == 404
+
 
 def test_get_comments_endpoint_returns_list(mocker, client):
     from app.schemas.comment import CommentWithAuthor

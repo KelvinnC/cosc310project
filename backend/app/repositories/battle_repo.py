@@ -16,6 +16,7 @@ def load_all() -> List[Dict[str, Any]]:
     except json.JSONDecodeError:
         return []
 
+
 def save_all(battles: List[Dict[str, Any]]) -> None:
     """Save all battles to battles.json safely using a temp file"""
     tmp = DATA_PATH.with_suffix(".tmp")

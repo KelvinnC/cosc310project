@@ -1,10 +1,12 @@
 from app.services.user_summary_service import get_reviews_by_author, get_user_object, get_user_summary, get_user_by_id, get_users_battles, get_users_reviews
 
+
 def test_get_users_reviews(mocker):
     mock_get = mocker.patch("app.services.user_summary_service.get_reviews_by_author", return_value=["review1", "review2"])
     result = get_users_reviews(current_user_id=1)
     mock_get.assert_called_once_with(1)
     assert result == ["review1", "review2"]
+
 
 def test_get_users_battles(mocker):
     mock_get = mocker.patch("app.services.user_summary_service.load_user_battles", return_value=["battle1", "battle2"])
@@ -12,11 +14,13 @@ def test_get_users_battles(mocker):
     mock_get.assert_called_once_with(1)
     assert result == ["battle1", "battle2"]
 
+
 def test_get_user_object(mocker):
     mock_get = mocker.patch("app.services.user_summary_service.get_user_by_id", return_value="user_obj")
     result = get_user_object(current_user_id=1)
     mock_get.assert_called_once_with(1)
     assert result == "user_obj"
+
 
 def test_get_user_summary(mocker, user_data):
     from app.schemas.user import User

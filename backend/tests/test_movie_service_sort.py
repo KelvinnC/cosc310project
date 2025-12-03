@@ -52,4 +52,3 @@ def test_sort_by_rating_handles_strings_and_missing(mocker):
 
     desc = list_movies(sort_by="rating", order="desc")
     assert [m.id for m in desc] == ["2", "1", "3"]
-

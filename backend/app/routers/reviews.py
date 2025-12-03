@@ -20,16 +20,18 @@ from app.services.admin_review_service import hide_review
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
+
 @router.post("", response_model=Review, status_code=201)
 async def post_review(review: ReviewCreate, current_user: dict = Depends(jwt_auth_dependency)):
     """
     Create a new review.
-    
+
     Supports both local movies and external TMDb movies.
     For TMDb movies, use movieId format: tmdb_<id> (e.g., tmdb_12345)
     """
     author_id = current_user.get("user_id")
     return await create_review(review, author_id=author_id)
+
 
 @router.get("/search", response_model=List[MovieWithReviews], summary="Search reviews by movie")
 def search_reviews(title: str = Query(..., min_length=1)):
@@ -55,7 +57,7 @@ def list_or_filter_reviews(
 ):
     """
     Retrieve reviews with optional filtering, sorting, and pagination.
-    
+
     - **rating**: Filter by exact rating (1-5)
     - **search**: Search in review text
     - **sort_by**: Sort by 'rating' or 'movie' title
@@ -90,16 +92,18 @@ def filter_reviews(
 ):
     return list_or_filter_reviews(rating=rating, search=search, sort_by=sort_by, order=order, page=page, per_page=per_page)
 
+
 @router.get("/{review_id}", response_model=Review, summary="Get review by ID")
 def get_review(review_id: int):
     """Retrieve a single review by its unique ID."""
     return get_review_by_id(review_id)
 
+
 @router.get("/author/{author_id}", response_model=List[Review], summary="Get reviews by author")
 def get_author_reviews(author_id: str):
     """
     Retrieve all reviews written by a specific user.
-    
+
     Returns an empty list if the author has no reviews.
     """
     try:
@@ -109,15 +113,18 @@ def get_author_reviews(author_id: str):
             return []
         raise
 
+
 @router.put("/{review_id}", response_model=Review, summary="Update review")
 def put_review(review_id: int, review_update: ReviewUpdate, current_user: dict = Depends(user_is_author)):
     """Update a review. Only the author can update their own review."""
     return update_review(review_id, review_update)
-    
+
+
 @router.patch("/{review_id}/hide", response_model=Review, summary="Hide review (Admin)")
 def hide_inappropriate_review(review_id: int, current_user=Depends(admin_required)):
     """Hide an inappropriate review from public view. Requires admin privileges."""
     return hide_review(review_id)
+
 
 @router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete review")
 def remove_review(review_id: int, current_user: dict = Depends(user_is_author)):
@@ -142,6 +149,7 @@ def flag_review(review_id: int, current_user: dict = Depends(jwt_auth_dependency
         status_code = status.HTTP_409_CONFLICT if "already flagged" in error_msg.lower() else status.HTTP_400_BAD_REQUEST
         raise HTTPException(status_code=status_code, detail=error_msg)
 
+
 @router.get("/{review_id}/flag/status", summary="Check flag status")
 def get_flag_status(review_id: int, current_user: dict = Depends(jwt_auth_dependency)):
     """Check if the current user has flagged this review."""
@@ -149,15 +157,18 @@ def get_flag_status(review_id: int, current_user: dict = Depends(jwt_auth_depend
     has_flagged = flag_service.has_user_flagged_review(user_id, review_id)
     return {"has_flagged": has_flagged}
 
+
 @router.post("/{review_id}/unflag", status_code=204, summary="Unflag review (Admin)")
 def unflag_review_endpoint(review_id: int, current_user: dict = Depends(admin_required)):
     """Remove all flags from a review. Requires admin privileges."""
     flag_service.unflag_review(review_id)
 
+
 @router.get("/{review_id}/comments", response_model=List[CommentWithAuthor], status_code=200, summary="Get review comments")
 def get_comments(review_id: int):
     """Retrieve all comments on a specific review."""
     return get_comments_by_review_id(review_id)
+
 
 @router.post("/{review_id}/comments", status_code=204, summary="Add comment")
 def post_comment(payload: CommentCreate, review_id: int, current_user: dict = Depends(jwt_auth_dependency)):

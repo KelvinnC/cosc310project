@@ -3,6 +3,7 @@ from typing import List, Optional
 from datetime import date
 from .review import Review
 
+
 class Movie(BaseModel):
     id: str
     title: str
@@ -13,12 +14,14 @@ class Movie(BaseModel):
     rating: Optional[float] = None
     posterUrl: Optional[str] = None
 
+
 class MovieCreate(BaseModel):
     title: str
     genre: str
     release: date
     description: str
     duration: int
+
 
 class MovieUpdate(BaseModel):
     title: str

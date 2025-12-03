@@ -11,7 +11,7 @@ async def search_external_movies(
 ):
     """
     Search for movies directly on TMDb (external database).
-    
+
     For a smarter search that checks local database first, use `/movies/search/all`.
     Each result includes a `movie_id` in format `tmdb_<id>` for use with reviews.
     """
@@ -25,7 +25,7 @@ async def search_external_movies(
 async def get_external_movie_details(tmdb_id: int):
     """
     Retrieve detailed information about a movie from TMDb.
-    
+
     Includes cast, crew, runtime, genres, and other metadata not in local database.
     """
     details = await get_tmdb_movie_details(tmdb_id)

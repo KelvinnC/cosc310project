@@ -19,7 +19,7 @@ router = APIRouter(prefix="/movies", tags=["movies"])
 def get_movies(sort_by: str | None = Query(None), order: str = Query("asc")):
     """
     Retrieve all movies in the local database.
-    
+
     - **sort_by**: Field to sort by (e.g., 'title', 'year')
     - **order**: Sort order ('asc' or 'desc')
     """
@@ -31,6 +31,7 @@ def post_movie(payload: MovieCreate):
     """Add a new movie to the local database."""
     return create_movie(payload)
 
+
 @router.get("/search/all", response_model=Dict[str, Any])
 async def search_movies_all(title: str = Query(..., min_length=1)):
     """
@@ -38,6 +39,7 @@ async def search_movies_all(title: str = Query(..., min_length=1)):
     Returns both local and external results in a structured format.
     """
     return await search_all_movies(title)
+
 
 @router.get("/search", response_model=List[MovieSummary])
 def search_movies(title: str = Query(..., min_length=1)):
@@ -47,15 +49,17 @@ def search_movies(title: str = Query(..., min_length=1)):
     """
     return search_movies_titles(title)
 
+
 @router.get("/search/", include_in_schema=False, response_model=List[MovieSummary])
 def search_movies_slash(title: str = Query(..., min_length=1)):
     return search_movies_titles(title)
+
 
 @router.get("/{movie_id}", response_model=List[MovieWithReviews], summary="Get movie with reviews")
 def get_movie(movie_id: str):
     """
     Retrieve a movie by ID along with all its reviews.
-    
+
     Returns an empty list if the movie is not found.
     """
     try:
@@ -64,6 +68,7 @@ def get_movie(movie_id: str):
         if getattr(exc, "status_code", None) == 404:
             return []
         raise
+
 
 @router.put("/{movie_id}", response_model=Movie, summary="Update movie")
 def put_movie(movie_id: str, payload: MovieUpdate):

@@ -17,6 +17,7 @@ def post_watchlist(request: WatchlistRequest, current_user: dict = Depends(jwt_a
     authorId = current_user.get("user_id")
     return add_movie_to_user_watchlist(author_id=authorId, movie_id=request.movie_id)
 
+
 @router.get("", response_model=Watchlist, status_code=201)
 def get_watchlist(current_user: dict = Depends(jwt_auth_dependency)):
     authorId = current_user.get("user_id")

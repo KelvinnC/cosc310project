@@ -63,4 +63,3 @@ def test_search_movies_with_reviews_no_match_returns_empty(mocker, client):
     resp = client.get("/reviews/search", params={"title": "Nonexistent"})
     assert resp.status_code == 200
     assert resp.json() == []
-

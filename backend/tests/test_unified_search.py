@@ -18,9 +18,9 @@ async def test_search_with_many_local_results(mock_tmdb, mock_local):
         MovieSummary(id="2", title="Inception Behind the Scenes"),
         MovieSummary(id="3", title="Inception Explained"),
     ]
-    
+
     result = await search_all_movies("inception")
-    
+
     assert len(result["local"]) == 3
     assert len(result["external"]) == 0
     assert result["source"] == "local"
@@ -36,7 +36,7 @@ async def test_search_with_few_local_results(mock_tmdb, mock_local):
     mock_local.return_value = [
         MovieSummary(id="1", title="Inception Documentary"),
     ]
-    
+
     # Mock TMDb results
     mock_tmdb.return_value = [
         {
@@ -47,9 +47,9 @@ async def test_search_with_few_local_results(mock_tmdb, mock_local):
             "poster_path": "/poster.jpg"
         }
     ]
-    
+
     result = await search_all_movies("inception")
-    
+
     assert len(result["local"]) == 1
     assert len(result["external"]) == 1
     assert result["source"] == "both"
@@ -64,7 +64,7 @@ async def test_search_with_no_local_results(mock_tmdb, mock_local):
     """When 0 local results, only return TMDb results"""
     # Mock no local results
     mock_local.return_value = []
-    
+
     # Mock TMDb results
     mock_tmdb.return_value = [
         {
@@ -75,9 +75,9 @@ async def test_search_with_no_local_results(mock_tmdb, mock_local):
             "poster_path": "/poster.jpg"
         }
     ]
-    
+
     result = await search_all_movies("inception")
-    
+
     assert len(result["local"]) == 0
     assert len(result["external"]) == 1
     assert result["source"] == "tmdb"
@@ -92,12 +92,12 @@ async def test_search_tmdb_failure_returns_local_only(mock_tmdb, mock_local):
     mock_local.return_value = [
         MovieSummary(id="1", title="Inception Documentary"),
     ]
-    
+
     # Mock TMDb failure
     mock_tmdb.side_effect = Exception("TMDb API error")
-    
+
     result = await search_all_movies("inception")
-    
+
     assert len(result["local"]) == 1
     assert len(result["external"]) == 0
     assert result["source"] == "local"
@@ -107,7 +107,7 @@ async def test_search_tmdb_failure_returns_local_only(mock_tmdb, mock_local):
 async def test_search_empty_query():
     """Empty query returns empty results"""
     result = await search_all_movies("")
-    
+
     assert len(result["local"]) == 0
     assert len(result["external"]) == 0
     assert result["source"] == "local"

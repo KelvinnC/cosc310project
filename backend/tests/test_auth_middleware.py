@@ -8,6 +8,7 @@ from app.middleware.auth_middleware import jwt_auth_dependency
 
 JWT_SECRET = os.getenv("JWT_SECRET")
 
+
 def make_request_with_token(token: str | None):
     headers = {}
     if token:

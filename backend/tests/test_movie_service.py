@@ -4,10 +4,12 @@ from fastapi import HTTPException
 from app.services.movie_service import create_movie, update_movie, get_movie_by_id, list_movies, delete_movie
 from app.schemas.movie import MovieCreate, Movie, MovieWithReviews
 
+
 def test_list_movie_empty_list(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
     movies = list_movies()
     assert movies == []
+
 
 def test_list_movie_has_movies(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[
@@ -28,6 +30,7 @@ def test_list_movie_has_movies(mocker):
     assert movies[0].duration == 90
     assert len(movies) == 1
 
+
 def test_create_movie_adds_movie(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.movie_repo.save_all")
@@ -46,6 +49,7 @@ def test_create_movie_adds_movie(mocker):
     assert movie.description == "Testing Description"
     assert movie.duration == 90
     assert mock_save.called
+
 
 def test_create_movie_collides_id(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[
@@ -67,6 +71,7 @@ def test_create_movie_collides_id(mocker):
     assert ex.value.status_code == 409
     assert ex.value.detail == "ID collision; retry"
 
+
 def test_create_movie_strips_whitespace(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.movie_repo.save_all")
@@ -79,6 +84,7 @@ def test_create_movie_strips_whitespace(mocker):
     assert movie.genre == "Horror"
     assert movie.description == "Testing Description"
     assert mock_save.called
+
 
 def test_get_movie_by_id_valid_id(mocker):
     mocker.patch("app.services.movie_service.load_all", return_value=[
@@ -96,12 +102,14 @@ def test_get_movie_by_id_valid_id(mocker):
     assert movie.title == "Test"
     assert isinstance(movie, MovieWithReviews)
 
+
 def test_get_movie_by_id_invalid_id(mocker):
     mocker.patch("app.services.movie_service.load_all", return_value=[])
     with pytest.raises(HTTPException) as ex:
         get_movie_by_id("1234")
     assert ex.value.status_code == 404
     assert "not found" in ex.value.detail
+
 
 def test_update_movie_valid_update(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[
@@ -123,6 +131,7 @@ def test_update_movie_valid_update(mocker):
     assert movie.description == "Now I have updated this movie!"
     assert mock_save.called
 
+
 def test_update_movie_invalid_id(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.movie_repo.save_all")
@@ -133,6 +142,7 @@ def test_update_movie_invalid_id(mocker):
         update_movie("1234", payload)
     assert ex.value.status_code == 404
     assert "not found" in ex.value.detail
+
 
 def test_delete_movie_valid_movie(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[
@@ -150,6 +160,7 @@ def test_delete_movie_valid_movie(mocker):
     assert all(m['id'] != "1234" for m in saved_movies)
     assert mock_save.called
 
+
 def test_delete_movie_invalid_movie(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.movie_repo.save_all")
@@ -158,20 +169,21 @@ def test_delete_movie_invalid_movie(mocker):
     assert ex.value.status_code == 404
     assert "not found" in ex.value.detail
 
+
 @pytest.mark.asyncio
 async def test_cache_tmdb_movie_returns_existing(mocker):
     """If movie already cached, return it without calling TMDb."""
     from app.services.movie_service import cache_tmdb_movie
     from unittest.mock import AsyncMock
-    
+
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[
-        {"id": "tmdb_27205", "title": "Inception", "description": "A thief...", 
+        {"id": "tmdb_27205", "title": "Inception", "description": "A thief...",
          "duration": 148, "genre": "Action", "release": "2010-07-15"}
     ])
     mock_tmdb = mocker.patch("app.services.movie_service.get_tmdb_movie_details", new=AsyncMock())
-    
+
     result = await cache_tmdb_movie("tmdb_27205")
-    
+
     assert result.id == "tmdb_27205"
     assert result.title == "Inception"
     mock_tmdb.assert_not_called()
@@ -182,7 +194,7 @@ async def test_cache_tmdb_movie_fetches_and_saves(mocker):
     """If movie not cached, fetch from TMDb and save locally."""
     from app.services.movie_service import cache_tmdb_movie
     from unittest.mock import AsyncMock
-    
+
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
     mock_save = mocker.patch("app.repositories.movie_repo.save_all")
     mocker.patch("app.services.movie_service.get_tmdb_movie_details", new=AsyncMock(return_value={
@@ -193,9 +205,9 @@ async def test_cache_tmdb_movie_fetches_and_saves(mocker):
         "genre": "Action, Sci-Fi",
         "release": "2010-07-15"
     }))
-    
+
     result = await cache_tmdb_movie("tmdb_27205")
-    
+
     assert result.id == "tmdb_27205"
     assert result.title == "Inception"
     assert mock_save.called
@@ -208,10 +220,10 @@ async def test_cache_tmdb_movie_not_found(mocker):
     """Raises 404 if TMDb returns no data."""
     from app.services.movie_service import cache_tmdb_movie
     from unittest.mock import AsyncMock
-    
+
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
     mocker.patch("app.services.movie_service.get_tmdb_movie_details", new=AsyncMock(return_value=None))
-    
+
     with pytest.raises(HTTPException) as ex:
         await cache_tmdb_movie("tmdb_99999999")
     assert ex.value.status_code == 404
@@ -222,9 +234,9 @@ async def test_cache_tmdb_movie_not_found(mocker):
 async def test_cache_tmdb_movie_invalid_id(mocker):
     """Raises 400 for invalid TMDb movie ID format."""
     from app.services.movie_service import cache_tmdb_movie
-    
+
     mocker.patch("app.repositories.movie_repo.load_all", return_value=[])
-    
+
     with pytest.raises(HTTPException) as ex:
         await cache_tmdb_movie("invalid_id")
     assert ex.value.status_code == 400

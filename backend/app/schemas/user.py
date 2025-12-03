@@ -6,6 +6,7 @@ from .review import Review
 UsernameStr = Annotated[str, Field(max_length=20, min_length=3)]
 PasswordStr = Annotated[str, Field(max_length=20, min_length=8)]
 
+
 class User(BaseModel):
     """User Schema containing system-level data"""
     id: str
@@ -15,16 +16,19 @@ class User(BaseModel):
     created_at: datetime
     active: bool = True
     warnings: int = 0
-    
+
+
 class UserCreate(BaseModel):
     """Schema for user registration"""
     username: UsernameStr
     password: PasswordStr
 
+
 class UserUpdate(BaseModel):
     """Schema for user update"""
     username: Optional[UsernameStr] = None
     password: Optional[PasswordStr] = None
+
 
 class UserBadge(BaseModel):
     """Lightweight badge descriptor for dashboard display."""
@@ -33,6 +37,7 @@ class UserBadge(BaseModel):
     category: Optional[str] = None
     position: Optional[int] = None
     medalColor: Optional[str] = None
+
 
 class UserSummaryResponse(BaseModel):
     """Schema for user dashboard"""

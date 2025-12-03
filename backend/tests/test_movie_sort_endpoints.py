@@ -52,4 +52,3 @@ def test_sort_movies_default_order_is_asc(mocker, client):
     assert res.status_code == 200
     data = res.json()
     assert [m["id"] for m in data] == ["3", "1", "2"]
-

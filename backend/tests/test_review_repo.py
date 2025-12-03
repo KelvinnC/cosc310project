@@ -79,6 +79,7 @@ def test_save_all_saves_data(mocker):
 
     mock_replace.assert_called_once_with(tmp_path, DATA_PATH)
 
+
 def test_sort_by_rating_ascending_descending(mocker):
     data = [
         {"id": 1, "movieId": "A", "rating": 3.0},
@@ -121,7 +122,6 @@ def test_sort_by_movie_id_supports_uuid(mocker):
 
     desc = get_all_reviews(sort_by="movieId", order="desc")
     assert [r["id"] for r in desc] == [2, 3, 1, 4]
-
 
 
 def test_sort_by_movie_title_ascending_descending(mocker):

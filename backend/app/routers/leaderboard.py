@@ -13,7 +13,7 @@ router = APIRouter(prefix="/leaderboard", tags=["leaderboard"])
 def get_leaderboard(limit: int = 10) -> List[Review]:
     """
     Retrieve the top-voted reviews ranked by vote count.
-    
+
     - **limit**: Maximum number of reviews to return (default: 10)
     """
     return get_leaderboard_reviews(limit=limit)

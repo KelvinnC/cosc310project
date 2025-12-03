@@ -5,10 +5,12 @@ from app.schemas.user import User
 from app.schemas.review import Review
 from app.routers.user_home import jwt_auth_dependency
 
+
 @pytest.fixture
 def client():
     with TestClient(app) as client:
         yield client
+
 
 def test_get_user_homepage(mocker, client, mock_unauthorized_user, user_data):
     app.dependency_overrides[jwt_auth_dependency] = lambda: mock_unauthorized_user
@@ -35,6 +37,7 @@ def test_get_user_homepage(mocker, client, mock_unauthorized_user, user_data):
     assert user_summary["user"]["username"] == "testmovielover"
     assert user_summary["reviews"][0]["id"] == 1
 
+
 def test_download_dashboard(mocker, client, mock_unauthorized_user, user_data):
     """Test /home/download returns JSON with download header"""
     app.dependency_overrides[jwt_auth_dependency] = lambda: mock_unauthorized_user
@@ -49,6 +52,7 @@ def test_download_dashboard(mocker, client, mock_unauthorized_user, user_data):
     assert "Content-Disposition" in response.headers
     assert "dashboard.json" in response.headers["Content-Disposition"]
     assert response.json()["user"]["username"] == "testmovielover"
+
 
 def test_download_dashboard_unauthenticated(client):
     """Test /home/download requires authentication"""

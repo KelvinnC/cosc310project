@@ -19,6 +19,7 @@ def _to_float(val: Any) -> Optional[float]:
     except (TypeError, ValueError):
         return None
 
+
 def _filter_by_rating_dicts(
     reviews: List[Dict[str, Any]], rating: Optional[float]
 ) -> List[Dict[str, Any]]:
@@ -64,6 +65,7 @@ def _filter_by_search(
     query = search.lower()
     return [rv for rv in reviews if _matches_search_query(rv, query, id_to_title)]
 
+
 def _make_rating_sort_key(descending: bool = False):
     def _key(rv: Dict[str, Any]):
         val = _to_float(rv.get("rating"))
@@ -73,6 +75,7 @@ def _make_rating_sort_key(descending: bool = False):
 
     return _key
 
+
 def _build_movie_title_index() -> Dict[str, str]:
     movies = movie_repo.load_all()
     return {
@@ -80,6 +83,7 @@ def _build_movie_title_index() -> Dict[str, str]:
         for mv in movies
         if isinstance(mv.get("id"), str)
     }
+
 
 def _make_movie_id_sort_key():
     def _key(rv: Dict[str, Any]):
@@ -89,6 +93,7 @@ def _make_movie_id_sort_key():
         return (1, mid)
 
     return _key
+
 
 def _make_movie_title_sort_key(
     id_to_title: Dict[str, str]
@@ -100,6 +105,7 @@ def _make_movie_title_sort_key(
         return (1, id_to_title.get(mid, ""))
 
     return _key
+
 
 def _sort_reviews(
     reviews: List[Dict[str, Any]],
@@ -126,6 +132,7 @@ def _sort_reviews(
 
     return reviews
 
+
 def _paginate(
     items: List[Dict[str, Any]], page: int, per_page: int
 ) -> tuple[List[Dict[str, Any]], int, int]:
@@ -134,6 +141,7 @@ def _paginate(
     total_pages = ceil(total / per_page) if per_page > 0 else 1
     start = (page - 1) * per_page
     return items[start : start + per_page], total, total_pages
+
 
 def _enrich_with_movie_titles(
     reviews: List[Dict[str, Any]],
@@ -148,6 +156,7 @@ def _enrich_with_movie_titles(
         result.append(ReviewWithMovie(**review_data, movieTitle=title))
     return result
 
+
 def filter_and_sort_reviews(
     *,
     rating: Optional[float] = None,
@@ -160,6 +169,7 @@ def filter_and_sort_reviews(
     id_to_title = _build_movie_title_index()
     result = _sort_reviews(result, sort_by, order, id_to_title)
     return [Review(**review) for review in result]
+
 
 def list_reviews_paginated(
     *,
@@ -187,6 +197,7 @@ def list_reviews_paginated(
         total_pages=total_pages,
     )
 
+
 def list_reviews(
     *,
     rating: Optional[float] = None,
@@ -195,6 +206,7 @@ def list_reviews(
 ) -> List[Review]:
     """Return all reviews matching filters (non-paginated)."""
     return filter_and_sort_reviews(rating=rating, sort_by=sort_by, order=order)
+
 
 def get_leaderboard_reviews(limit: int = 10) -> List[Review]:
     """Return top reviews ranked by votes (descending), limited to `limit`.
@@ -211,6 +223,7 @@ def get_leaderboard_reviews(limit: int = 10) -> List[Review]:
     )
     return sorted_reviews[:limit]
 
+
 def get_review_by_id(review_id: int) -> Review:
     """Get a review by ID."""
     reviews = load_all()
@@ -219,13 +232,14 @@ def get_review_by_id(review_id: int) -> Review:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
     return Review(**reviews[index])
 
+
 async def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
     """Create a new review. For TMDb movies, caches to local movies.json."""
     reviews = load_all(load_invisible=True)
     new_review_id = max((rev.get("id", 0) for rev in reviews), default=0) + 1
 
     movie_id = payload.movieId.strip()
-    
+
     if is_tmdb_movie_id(movie_id):
         try:
             await cache_tmdb_movie(movie_id)
@@ -235,7 +249,7 @@ async def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
         movies = movie_repo.load_all()
         if not any(m.get("id") == movie_id for m in movies):
             raise HTTPException(status_code=400, detail="Invalid movieId: movie does not exist")
-    
+
     new_review = Review(
         id=new_review_id,
         movieId=movie_id,
@@ -250,6 +264,7 @@ async def create_review(payload: ReviewCreate, *, author_id: str) -> Review:
     save_all(reviews)
     return new_review
 
+
 def update_review(review_id: int, payload: ReviewUpdate) -> Review:
     """Update an existing review. Only rating, title, and body can be modified."""
     reviews = load_all(load_invisible=True)
@@ -257,7 +272,7 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
 
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
-    
+
     old_review = reviews[index]
     updated_review = Review(
         id=review_id,
@@ -275,40 +290,43 @@ def update_review(review_id: int, payload: ReviewUpdate) -> Review:
     save_all(reviews)
     return updated_review
 
+
 def delete_review(review_id: int):
     """Delete a review by ID."""
     reviews = load_all(load_invisible=True)
     index = find_dict_by_id(reviews, "id", review_id)
-    
+
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
-    
+
     reviews.pop(index)
     save_all(reviews)
+
 
 def increment_vote(review_id: int) -> None:
     """Increment the vote count for a review."""
     reviews = load_all(load_invisible=True)
     index = find_dict_by_id(reviews, "id", review_id)
-    
+
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
-    
+
     reviews[index]["votes"] = reviews[index].get("votes", 0) + 1
     save_all(reviews)
+
 
 def mark_review_as_flagged(review: Review) -> None:
     """Mark a review as flagged"""
     reviews = load_all()
     index = find_dict_by_id(reviews, "id", review.id)
-    
+
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=REVIEW_NOT_FOUND)
-    
+
     reviews[index]["flagged"] = True
     save_all(reviews)
 
-    
+
 def mark_review_as_unflagged(review: Review) -> None:
     """Mark a review as unflagged"""
     reviews = load_all(load_invisible=True)
@@ -319,7 +337,7 @@ def mark_review_as_unflagged(review: Review) -> None:
 
     reviews[index]["flagged"] = False
     save_all(reviews)
-    
+
 
 def get_reviews_by_author(user_id: str) -> List[Review]:
     results = []

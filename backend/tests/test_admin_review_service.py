@@ -1,10 +1,12 @@
 from app.services.admin_review_service import get_flagged_reviews, hide_review
 from app.schemas.review import Review
 
+
 def test_get_flagged_reviews_no_reviews(mocker):
     mocker.patch("app.services.admin_review_service.list_reviews", return_value=[])
     result = get_flagged_reviews()
     assert len(result) == 0
+
 
 def test_get_flagged_reviews_has_flagged(mocker):
     flagged_review = [Review(**{
@@ -22,6 +24,7 @@ def test_get_flagged_reviews_has_flagged(mocker):
     result = get_flagged_reviews()
     assert len(result) == 1
     assert all([review.flagged for review in result])
+
 
 def test_get_flagged_reviews_has_flagged_and_unflagged(mocker):
     flagged_review = [Review(**{
@@ -50,6 +53,7 @@ def test_get_flagged_reviews_has_flagged_and_unflagged(mocker):
     result = get_flagged_reviews()
     assert len(result) == 1
     assert all([review.flagged for review in result])
+
 
 def test_hide_review_hides_review(mocker):
     mocker.patch("app.services.admin_review_service.load_all", return_value=[

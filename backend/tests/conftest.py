@@ -16,14 +16,15 @@ def mock_logger(mocker, tmp_path):
     from app.utils.logger import Logger
     original_instance = Logger._instance
     Logger._instance = None
-    
+
     test_logger = Logger()
     test_logger.log_file = tmp_path / "logs.json"
     test_logger.log_file.write_text("[]")
-    
+
     yield test_logger
-    
+
     Logger._instance = original_instance
+
 
 @pytest.fixture
 def user_data():
@@ -38,6 +39,7 @@ def user_data():
     }
     return payload
 
+
 @pytest.fixture
 def mock_admin_user():
     import datetime
@@ -45,6 +47,7 @@ def mock_admin_user():
                 "username": "admin",
                 "exp": datetime.datetime.now() + datetime.timedelta(1),
                 "role": "admin"}
+
 
 @pytest.fixture
 def mock_unauthorized_user():

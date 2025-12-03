@@ -10,6 +10,7 @@ def client():
     with TestClient(app) as client:
         yield client
 
+
 def test_get_watchlist(mocker, client):
     mock_user_id = 101
     mock_watchlist_data = {
@@ -21,7 +22,7 @@ def test_get_watchlist(mocker, client):
     app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": mock_user_id}
 
     mocker.patch(
-        "app.routers.watchlist_endpoints.get_watchlist_by_author_id", 
+        "app.routers.watchlist_endpoints.get_watchlist_by_author_id",
         return_value=mock_watchlist_data
     )
 
@@ -34,6 +35,7 @@ def test_get_watchlist(mocker, client):
     assert data["id"] == 50
     assert data["authorId"] == 101
     assert len(data["movieIds"]) == 2
+
 
 def test_post_watchlist(mocker, client):
     mock_user_id = 101
@@ -54,7 +56,7 @@ def test_post_watchlist(mocker, client):
 
     response = client.post(
         "/watchlist/add",
-        json={"movie_id": new_movie_id}   
+        json={"movie_id": new_movie_id}
     )
 
     app.dependency_overrides = {}
@@ -70,4 +72,3 @@ def test_post_watchlist(mocker, client):
         author_id=mock_user_id,
         movie_id=new_movie_id
     )
-

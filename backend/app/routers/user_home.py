@@ -11,7 +11,7 @@ router = APIRouter(prefix="/home", tags=["home"])
 def get_user_homepage(current_user: dict = Depends(jwt_auth_dependency)):
     """
     Retrieve the authenticated user's personalized dashboard.
-    
+
     Includes user profile, recent reviews, battle statistics, and activity summary.
     """
     user_id = current_user.get("user_id")
@@ -22,7 +22,7 @@ def get_user_homepage(current_user: dict = Depends(jwt_auth_dependency)):
 def download_dashboard(current_user: dict = Depends(jwt_auth_dependency)):
     """
     Download the user's dashboard data as a JSON file.
-    
+
     Returns a downloadable file containing the user's complete activity history.
     """
     data = get_user_summary(current_user.get("user_id"))
