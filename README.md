@@ -12,10 +12,10 @@ A full-stack multiuser system for collaborative movie review management and comp
 
 | Layer | Technology |
 |:------|:-----------|
-| Backend | FastAPI (Python 3.11) |
+| Backend | FastAPI (Python 3.12) |
 | Frontend | Next.js 16 / React 19 |
 | Data Storage | JSON files |
-| Testing | Pytest (96% coverage) |
+| Testing | Pytest (90% coverage, 356 tests) |
 | CI/CD | GitHub Actions |
 | Containerization | Docker |
 
@@ -223,7 +223,10 @@ cd backend
 python -m pytest --cov=app --cov-report=term-missing
 ```
 
-**Current coverage:** 96%
+**Current Stats:**
+- **Tests:** 356 passed
+- **Coverage:** 90%
+- **Runtime:** ~11 seconds
 
 ---
 
