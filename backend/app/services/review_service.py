@@ -19,6 +19,13 @@ def _to_float(val: Any) -> Optional[float]:
     except (TypeError, ValueError):
         return None
 
+def _normalize_movie_id(raw_id: Any, idx_to_uuid: Dict[int, str]) -> Optional[str]:
+    if isinstance(raw_id, str):
+        return raw_id
+    if isinstance(raw_id, int):
+        return idx_to_uuid.get(raw_id)
+    return None
+
 def _filter_by_rating_dicts(
     reviews: List[Dict[str, Any]], rating: Optional[float]
 ) -> List[Dict[str, Any]]:
@@ -30,18 +37,21 @@ def _filter_by_rating_dicts(
 
 def _get_movie_title(
     raw_movie_id: Any,
+    idx_to_uuid: Dict[int, str],
     id_to_title: Dict[str, str],
     default: str = "",
 ) -> str:
     """Get movie title from local DB (includes cached TMDb movies)."""
-    if isinstance(raw_movie_id, str):
-        return id_to_title.get(raw_movie_id, default)
+    movie_id = _normalize_movie_id(raw_movie_id, idx_to_uuid)
+    if movie_id:
+        return id_to_title.get(movie_id, default)
     return default
 
 
 def _matches_search_query(
     rv: Dict[str, Any],
     query: str,
+    idx_to_uuid: Dict[int, str],
     id_to_title: Dict[str, str],
 ) -> bool:
     """Check if a review matches a search query (title, body, or movie title)."""
@@ -49,7 +59,7 @@ def _matches_search_query(
         return True
     if query in rv.get("reviewBody", "").lower():
         return True
-    movie_title = _get_movie_title(rv.get("movieId"), id_to_title)
+    movie_title = _get_movie_title(rv.get("movieId"), idx_to_uuid, id_to_title)
     return query in movie_title.lower()
 
 
@@ -57,12 +67,13 @@ def _filter_by_search(
     reviews: List[Dict[str, Any]],
     search: Optional[str],
     id_to_title: Dict[str, str],
+    idx_to_uuid: Dict[int, str],
 ) -> List[Dict[str, Any]]:
     """Filter reviews by search query (title, body, or movie title)."""
     if not search:
         return reviews
     query = search.lower()
-    return [rv for rv in reviews if _matches_search_query(rv, query, id_to_title)]
+    return [rv for rv in reviews if _matches_search_query(rv, query, idx_to_uuid, id_to_title)]
 
 def _make_rating_sort_key(descending: bool = False):
     def _key(rv: Dict[str, Any]):
@@ -73,29 +84,33 @@ def _make_rating_sort_key(descending: bool = False):
 
     return _key
 
-def _build_movie_title_index() -> Dict[str, str]:
+def _build_movie_indexes() -> tuple[Dict[int, str], Dict[str, str]]:
     movies = movie_repo.load_all()
-    return {
+    idx_to_uuid: Dict[int, str] = {
+        idx + 1: mv.get("id")
+        for idx, mv in enumerate(movies)
+        if isinstance(mv.get("id"), str)
+    }
+    id_to_title: Dict[str, str] = {
         mv.get("id"): (mv.get("title") or "")
         for mv in movies
         if isinstance(mv.get("id"), str)
     }
+    return idx_to_uuid, id_to_title
 
-def _make_movie_id_sort_key():
+def _make_movie_id_sort_key(idx_to_uuid: Dict[int, str]):
     def _key(rv: Dict[str, Any]):
-        mid = rv.get("movieId")
-        if not isinstance(mid, str):
-            return (0, "")
-        return (1, mid)
+        norm = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
+        return (0, "") if norm is None else (1, norm)
 
     return _key
 
 def _make_movie_title_sort_key(
-    id_to_title: Dict[str, str]
+    idx_to_uuid: Dict[int, str], id_to_title: Dict[str, str]
 ):
     def _key(rv: Dict[str, Any]):
-        mid = rv.get("movieId")
-        if not isinstance(mid, str):
+        mid = _normalize_movie_id(rv.get("movieId"), idx_to_uuid)
+        if mid is None:
             return (0, "")
         return (1, id_to_title.get(mid, ""))
 
@@ -105,6 +120,7 @@ def _sort_reviews(
     reviews: List[Dict[str, Any]],
     sort_by: Optional[str],
     order: str,
+    idx_to_uuid: Dict[int, str],
     id_to_title: Dict[str, str],
 ) -> List[Dict[str, Any]]:
     """Apply sorting to a list of review dicts."""
@@ -119,9 +135,9 @@ def _sort_reviews(
 
     if key_name in ("movieid", "movietitle"):
         if key_name == "movieid":
-            sort_key = _make_movie_id_sort_key()
+            sort_key = _make_movie_id_sort_key(idx_to_uuid)
         else:
-            sort_key = _make_movie_title_sort_key(id_to_title)
+            sort_key = _make_movie_title_sort_key(idx_to_uuid, id_to_title)
         return sorted(reviews, key=sort_key, reverse=descending)
 
     return reviews
@@ -137,14 +153,14 @@ def _paginate(
 
 def _enrich_with_movie_titles(
     reviews: List[Dict[str, Any]],
+    idx_to_uuid: Dict[int, str],
     id_to_title: Dict[str, str],
 ) -> List[ReviewWithMovie]:
     """Convert review dicts to ReviewWithMovie models with titles."""
     result = []
     for review in reviews:
-        movie_id = review.get("movieId")
-        title = _get_movie_title(movie_id, id_to_title, "Unknown Movie")
-        review_data = {**review, "movieId": str(movie_id or "")}
+        title = _get_movie_title(review.get("movieId"), idx_to_uuid, id_to_title, "Unknown Movie")
+        review_data = {**review, "movieId": str(review.get("movieId", ""))}
         result.append(ReviewWithMovie(**review_data, movieTitle=title))
     return result
 
@@ -157,8 +173,8 @@ def filter_and_sort_reviews(
     """Filter and sort reviews, returning Review models."""
     reviews_raw = load_all()
     result = _filter_by_rating_dicts(reviews_raw, rating)
-    id_to_title = _build_movie_title_index()
-    result = _sort_reviews(result, sort_by, order, id_to_title)
+    idx_to_uuid, id_to_title = _build_movie_indexes()
+    result = _sort_reviews(result, sort_by, order, idx_to_uuid, id_to_title)
     return [Review(**review) for review in result]
 
 def list_reviews_paginated(
@@ -173,11 +189,11 @@ def list_reviews_paginated(
     """Return paginated reviews with movie titles."""
     reviews_raw = load_all()
     filtered = _filter_by_rating_dicts(reviews_raw, rating)
-    id_to_title = _build_movie_title_index()
-    filtered = _filter_by_search(filtered, search, id_to_title)
-    sorted_reviews = _sort_reviews(filtered, sort_by, order, id_to_title)
+    idx_to_uuid, id_to_title = _build_movie_indexes()
+    filtered = _filter_by_search(filtered, search, id_to_title, idx_to_uuid)
+    sorted_reviews = _sort_reviews(filtered, sort_by, order, idx_to_uuid, id_to_title)
     paginated, total, total_pages = _paginate(sorted_reviews, page, per_page)
-    reviews_with_movies = _enrich_with_movie_titles(paginated, id_to_title)
+    reviews_with_movies = _enrich_with_movie_titles(paginated, idx_to_uuid, id_to_title)
 
     return PaginatedReviews(
         reviews=reviews_with_movies,

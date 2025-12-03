@@ -1,16 +1,15 @@
 import uuid
-from datetime import date as date_type
-from typing import Any, Dict, List
-
+from typing import List, Dict, Any, Optional
 from fastapi import HTTPException
-
+from datetime import date as date_type
 from app.schemas.movie import Movie, MovieCreate, MovieUpdate, MovieSummary, MovieWithReviews
 import app.repositories.movie_repo as movie_repo
+from app.repositories.movie_repo import load_all
 from app.repositories.review_repo import load_all as load_reviews
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 from app.services.tmdb_service import (
-    get_tmdb_movie_details,
-    validate_tmdb_movie_id,
+    get_tmdb_movie_details, 
+    validate_tmdb_movie_id
 )
 
 
@@ -36,16 +35,8 @@ def _get_reviews_for_movie(movie_id: str) -> List[Dict[str, Any]]:
     return [rv for rv in load_reviews() if rv.get("movieId") == movie_id]
 
 
-def load_all() -> List[Dict[str, Any]]:
-    return movie_repo.load_all()
-
-
-def save_all(movies: List[Dict[str, Any]]) -> None:
-    movie_repo.save_all(movies)
-
-
 def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
-    movies: List[Dict[str, Any]] = load_all()
+    movies: List[Dict[str, Any]] = movie_repo.load_all()
 
     if sort_by == "rating":
         direction = (order or "asc").lower()
@@ -54,13 +45,23 @@ def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
         reviews_data = load_reviews()
         if reviews_data:
             movie_ids = {mv.get("id") for mv in movies}
+            index_to_id: Dict[int, Any] = {
+                idx + 1: mv.get("id") for idx, mv in enumerate(movies)
+            }
 
             rating_sums: Dict[str, float] = {}
             rating_counts: Dict[str, int] = {}
 
             for rv in reviews_data:
                 mv_id = rv.get("movieId")
-                if not isinstance(mv_id, str) or mv_id not in movie_ids:
+                resolved_id = None
+
+                if isinstance(mv_id, str) and mv_id in movie_ids:
+                    resolved_id = mv_id
+                elif isinstance(mv_id, int):
+                    resolved_id = index_to_id.get(mv_id)
+
+                if not resolved_id:
                     continue
 
                 try:
@@ -68,8 +69,8 @@ def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
                 except (TypeError, ValueError):
                     continue
 
-                rating_sums[mv_id] = rating_sums.get(mv_id, 0.0) + rating_val
-                rating_counts[mv_id] = rating_counts.get(mv_id, 0) + 1
+                rating_sums[resolved_id] = rating_sums.get(resolved_id, 0.0) + rating_val
+                rating_counts[resolved_id] = rating_counts.get(resolved_id, 0) + 1
 
             avg_ratings: Dict[str, float] = {
                 movie_id: rating_sums[movie_id] / rating_counts[movie_id]
@@ -93,24 +94,16 @@ def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
 
     return [Movie(**mv) for mv in movies]
 
-
 def create_movie(payload: MovieCreate) -> Movie:
-    movies = load_all()
+    movies = movie_repo.load_all()
     new_movie_id = str(uuid.uuid4())
     if any(mov.get("id") == new_movie_id for mov in movies):
         raise HTTPException(status_code=409, detail="ID collision; retry")
-    new_movie = Movie(
-        id=new_movie_id,
-        title=payload.title.strip(),
-        genre=payload.genre.strip(),
-        release=payload.release,
-        description=payload.description.strip(),
-        duration=payload.duration,
-    )
+    new_movie = Movie(id=new_movie_id, title=payload.title.strip(), genre=payload.genre.strip(), release=payload.release, 
+                      description=payload.description.strip(), duration=payload.duration)
     movies.append(new_movie.model_dump(mode="json"))
-    save_all(movies)
+    movie_repo.save_all(movies)
     return new_movie
-
 
 def get_movie_by_id(movie_id: str) -> MovieWithReviews:
     """Get movie by ID (local lookup only - TMDb movies are cached on review creation)."""
@@ -130,12 +123,11 @@ def get_movie_by_id(movie_id: str) -> MovieWithReviews:
         reviews=_get_reviews_for_movie(movie_id),
     )
 
-
 def search_movies_titles(query: str) -> List[MovieSummary]:
     q = (query or "").strip().lower()
     if not q:
         return []
-    movies = load_all()
+    movies = movie_repo.load_all()
     results: List[MovieSummary] = []
     for mv in movies:
         title = (mv.get("title") or "").lower()
@@ -143,49 +135,40 @@ def search_movies_titles(query: str) -> List[MovieSummary]:
             results.append(MovieSummary(
                 id=mv.get("id"),
                 title=mv.get("title"),
-                release=mv.get("release"),
+                release=mv.get("release")
             ))
     return results
 
-
 def movie_summary_by_id(movie_id: str) -> List[MovieSummary]:
-    movies = load_all()
+    movies = movie_repo.load_all()
     index = find_dict_by_id(movies, "id", movie_id)
     if index == NOT_FOUND:
         return []
     mv = movies[index]
     return [MovieSummary(id=mv.get("id"), title=mv.get("title"))]
 
-
 def update_movie(movie_id: str, payload: MovieUpdate) -> Movie:
-    movies = load_all()
+    movies = movie_repo.load_all()
     index = find_dict_by_id(movies, "id", movie_id)
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
-    updated = Movie(
-        id=movie_id,
-        title=payload.title.strip(),
-        genre=payload.genre.strip(),
-        release=payload.release,
-        description=payload.description.strip(),
-        duration=payload.duration,
-    )
+    updated = Movie(id=movie_id, title=payload.title.strip(), genre=payload.genre.strip(), release=payload.release, 
+                    description=payload.description.strip(), duration=payload.duration)
     movies[index] = updated.model_dump(mode="json")
-    save_all(movies)
+    movie_repo.save_all(movies)
     return updated
 
-
 def delete_movie(movie_id: str) -> None:
-    movies = load_all()
+    movies = movie_repo.load_all()
     new_movies = [movie for movie in movies if movie.get("id") != movie_id]
     if len(new_movies) == len(movies):
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
-    save_all(new_movies)
+    movie_repo.save_all(new_movies)
 
 
 async def cache_tmdb_movie(movie_id: str) -> Movie:
     """Fetch TMDb movie and cache to local movies.json. Returns existing if cached."""
-    movies = load_all()
+    movies = movie_repo.load_all()
     
     existing = next((m for m in movies if m.get("id") == movie_id), None)
     if existing:
@@ -201,6 +184,6 @@ async def cache_tmdb_movie(movie_id: str) -> Movie:
     new_movie = Movie(**movie_dict)
     
     movies.append(new_movie.model_dump(mode="json"))
-    save_all(movies)
+    movie_repo.save_all(movies)
     
     return new_movie

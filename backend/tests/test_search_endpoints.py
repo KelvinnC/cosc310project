@@ -40,8 +40,8 @@ def test_search_movies_with_reviews_legacy_integer_ids(mocker, client):
         {"id": "uuid-inception", "title": "Inception", "description": "", "duration": 148, "genre": "Sci-Fi", "release": "2010-07-16"},
     ]
     reviews = [
-        {"id": 10, "movieId": "uuid-inception", "date": "2020-01-01", "authorId": 1, "reviewTitle": "Great!", "reviewBody": "Loved the layers", "rating": 5.0, "votes": 0, "flagged": False},
-        {"id": 12, "movieId": "uuid-joker", "date": "2020-01-03", "authorId": 2, "reviewTitle": "Intense", "reviewBody": "Dark character study", "rating": 4.0, "votes": 0, "flagged": False},
+        {"id": 10, "movieId": 2, "date": "2020-01-01", "authorId": 1, "reviewTitle": "Great!", "reviewBody": "Loved the layers", "rating": 5.0, "votes": 0, "flagged": False},
+        {"id": 12, "movieId": 1, "date": "2020-01-03", "authorId": 2, "reviewTitle": "Intense", "reviewBody": "Dark character study", "rating": 4.0, "votes": 0, "flagged": False},
     ]
     mocker.patch("app.services.search_service.load_movies", return_value=movies)
     mocker.patch("app.services.search_service.load_reviews", return_value=reviews)

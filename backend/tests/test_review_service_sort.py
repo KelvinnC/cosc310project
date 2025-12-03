@@ -61,7 +61,7 @@ def test_sort_by_movie_id_supports_uuid_and_index(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
     asc = list_reviews(sort_by="movieId", order="asc")
-    assert [r.id for r in asc] == [1, 4, 3, 2]
+    assert [r.id for r in asc] == [4, 1, 3, 2]
 
     desc = list_reviews(sort_by="movieId", order="desc")
     assert [r.id for r in desc] == [2, 3, 1, 4]
@@ -83,7 +83,7 @@ def test_sort_by_movie_title_ascending_descending(mocker):
     mocker.patch("app.repositories.movie_repo.load_all", return_value=movies)
 
     asc = list_reviews(sort_by="movieTitle", order="asc")
-    assert [r.id for r in asc] == [2, 4, 3, 1]
+    assert [r.id for r in asc] == [4, 2, 3, 1]
 
     desc = list_reviews(sort_by="movieTitle", order="desc")
     assert [r.id for r in desc] == [1, 3, 2, 4]
