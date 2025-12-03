@@ -26,8 +26,17 @@ class UserUpdate(BaseModel):
     username: Optional[UsernameStr] = None
     password: Optional[PasswordStr] = None
 
+class UserBadge(BaseModel):
+    """Lightweight badge descriptor for dashboard display."""
+    title: str
+    description: Optional[str] = None
+    category: Optional[str] = None
+    position: Optional[int] = None
+    medalColor: Optional[str] = None
+
 class UserSummaryResponse(BaseModel):
     """Schema for user dashboard"""
     battles: List[Any]
     reviews: List[Review]
     user: User
+    badges: List[UserBadge] = Field(default_factory=list)

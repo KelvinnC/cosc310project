@@ -1,38 +1,10 @@
-from typing import List, Dict, Set, Tuple, Optional
+from typing import Dict, List, Set, Optional
 
 from app.schemas.search import MovieSearch, MovieWithReviews
 from app.schemas.review import Review
 from app.repositories.movie_repo import load_all as load_movies
 from app.repositories.review_repo import load_all as load_reviews
 
-
-def _build_idx_to_uuid(movies: List[Dict]) -> Dict[int, str]:
-    return {
-        idx + 1: mv.get("id")
-        for idx, mv in enumerate(movies)
-        if isinstance(mv.get("id"), str)
-    }
-
-
-def _normalize_review_movie_id(
-    rv: Dict,
-    idx_to_uuid: Dict[int, str],
-) -> Tuple[Optional[str], Optional[Dict]]:
-    """
-    Normalize a review's movieId to a UUID string.
-
-    Returns (uuid_or_none, maybe_modified_review_dict_or_none).
-    If the id cannot be resolved, returns (None, None).
-    """
-    movie_id = rv.get("movieId")
-    if isinstance(movie_id, str):
-        return movie_id, rv
-    if isinstance(movie_id, int):
-        uuid = idx_to_uuid.get(movie_id)
-        if not uuid:
-            return None, None
-        return uuid, {**rv, "movieId": uuid}
-    return None, None
 
 def _matching_movie_ids(search: MovieSearch) -> Set[str]:
     movies = load_movies()
@@ -46,29 +18,54 @@ def _matching_movie_ids(search: MovieSearch) -> Set[str]:
     return match_ids
 
 
+def _legacy_index_to_id_map() -> Dict[int, str]:
+    """Map 1-based legacy integer indices to movie UUID ids.
+
+    Some historic data stored integer movieId values corresponding to the
+    position of the movie in the movies list (1-based). Build a mapping so
+    that those legacy values can be resolved to their string ids.
+    """
+    mapping: Dict[int, str] = {}
+    for idx, mv in enumerate(load_movies(), start=1):
+        mid = mv.get("id")
+        if isinstance(mid, str):
+            mapping[idx] = mid
+    return mapping
+
+
+def _resolve_movie_id(raw_id: object, legacy_map: Dict[int, str]) -> Optional[str]:
+    """Resolve a raw movieId (str or legacy int) to a string id.
+
+    Returns the resolved string id if possible, otherwise None.
+    """
+    if isinstance(raw_id, str):
+        return raw_id
+    if isinstance(raw_id, int):
+        return legacy_map.get(raw_id)
+    return None
+
+
 def _iter_matching_reviews(search: MovieSearch, *, page: int, per_page: int) -> List[Review]:
-    movies = load_movies()
     matched_movie_ids = _matching_movie_ids(search)
     if not matched_movie_ids:
         return []
 
-    idx_to_uuid = _build_idx_to_uuid(movies)
-
+    legacy_map = _legacy_index_to_id_map()
     start = (page - 1) * per_page
     taken = 0
     seen = 0
     results: List[Review] = []
 
     for rv in load_reviews():
-        uuid, normalized = _normalize_review_movie_id(rv, idx_to_uuid)
-        if uuid is None or normalized is None:
-            continue
-        if uuid not in matched_movie_ids:
+        resolved = _resolve_movie_id(rv.get("movieId"), legacy_map)
+        if resolved is None or resolved not in matched_movie_ids:
             continue
         if seen < start:
             seen += 1
             continue
-        results.append(Review(**normalized))
+        rv_copy = dict(rv)
+        rv_copy["movieId"] = resolved
+        results.append(Review(**rv_copy))
         taken += 1
         seen += 1
         if taken >= per_page:
@@ -77,21 +74,19 @@ def _iter_matching_reviews(search: MovieSearch, *, page: int, per_page: int) -> 
 
 
 def all_matching_reviews(search: MovieSearch) -> List[Review]:
-    movies = load_movies()
     matched_movie_ids = _matching_movie_ids(search)
     if not matched_movie_ids:
         return []
 
-    idx_to_uuid = _build_idx_to_uuid(movies)
-
+    legacy_map = _legacy_index_to_id_map()
     results: List[Review] = []
     for rv in load_reviews():
-        uuid, normalized = _normalize_review_movie_id(rv, idx_to_uuid)
-        if uuid is None or normalized is None:
+        resolved = _resolve_movie_id(rv.get("movieId"), legacy_map)
+        if resolved is None or resolved not in matched_movie_ids:
             continue
-        if uuid not in matched_movie_ids:
-            continue
-        results.append(Review(**normalized))
+        rv_copy = dict(rv)
+        rv_copy["movieId"] = resolved
+        results.append(Review(**rv_copy))
     return results
 
 
@@ -112,18 +107,18 @@ def search_movies_with_reviews(search: MovieSearch) -> List[MovieWithReviews]:
     if not matched_ids:
         return []
 
-    idx_to_uuid = _build_idx_to_uuid(movies)
-
+    legacy_map = _legacy_index_to_id_map()
     buckets: Dict[str, List[Review]] = {mid: [] for mid in matched_ids}
     for rv in load_reviews():
-        uuid, normalized = _normalize_review_movie_id(rv, idx_to_uuid)
-        if uuid is None or normalized is None:
+        resolved = _resolve_movie_id(rv.get("movieId"), legacy_map)
+        if resolved is None or resolved not in matched_ids:
             continue
-        if uuid in matched_ids:
-            try:
-                buckets[uuid].append(Review(**normalized))
-            except Exception:
-                continue
+        try:
+            rv_copy = dict(rv)
+            rv_copy["movieId"] = resolved
+            buckets[resolved].append(Review(**rv_copy))
+        except Exception:
+            continue
 
     results: List[MovieWithReviews] = []
     for mid in matched_ids:

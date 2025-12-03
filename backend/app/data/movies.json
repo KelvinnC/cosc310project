@@ -5,7 +5,8 @@
     "description": "A mentally troubled stand-up comedian embarks on a downward spiral that leads to the creation of an iconic villain.",
     "duration": 122,
     "genre": "Crime, Drama, Thriller",
-    "release": "2019-10-04"
+    "release": "2019-10-04",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg"
   },
   {
     "id": "56f8e975-49b0-4e74-8465-b5c249b0b53b",
@@ -13,7 +14,8 @@
     "description": "After the devastating events of Avengers: Infinity War (2018), the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos' actions and restore balance to the universe.",
     "duration": 181,
     "genre": "Action, Adventure, Drama",
-    "release": "2019-04-26"
+    "release": "2019-04-26",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/bR8ISy1O9XQxqiy0fQFw2BX72RQ.jpg"
   },
   {
     "id": "078fe357-26ae-4d77-88d8-5f6d7ece7760",
@@ -21,7 +23,8 @@
     "description": "The presidencies of Kennedy and Johnson, the Vietnam War, the Watergate scandal and other historical events unfold from the perspective of an Alabama man with an IQ of 75, whose only desire is to be reunited with his childhood swe...",
     "duration": 142,
     "genre": "Drama, Romance",
-    "release": "1994-07-06"
+    "release": "1994-07-06",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/saHP97rTPS5eLmrLQEcANmKrsFl.jpg"
   },
   {
     "id": "f8f0578d-410b-46ae-98eb-d0dc186ed857",
@@ -29,7 +32,8 @@
     "description": "John Wick is on the run after killing a member of the international assassins' guild, and with a $14 million price tag on his head, he is the target of hit men and women everywhere.",
     "duration": 130,
     "genre": "Action, Crime, Thriller",
-    "release": "2019-07-05"
+    "release": "2019-07-05",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/ziEuG1essDuWuC5lpWUaw1uXY2O.jpg"
   },
   {
     "id": "adae3fb8-246c-4373-8b52-90cc0137c2b4",
@@ -37,7 +41,8 @@
     "description": "Biochemist Michael Morbius tries to cure himself of a rare blood disease, but he inadvertently infects himself with a form of vampirism instead.",
     "duration": 104,
     "genre": "Action, Adventure, Horror",
-    "release": "2022-04-01"
+    "release": "2022-04-01",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/6JjfSchsU6daXk2AKX8EEBjO3Fm.jpg"
   },
   {
     "id": "54904814-613c-4e63-8ab0-d4ce2a8dec08",
@@ -45,7 +50,8 @@
     "description": "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
     "duration": 154,
     "genre": "Crime, Drama",
-    "release": "1994-10-14"
+    "release": "1994-10-14",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/vQWk5YBFWF4bZaofAbv0tShwBvQ.jpg"
   },
   {
     "id": "16683001-a991-4bff-b746-43113ff85b28",
@@ -53,7 +59,8 @@
     "description": "With Spider-Man's identity now revealed, Peter asks Doctor Strange for help. When a spell goes wrong, dangerous foes from other worlds start to appear, forcing Peter to discover what it truly means to be Spider-Man.",
     "duration": 148,
     "genre": "Action, Adventure, Fantasy",
-    "release": "2021-12-17"
+    "release": "2021-12-17",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg"
   },
   {
     "id": "13e850a4-76db-432a-bb78-6d82ca3e752b",
@@ -61,7 +68,8 @@
     "description": "Earth's mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.",
     "duration": 143,
     "genre": "Action, Adventure, Sci-Fi",
-    "release": "2012-05-11"
+    "release": "2012-05-11",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg"
   },
   {
     "id": "34a4c90d-8287-4bd1-a074-bf929a634ca1",
@@ -69,14 +77,36 @@
     "description": "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
     "duration": 152,
     "genre": "Action, Crime, Drama",
-    "release": "2008-07-18"
+    "release": "2008-07-18",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg"
   },
   {
     "id": "fb64695f-e621-4577-8684-162a90e7a790",
     "title": "Thor Ragnarok",
-    "description": "Imprisoned on the planet Sakaar, Thor must race against time to return to Asgard and stop RagnarÃ¶k, the destruction of his world, at the hands of the powerful and ruthless villain Hela.",
+    "description": "Imprisoned on the planet Sakaar, Thor must race against time to return to Asgard and stop Ragnar\u00c3\u00b6k, the destruction of his world, at the hands of the powerful and ruthless villain Hela.",
     "duration": 130,
     "genre": "Action, Adventure, Comedy",
-    "release": "2017-11-03"
+    "release": "2017-11-03",
+    "posterUrl": "https://image.tmdb.org/t/p/w500/rzRwTcFvttcN1ZpX2xv4j3tSdJu.jpg"
+  },
+  {
+    "id": "tmdb_701387",
+    "title": "Bugonia",
+    "description": "Two conspiracy obsessed young men kidnap the high-powered CEO of a major company, convinced that she is an alien intent on destroying planet Earth.",
+    "duration": 119,
+    "genre": "Crime, Science Fiction",
+    "release": "2025-10-23",
+    "rating": null,
+    "posterUrl": "https://image.tmdb.org/t/p/w500/oxgsAQDAAxA92mFGYCZllgWkH9J.jpg"
+  },
+  {
+    "id": "tmdb_157336",
+    "title": "Interstellar",
+    "description": "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.",
+    "duration": 169,
+    "genre": "Adventure, Drama, Science Fiction",
+    "release": "2014-11-05",
+    "rating": null,
+    "posterUrl": "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg"
   }
 ]

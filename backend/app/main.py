@@ -10,6 +10,7 @@ from app.routers.reviews import router as reviews_router
 from app.routers.admin_endpoints import router as admin_router
 from app.routers.user_home import router as home_router
 from app.routers.leaderboard import router as leaderboard_router
+from app.routers.achievements import router as achievements_router
 from app.routers.login import router as login_router
 from app.routers.tmdb import router as tmdb_router
 
@@ -40,3 +41,4 @@ app.include_router(battles_router)
 app.include_router(home_router)
 app.include_router(leaderboard_router)
 app.include_router(tmdb_router)
+app.include_router(achievements_router)
