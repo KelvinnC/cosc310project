@@ -27,6 +27,28 @@
     font-weight: 600;
 }
 
+.movies-search-input {
+    width: 100%;
+    max-width: 480px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.2);
+    color: #0f1f36;
+    font-size: 14px;
+    outline: none;
+    transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.movies-search-input::placeholder {
+    color: rgba(15, 31, 54, 0.6);
+}
+
+.movies-search-input:focus {
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(15, 31, 54, 0.12);
+}
+
 .movies-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));

@@ -6,6 +6,7 @@ from fastapi import HTTPException
 
 TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
+TMDB_IMAGE_BASE = os.getenv("TMDB_IMAGE_BASE", "https://image.tmdb.org/t/p/w500")
 
 
 def _ensure_api_key() -> None:
@@ -31,6 +32,12 @@ def _get_auth_params() -> Dict[str, str]:
     if not _is_bearer_token(TMDB_API_KEY):
         return {"api_key": TMDB_API_KEY}
     return {}
+
+
+def _build_image_url(path: Optional[str]) -> Optional[str]:
+    if not path:
+        return None
+    return f"{TMDB_IMAGE_BASE}{path}"
 
 
 async def _tmdb_get(endpoint: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
@@ -60,6 +67,7 @@ async def search_tmdb_movies(query: str, limit: int = 10) -> List[Dict[str, Any]
                 "overview": m.get("overview", ""),
                 "release_date": m.get("release_date", ""),
                 "poster_path": m.get("poster_path"),
+                "poster_url": _build_image_url(m.get("poster_path")),
             }
             for m in data.get("results", [])[:limit]
         ]
@@ -80,6 +88,7 @@ async def get_tmdb_movie_details(tmdb_id: int) -> Optional[Dict[str, Any]]:
             "genre": genres or "Unknown",
             "release": movie.get("release_date", ""),
             "poster_path": movie.get("poster_path"),
+            "poster_url": _build_image_url(movie.get("poster_path")),
             "backdrop_path": movie.get("backdrop_path"),
         }
     except httpx.HTTPError as e:
