@@ -35,7 +35,7 @@ def test_get_watchlist(mocker, client):
     assert data["authorId"] == 101
     assert len(data["movieIds"]) == 2
 
-def test_post_watchlist_add(mocker, client):
+def test_post_watchlist(mocker, client):
     mock_user_id = 101
     new_movie_id = "movie-99"
 
@@ -60,6 +60,7 @@ def test_post_watchlist_add(mocker, client):
     app.dependency_overrides = {}
 
     assert response.status_code == 201
+
     data = response.json()
     assert data["id"] == 50
     assert data["authorId"] == mock_user_id
@@ -69,3 +70,4 @@ def test_post_watchlist_add(mocker, client):
         author_id=mock_user_id,
         movie_id=new_movie_id
     )
+
