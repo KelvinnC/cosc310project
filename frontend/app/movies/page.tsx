@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import './movies.css';
+import { apiFetch } from '../../lib/api';
 
 const FASTAPI_URL = "http://127.0.0.1:8000";;
 
@@ -55,7 +56,7 @@ const MoviesPage = () => {
     try {
       // 2. CHANGE URL: Pass movieId as a Query Parameter to match backend signature
       // Backend expects: /watchlist/add?movieId=123
-      const response = await fetch(`${FASTAPI_URL}/watchlist/add?movieId=${movie.id}`, {
+      const response = await apiFetch(`${FASTAPI_URL}/watchlist/add?movieId=${movie.id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
