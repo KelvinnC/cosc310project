@@ -31,6 +31,8 @@ class UserBadge(BaseModel):
     title: str
     description: Optional[str] = None
     category: Optional[str] = None
+    position: Optional[int] = None
+    medalColor: Optional[str] = None
 
 class UserSummaryResponse(BaseModel):
     """Schema for user dashboard"""
