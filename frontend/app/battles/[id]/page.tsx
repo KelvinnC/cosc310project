@@ -228,8 +228,8 @@ const BattleDetailPage = () => {
         <div className="battles-box">
           <h1>ReviewBattle</h1>
           <h2>Loading Battle...</h2>
-          <div className="reviews-container">
-            <div className="review-card skeleton">
+          <div className="battle-reviews-container">
+            <div className="battle-review-card skeleton">
               <div className="skeleton-line skeleton-title"></div>
               <div className="skeleton-line skeleton-subtitle"></div>
               <div className="skeleton-line"></div>
@@ -237,7 +237,7 @@ const BattleDetailPage = () => {
               <div className="skeleton-line skeleton-short"></div>
             </div>
             <div className="vs-divider">VS</div>
-            <div className="review-card skeleton">
+            <div className="battle-review-card skeleton">
               <div className="skeleton-line skeleton-title"></div>
               <div className="skeleton-line skeleton-subtitle"></div>
               <div className="skeleton-line"></div>
@@ -285,10 +285,10 @@ const BattleDetailPage = () => {
           <h2 className="result-label winner-label">Winner</h2>
           <Link href={`/reviews/${winningReview.id}`} className="result-card winner-card">
             {winnerMovie && <p className="review-movie">{winnerMovie.title}</p>}
-            <h3 className="review-title">{winningReview.reviewTitle}</h3>
+            <h3 className="battle-review-title">{winningReview.reviewTitle}</h3>
             <p className="review-rating">Rating: {winningReview.rating}/10</p>
-            <p className="review-body">{winningReview.reviewBody}</p>
-            <p className="review-votes">Total Votes: {winningReview.votes}</p>
+            <p className="battle-review-body">{winningReview.reviewBody}</p>
+            <p className="battle-review-votes">Total Votes: {winningReview.votes}</p>
             <span className="card-link-hint">View full review →</span>
           </Link>
 
@@ -297,7 +297,7 @@ const BattleDetailPage = () => {
               <h2 className="result-label loser-label">Loser</h2>
               <Link href={`/reviews/${losingReview.id}`} className="result-card loser-card">
                 {loserMovie && <p className="review-movie">{loserMovie.title}</p>}
-                <h3 className="review-title">{losingReview.reviewTitle}</h3>
+                <h3 className="battle-review-title">{losingReview.reviewTitle}</h3>
                 <span className="card-link-hint">View full review →</span>
               </Link>
             </>
@@ -323,9 +323,9 @@ const BattleDetailPage = () => {
         
         {battle && review1 && review2 ? (
           <>
-            <div className="reviews-container">
+            <div className="battle-reviews-container">
               <div 
-                className={`review-card ${selectedReviewId === review1.id ? 'selected' : ''}`}
+                className={`battle-review-card ${selectedReviewId === review1.id ? 'selected' : ''}`}
                 onClick={() => setSelectedReviewId(review1.id)}
                 onKeyDown={handleKeyDown(review1.id)}
                 tabIndex={0}
@@ -334,15 +334,15 @@ const BattleDetailPage = () => {
                 aria-label={`Select review: ${review1.reviewTitle}`}
               >
                 {movie1 && <p className="review-movie">{movie1.title}</p>}
-                <h3 className="review-title">{review1.reviewTitle}</h3>
+                <h3 className="battle-review-title">{review1.reviewTitle}</h3>
                 <p className="review-rating">Rating: {review1.rating}/10</p>
-                <p className="review-body">{review1.reviewBody}</p>
+                <p className="battle-review-body">{review1.reviewBody}</p>
               </div>
               
               <div className="vs-divider">VS</div>
               
               <div 
-                className={`review-card ${selectedReviewId === review2.id ? 'selected' : ''}`}
+                className={`battle-review-card ${selectedReviewId === review2.id ? 'selected' : ''}`}
                 onClick={() => setSelectedReviewId(review2.id)}
                 onKeyDown={handleKeyDown(review2.id)}
                 tabIndex={0}
@@ -351,9 +351,9 @@ const BattleDetailPage = () => {
                 aria-label={`Select review: ${review2.reviewTitle}`}
               >
                 {movie2 && <p className="review-movie">{movie2.title}</p>}
-                <h3 className="review-title">{review2.reviewTitle}</h3>
+                <h3 className="battle-review-title">{review2.reviewTitle}</h3>
                 <p className="review-rating">Rating: {review2.rating}/10</p>
-                <p className="review-body">{review2.reviewBody}</p>
+                <p className="battle-review-body">{review2.reviewBody}</p>
               </div>
             </div>
             

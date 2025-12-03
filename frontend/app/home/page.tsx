@@ -95,11 +95,11 @@ const Page = () => {
                             <div key={idx}>
                                 <Link href={`/reviews/${review["id"]}`}>
                                 <div className="review">
-                                    <h2 className="review-title">{review["reviewTitle"]}</h2>
+                                    <h2 className="home-review-title">{review["reviewTitle"]}</h2>
                                     <span>Posted on {review["date"]}</span>
                                     <span>Rating {review["rating"]} / 5</span>
-                                    <span className="review-body">{review["reviewBody"]}</span>
-                                    <span className="review-votes">{review["votes"]} votes</span>
+                                    <span className="home-review-body">{review["reviewBody"]}</span>
+                                    <span className="home-review-votes">{review["votes"]} votes</span>
                                 </div>
                                 </Link>
                             </div>

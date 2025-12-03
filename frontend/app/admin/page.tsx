@@ -105,7 +105,7 @@ const Page = () => {
                         {warnedUsers.length > 0 && warnedUsers.map((warnedUser, idx) => (
                             <div key={idx}>
                                 <div className="review">
-                                    <h2 className="review-title">{warnedUser["username"]}</h2>
+                                    <h2 className="admin-review-title">{warnedUser["username"]}</h2>
                                     <span>Created on {(warnedUser["created_at"] as string).split("T")[0]}</span>
                                     <span>Role: {warnedUser["role"]}</span>
                                     <span>Warnings: {warnedUser["warnings"]}</span>
@@ -127,7 +127,7 @@ const Page = () => {
                         {bannedUsers.length > 0 && bannedUsers.map((bannedUser, idx) => (
                             <div key={idx}>
                                 <div className="review">
-                                    <h2 className="review-title">{bannedUser["username"]}</h2>
+                                    <h2 className="admin-review-title">{bannedUser["username"]}</h2>
                                     <span>Created on {(bannedUser["created_at"] as string).split("T")[0]}</span>
                                     <span>Role: {bannedUser["role"]}</span>
                                     <span>Warnings: {bannedUser["warnings"]}</span>
@@ -147,7 +147,7 @@ const Page = () => {
                         {flaggedReviews.length > 0 && flaggedReviews.map((flaggedReview, idx) => (
                             <div key={idx}>
                                 <div className="flagged-review">
-                                    <h2 className="review-title">{flaggedReview["reviewTitle"]}</h2>
+                                    <h2 className="admin-review-title">{flaggedReview["reviewTitle"]}</h2>
                                     <span>Author: {flaggedReview["authorId"]}</span>
                                     <span>Created: {flaggedReview["date"]}</span>
                                     <span>Rating: {flaggedReview["rating"]}</span>
