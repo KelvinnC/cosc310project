@@ -236,6 +236,19 @@
   font-size: 12px;
 }
 
+.leaderboard-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px; /* Same gap as leaderboard-shell */
+}
+
+/* For smaller screens, stack them */
+@media (max-width: 768px) {
+  .leaderboard-grid-container {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .entry {
     grid-template-columns: 1fr;
