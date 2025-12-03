@@ -9,6 +9,22 @@ if _BACKEND_DIR not in sys.path:
 
 os.environ.setdefault("JWT_SECRET", "testsecret")
 
+
+@pytest.fixture(autouse=True)
+def mock_logger(mocker, tmp_path):
+    """Auto-mock logger to prevent tests from writing to real logs.json."""
+    from app.utils.logger import Logger
+    original_instance = Logger._instance
+    Logger._instance = None
+    
+    test_logger = Logger()
+    test_logger.log_file = tmp_path / "logs.json"
+    test_logger.log_file.write_text("[]")
+    
+    yield test_logger
+    
+    Logger._instance = original_instance
+
 @pytest.fixture
 def user_data():
     payload = {

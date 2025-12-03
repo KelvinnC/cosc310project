@@ -214,8 +214,10 @@ __marimo__/
 # macOS system file
 .DS_Store
 
-# Application logs
+# Application data files (only users.json, movies.json, reviews.json are tracked)
 backend/app/data/logs.json
 backend/app/data/battles.json
-/backend/app/data
+backend/app/data/flags.json
+backend/app/data/*.bak
+
 package-lock.json

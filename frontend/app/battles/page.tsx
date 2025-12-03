@@ -73,8 +73,8 @@ const BattlesPage = () => {
         <div className="battles-box">
           <h1>ReviewBattle</h1>
           <h2>Creating Battle...</h2>
-          <div className="reviews-container">
-            <div className="review-card skeleton">
+          <div className="battle-reviews-container">
+            <div className="battle-review-card skeleton">
               <div className="skeleton-line skeleton-title"></div>
               <div className="skeleton-line skeleton-subtitle"></div>
               <div className="skeleton-line"></div>
@@ -82,7 +82,7 @@ const BattlesPage = () => {
               <div className="skeleton-line skeleton-short"></div>
             </div>
             <div className="vs-divider">VS</div>
-            <div className="review-card skeleton">
+            <div className="battle-review-card skeleton">
               <div className="skeleton-line skeleton-title"></div>
               <div className="skeleton-line skeleton-subtitle"></div>
               <div className="skeleton-line"></div>

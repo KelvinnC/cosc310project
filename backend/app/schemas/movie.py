@@ -11,6 +11,7 @@ class Movie(BaseModel):
     genre: str
     release: date
     rating: Optional[float] = None
+    posterUrl: Optional[str] = None
 
 class MovieCreate(BaseModel):
     title: str
@@ -31,6 +32,7 @@ class MovieSummary(BaseModel):
     id: str
     title: str
     release: Optional[date] = None
+    posterUrl: Optional[str] = None
 
 
 class MovieWithReviews(Movie):

@@ -3,13 +3,14 @@
 import React, { useState } from 'react'
 import {useEffect} from 'react'
 import { apiFetch } from '@/lib/api'
+import { collapseWhitespace } from '@/lib/utils'
 import './admin.css'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 const FASTAPI_URL = "http://127.0.0.1:8000"
 
-const page = () => {
+const Page = () => {
     const [adminData, setAdminData] = useState(null)
     const [totalUsers, setTotalUsers] = useState(0)
     const [warnedUsers, setWarnedUsers] = useState<any[]>([])
@@ -104,7 +105,7 @@ const page = () => {
                         {warnedUsers.length > 0 && warnedUsers.map((warnedUser, idx) => (
                             <div key={idx}>
                                 <div className="review">
-                                    <h2 className="review-title">{warnedUser["username"]}</h2>
+                                    <h2 className="admin-review-title">{warnedUser["username"]}</h2>
                                     <span>Created on {(warnedUser["created_at"] as string).split("T")[0]}</span>
                                     <span>Role: {warnedUser["role"]}</span>
                                     <span>Warnings: {warnedUser["warnings"]}</span>
@@ -126,7 +127,7 @@ const page = () => {
                         {bannedUsers.length > 0 && bannedUsers.map((bannedUser, idx) => (
                             <div key={idx}>
                                 <div className="review">
-                                    <h2 className="review-title">{bannedUser["username"]}</h2>
+                                    <h2 className="admin-review-title">{bannedUser["username"]}</h2>
                                     <span>Created on {(bannedUser["created_at"] as string).split("T")[0]}</span>
                                     <span>Role: {bannedUser["role"]}</span>
                                     <span>Warnings: {bannedUser["warnings"]}</span>
@@ -146,12 +147,12 @@ const page = () => {
                         {flaggedReviews.length > 0 && flaggedReviews.map((flaggedReview, idx) => (
                             <div key={idx}>
                                 <div className="flagged-review">
-                                    <h2 className="review-title">{flaggedReview["reviewTitle"]}</h2>
+                                    <h2 className="admin-review-title">{flaggedReview["reviewTitle"]}</h2>
                                     <span>Author: {flaggedReview["authorId"]}</span>
                                     <span>Created: {flaggedReview["date"]}</span>
                                     <span>Rating: {flaggedReview["rating"]}</span>
                                     <span>Votes: {flaggedReview["votes"]}</span>
-                                    <span>{flaggedReview["reviewBody"]}</span>
+                                    <span>{collapseWhitespace(flaggedReview["reviewBody"])}</span>
                                     <div className="admin-actions-container">
                                         <button onClick={(e) => hideReview(flaggedReview["id"])}>Hide Review </button>
                                         <button onClick={(e) => clearReviewFlags(flaggedReview["id"])}>Clear Flags</button>
@@ -167,4 +168,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

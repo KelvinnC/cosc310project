@@ -39,15 +39,15 @@ body {
     margin-bottom: 32px;
 }
 
-.review-body {
+.admin-review-body {
     color: #eeeeee;
 }
 
-.review-votes {
+.admin-review-votes {
     text-align: end;
 }
 
-.review-title {
+.admin-review-title {
     font-weight: 700;
     font-size: 20px;
     color: rgb(254, 254, 254);
