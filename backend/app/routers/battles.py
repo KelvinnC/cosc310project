@@ -11,10 +11,13 @@ from app.middleware.auth_middleware import jwt_auth_dependency
 
 router = APIRouter(tags=["battles"])
 
-@router.post("/battles", response_model=Battle, status_code=201)
+
+@router.post("/battles", response_model=Battle, status_code=201, summary="Create a new battle")
 def create_battle(response: Response, current_user: dict = Depends(jwt_auth_dependency)) -> Battle:
     """
-    Create a new battle for the authenticated user.
+    Create a new review battle for the authenticated user.
+    
+    Randomly selects two reviews (excluding user's own) for head-to-head voting.
     Returns 201 Created with Location header pointing to the battle resource.
     """
     user_id = current_user.get("user_id")
@@ -45,12 +48,12 @@ def create_battle(response: Response, current_user: dict = Depends(jwt_auth_depe
         )
 
 
-@router.get("/battles/{battle_id}", response_model=Battle)
+@router.get("/battles/{battle_id}", response_model=Battle, summary="Get battle by ID")
 def get_battle(battle_id: str) -> Battle:
     """
-    Retrieve a battle by ID.
+    Retrieve a battle by its unique ID.
     
-    Returns the battle object with its current state (voted or unvoted).
+    Returns the battle object including both reviews and current voting state.
     """
     try:
         return battle_service.get_battle_by_id(battle_id)
@@ -61,12 +64,14 @@ def get_battle(battle_id: str) -> Battle:
         )
 
 
-@router.post("/battles/{battle_id}/votes", response_model=Review, status_code=200)
+@router.post("/battles/{battle_id}/votes", response_model=Review, status_code=200, summary="Submit battle vote")
 def submit_vote(battle_id: str, payload: VoteRequest, current_user: dict = Depends(jwt_auth_dependency)) -> Review:
     """
-    Submit a vote for a battle.
+    Cast a vote for the winning review in a battle.
     
-    Returns the winning review (the one that won this battle) with updated vote count.
+    - **winnerId**: The review ID of the chosen winner
+    
+    Returns the winning review with updated vote count. Users can only vote once per battle.
     """
     user_id = current_user.get("user_id")
     user = get_user_by_id(user_id)

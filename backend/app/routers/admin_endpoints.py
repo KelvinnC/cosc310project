@@ -9,8 +9,15 @@ from typing import Dict, Any
 logger = get_logger()
 router = APIRouter(prefix="/admin", tags=["admin"])
 
-@router.get("/", response_model=AdminSummaryResponse, status_code=status.HTTP_200_OK)
+
+@router.get("/", response_model=AdminSummaryResponse, status_code=status.HTTP_200_OK, summary="Get admin dashboard")
 def get_admin_summary(current_user: dict = Depends(admin_required)):
+    """
+    Retrieve admin dashboard summary data.
+    
+    Includes user counts, flagged reviews, warned/banned users, and system statistics.
+    Requires admin privileges.
+    """
     logger.info(
         "Admin dashboard accessed",
         component="admin",

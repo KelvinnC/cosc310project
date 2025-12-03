@@ -15,16 +15,47 @@ from app.routers.login import router as login_router
 from app.routers.tmdb import router as tmdb_router
 from app.routers.watchlist_endpoints import router as watchlist_router
 
-app = FastAPI()
+app = FastAPI(
+    title="Review Battle API",
+    description="A movie review platform with head-to-head review battles, leaderboards, and achievements.",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
 
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000"
 ]
 
-@app.get("/")
+
+@app.get("/", tags=["status"], summary="API Health Check")
 def root():
-    return {"message": "Hello Movie World!"}
+    """
+    Root endpoint providing API status and navigation links.
+    
+    Use this to verify the API is running and discover available endpoints.
+    """
+    return {
+        "name": "Review Battle API",
+        "version": "1.0.0",
+        "status": "healthy",
+        "documentation": {
+            "swagger": "/docs",
+            "redoc": "/redoc",
+            "openapi": "/openapi.json"
+        },
+        "endpoints": {
+            "movies": "/movies",
+            "reviews": "/reviews",
+            "users": "/users",
+            "battles": "/battles",
+            "leaderboard": "/leaderboard",
+            "achievements": "/achievements",
+            "admin": "/admin",
+            "tmdb": "/tmdb"
+        }
+    }
 
 app.add_middleware(
     CORSMiddleware,
