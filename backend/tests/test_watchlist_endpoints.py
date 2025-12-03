@@ -48,12 +48,12 @@ def test_post_watchlist_add(mocker, client):
     app.dependency_overrides[jwt_auth_dependency] = lambda: {"user_id": mock_user_id}
 
     mock_service = mocker.patch(
-        "app.routers.watchlist_endpoints.add_movie_to_user_watchlist", 
+        "app.routers.watchlist_endpoints.add_movie_to_user_watchlist",
         return_value=mock_updated_watchlist
     )
 
     response = client.post(
-        "/watchlist/add", 
+        "/watchlist/add",
         params={"movieId": new_movie_id}
     )
 
@@ -64,8 +64,8 @@ def test_post_watchlist_add(mocker, client):
     assert data["id"] == 50
     assert data["authorId"] == mock_user_id
     assert new_movie_id in data["movieIds"]
-    
+
     mock_service.assert_called_once_with(
-        authorid=mock_user_id, 
+        author_id=mock_user_id,
         movie_id=new_movie_id
     )
