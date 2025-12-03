@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import {useEffect} from 'react'
 import { apiFetch } from '@/lib/api'
+import { collapseWhitespace } from '@/lib/utils'
 import './admin.css'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -151,7 +152,7 @@ const page = () => {
                                     <span>Created: {flaggedReview["date"]}</span>
                                     <span>Rating: {flaggedReview["rating"]}</span>
                                     <span>Votes: {flaggedReview["votes"]}</span>
-                                    <span>{flaggedReview["reviewBody"]}</span>
+                                    <span>{collapseWhitespace(flaggedReview["reviewBody"])}</span>
                                     <div className="admin-actions-container">
                                         <button onClick={(e) => hideReview(flaggedReview["id"])}>Hide Review </button>
                                         <button onClick={(e) => clearReviewFlags(flaggedReview["id"])}>Clear Flags</button>
