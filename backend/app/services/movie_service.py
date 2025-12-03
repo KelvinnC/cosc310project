@@ -1,15 +1,16 @@
 import uuid
 import asyncio
-from typing import List, Dict, Any, Optional
-from fastapi import HTTPException
 from datetime import date as date_type
+from typing import Any, Dict, List
+
+from fastapi import HTTPException
+
 from app.schemas.movie import Movie, MovieCreate, MovieUpdate, MovieSummary, MovieWithReviews
 import app.repositories.movie_repo as movie_repo
-from app.repositories.movie_repo import load_all
 from app.repositories.review_repo import load_all as load_reviews
 from app.utils.list_helpers import find_dict_by_id, NOT_FOUND
 from app.services.tmdb_service import (
-    get_tmdb_movie_details, 
+    get_tmdb_movie_details,
     validate_tmdb_movie_id,
     is_tmdb_movie_id,
 )
@@ -21,7 +22,7 @@ def _parse_tmdb_to_movie_dict(movie_id: str, tmdb_data: Dict[str, Any]) -> Dict[
         release_date = date_type.fromisoformat(tmdb_data["release"])
     except (ValueError, KeyError):
         release_date = date_type(1900, 1, 1)
-    
+
     return {
         "id": movie_id,
         "title": tmdb_data["title"],
@@ -38,8 +39,16 @@ def _get_reviews_for_movie(movie_id: str) -> List[Dict[str, Any]]:
     return [rv for rv in load_reviews() if rv.get("movieId") == movie_id]
 
 
+def load_all() -> List[Dict[str, Any]]:
+    return movie_repo.load_all()
+
+
+def save_all(movies: List[Dict[str, Any]]) -> None:
+    movie_repo.save_all(movies)
+
+
 def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
-    movies: List[Dict[str, Any]] = movie_repo.load_all()
+    movies: List[Dict[str, Any]] = load_all()
 
     if sort_by == "rating":
         direction = (order or "asc").lower()
@@ -48,9 +57,7 @@ def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
         reviews_data = load_reviews()
         if reviews_data:
             movie_ids = {mv.get("id") for mv in movies}
-            index_to_id: Dict[int, Any] = {
-                idx + 1: mv.get("id") for idx, mv in enumerate(movies)
-            }
+            index_to_id: Dict[int, Any] = {idx + 1: mv.get("id") for idx, mv in enumerate(movies)}
 
             rating_sums: Dict[str, float] = {}
             rating_counts: Dict[str, int] = {}
@@ -97,16 +104,24 @@ def list_movies(sort_by: str | None = None, order: str = "asc") -> List[Movie]:
 
     return [Movie(**mv) for mv in movies]
 
+
 def create_movie(payload: MovieCreate) -> Movie:
-    movies = movie_repo.load_all()
+    movies = load_all()
     new_movie_id = str(uuid.uuid4())
     if any(mov.get("id") == new_movie_id for mov in movies):
         raise HTTPException(status_code=409, detail="ID collision; retry")
-    new_movie = Movie(id=new_movie_id, title=payload.title.strip(), genre=payload.genre.strip(), release=payload.release, 
-                      description=payload.description.strip(), duration=payload.duration)
+    new_movie = Movie(
+        id=new_movie_id,
+        title=payload.title.strip(),
+        genre=payload.genre.strip(),
+        release=payload.release,
+        description=payload.description.strip(),
+        duration=payload.duration,
+    )
     movies.append(new_movie.model_dump(mode="json"))
-    movie_repo.save_all(movies)
+    save_all(movies)
     return new_movie
+
 
 def _refresh_tmdb_fields_if_missing(
     movie_id: str, movie: Dict[str, Any], movies: List[Dict[str, Any]], idx: int
@@ -127,7 +142,7 @@ def _refresh_tmdb_fields_if_missing(
         movie["description"] = movie.get("description") or tmdb_data.get("description")
         movie["genre"] = movie.get("genre") or tmdb_data.get("genre")
         movies[idx] = movie
-        movie_repo.save_all(movies)
+        save_all(movies)
 
     return movie
 
@@ -152,67 +167,79 @@ def get_movie_by_id(movie_id: str) -> MovieWithReviews:
         posterUrl=movie.get("posterUrl"),
     )
 
+
 def search_movies_titles(query: str) -> List[MovieSummary]:
     q = (query or "").strip().lower()
     if not q:
         return []
-    movies = movie_repo.load_all()
+    movies = load_all()
     results: List[MovieSummary] = []
     for mv in movies:
         title = (mv.get("title") or "").lower()
         if q in title:
-            results.append(MovieSummary(
-                id=mv.get("id"),
-                title=mv.get("title"),
-                release=mv.get("release")
-            ))
+            results.append(
+                MovieSummary(
+                    id=mv.get("id"),
+                    title=mv.get("title"),
+                    release=mv.get("release"),
+                )
+            )
     return results
 
+
 def movie_summary_by_id(movie_id: str) -> List[MovieSummary]:
-    movies = movie_repo.load_all()
+    movies = load_all()
     index = find_dict_by_id(movies, "id", movie_id)
     if index == NOT_FOUND:
         return []
     mv = movies[index]
     return [MovieSummary(id=mv.get("id"), title=mv.get("title"))]
 
+
 def update_movie(movie_id: str, payload: MovieUpdate) -> Movie:
-    movies = movie_repo.load_all()
+    movies = load_all()
     index = find_dict_by_id(movies, "id", movie_id)
     if index == NOT_FOUND:
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
-    updated = Movie(id=movie_id, title=payload.title.strip(), genre=payload.genre.strip(), release=payload.release, 
-                    description=payload.description.strip(), duration=payload.duration)
+    updated = Movie(
+        id=movie_id,
+        title=payload.title.strip(),
+        genre=payload.genre.strip(),
+        release=payload.release,
+        description=payload.description.strip(),
+        duration=payload.duration,
+    )
     movies[index] = updated.model_dump(mode="json")
-    movie_repo.save_all(movies)
+    save_all(movies)
     return updated
 
+
 def delete_movie(movie_id: str) -> None:
-    movies = movie_repo.load_all()
+    movies = load_all()
     new_movies = [movie for movie in movies if movie.get("id") != movie_id]
     if len(new_movies) == len(movies):
         raise HTTPException(status_code=404, detail=f"Movie '{movie_id}' not found")
-    movie_repo.save_all(new_movies)
+    save_all(new_movies)
 
 
 async def cache_tmdb_movie(movie_id: str) -> Movie:
     """Fetch TMDb movie and cache to local movies.json. Returns existing if cached."""
-    movies = movie_repo.load_all()
-    
+    movies = load_all()
+
     existing = next((m for m in movies if m.get("id") == movie_id), None)
     if existing:
         return Movie(**existing)
-    
+
     tmdb_id = validate_tmdb_movie_id(movie_id)
     tmdb_data = await get_tmdb_movie_details(tmdb_id)
-    
+
     if not tmdb_data:
         raise HTTPException(status_code=404, detail=f"TMDb movie '{movie_id}' not found")
-    
+
     movie_dict = _parse_tmdb_to_movie_dict(movie_id, tmdb_data)
     new_movie = Movie(**movie_dict)
-    
+
     movies.append(new_movie.model_dump(mode="json"))
-    movie_repo.save_all(movies)
-    
+    save_all(movies)
+
     return new_movie
