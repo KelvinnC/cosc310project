@@ -9,10 +9,10 @@ router = APIRouter(prefix="/watchlist", tags=["watchlist"])
 
 @router.post("/add", response_model=Watchlist, status_code=201)
 def post_watchlist(movieId: str, current_user: dict = Depends(jwt_auth_dependency)):
-    author_id = current_user.get("user_id")
-    return add_movie_to_user_watchlist(authorid=author_id, movie_id=movieId)
+    authorId = current_user.get("user_id")
+    return add_movie_to_user_watchlist(author_id=authorId, movie_id=movieId)
 
 @router.get("", response_model=Watchlist, status_code=201)
 def get_watchlist(current_user: dict = Depends(jwt_auth_dependency)):
-    author_id = current_user.get("user_id")
-    return get_watchlist_by_author_id(authorid=author_id)
+    authorId = current_user.get("user_id")
+    return get_watchlist_by_author_id(author_id=authorId)

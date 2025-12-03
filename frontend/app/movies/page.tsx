@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import './movies.css';
 
-const FASTAPI_URL = "http://127.0.0.1:8000";
+const FASTAPI_URL = "http://127.0.0.1:8000";;
 
 interface Movie {
   id: string;
@@ -19,6 +19,8 @@ interface Movie {
 const MoviesPage = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [error, setError] = useState('');
+  // Optional: Track which movies are currently adding to prevent double clicks
+  const [addingId, setAddingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -36,6 +38,48 @@ const MoviesPage = () => {
     fetchMovies();
   }, []);
 
+  const handleAddToWatchlist = async (e: React.MouseEvent, movie: Movie) => {
+    e.preventDefault(); 
+    e.stopPropagation();
+
+    // 1. GET THE TOKEN (Assuming you store it in localStorage after login)
+    const token = localStorage.getItem('token'); 
+    
+    if (!token) {
+      alert("You must be logged in to use the watchlist.");
+      return;
+    }
+
+    setAddingId(movie.id);
+
+    try {
+      // 2. CHANGE URL: Pass movieId as a Query Parameter to match backend signature
+      // Backend expects: /watchlist/add?movieId=123
+      const response = await fetch(`${FASTAPI_URL}/watchlist/add?movieId=${movie.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // 3. ADD AUTH HEADER
+          'Authorization': `Bearer ${token}` 
+        },
+        // 4. REMOVE BODY: Since data is in the URL, you don't need a body
+        body: null, 
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to add to watchlist');
+      }
+      
+      alert(`${movie.title} added to watchlist!`);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message);
+    } finally {
+      setAddingId(null);
+    }
+  };
+
   return (
     <div className="movies-page">
       <div className="movies-box">
@@ -48,12 +92,33 @@ const MoviesPage = () => {
                 key={movie.id}
                 href={`/movies/${movie.id}`}
                 className="movie-card"
+                style={{ position: 'relative' }} // Ensure relative positioning for button placement
               >
                 <div className="movie-title">{movie.title}</div>
                 <div className="movie-meta">
                   {new Date(movie.release).getFullYear()} • {movie.genre}
                   {movie.rating != null && ` • ⭐ ${movie.rating.toFixed(1)}`}
                 </div>
+
+                {/* WATCHLIST BUTTON */}
+                <button
+                  onClick={(e) => handleAddToWatchlist(e, movie)}
+                  disabled={addingId === movie.id}
+                  style={{
+                    marginTop: '10px',
+                    padding: '5px 10px',
+                    backgroundColor: '#0070f3',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    zIndex: 10 // Ensure it sits above other elements
+                  }}
+                >
+                  {addingId === movie.id ? 'Adding...' : '+ Watchlist'}
+                </button>
+
               </Link>
             ))
           ) : (

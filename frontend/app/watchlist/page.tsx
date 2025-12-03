@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import './watchlist.css';
 
 const FASTAPI_URL = "http://127.0.0.1:8000";
@@ -16,40 +17,89 @@ interface Movie {
   rating?: number;
 }
 
-interface Watchlist {
-  id: string;
-  author_id: string;
-  movies: Movie[];
+// MATCHES THE JSON YOU FOUND
+interface WatchlistRawResponse {
+  id: number;
+  authorId: string;
+  movieIds: string[]; // We get IDs, not objects
 }
 
 const WatchlistPage = () => {
-  const [watchlist, setWatchlist] = useState<Watchlist | null>(null);
+  // We will store the RESOLVED movies here, not the raw watchlist
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchWatchlist = async () => {
+    const fetchWatchlistAndMovies = async () => {
       try {
         const token = localStorage.getItem("token");
+        if (!token) { router.push('/login'); return; }
 
-        const response = await fetch(`${FASTAPI_URL}/watchlist`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        // 1. Get Watchlist IDs
+        const watchlistRes = await fetch(`${FASTAPI_URL}/watchlist`, {
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch watchlist');
+        if (watchlistRes.status === 401) {
+            localStorage.removeItem('token');
+            router.push('/login');
+            return;
         }
 
-        const data = await response.json();
-        setWatchlist(data);
+        const watchlistData: WatchlistRawResponse = await watchlistRes.json();
+
+        if (!watchlistData.movieIds || watchlistData.movieIds.length === 0) {
+            setMovies([]);
+            setLoading(false);
+            return;
+        }
+
+        // 2. Fetch Details
+        const moviePromises = watchlistData.movieIds.map(async (id) => {
+            try {
+                const res = await fetch(`${FASTAPI_URL}/movies/${id}`);
+                if (!res.ok) return null;
+                
+                let data = await res.json();
+
+                // --- THE FIX: Handle Array Response ---
+                // If the API returns [ {movie} ], grab the first item
+                if (Array.isArray(data)) {
+                    data = data.length > 0 ? data[0] : null;
+                }
+                // --------------------------------------
+                
+                // Validate the object has what we need
+                // We check for 'id' because sometimes empty objects {} slip through
+                if (!data || !data.id) return null; 
+
+                return data;
+            } catch (e) {
+                return null;
+            }
+        });
+
+        const moviesResults = await Promise.all(moviePromises);
+        const validMovies = moviesResults.filter((m): m is Movie => m !== null);
+        
+        setMovies(validMovies);
+
       } catch (err: any) {
-        setError(err.message || 'Error fetching watchlist');
+        console.error(err);
+        setError(err.message || "Error loading watchlist");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchWatchlist();
-  }, []);
+    fetchWatchlistAndMovies();
+  }, [router]);
+
+  if (loading) {
+    return <div className="watchlist-page"><p>Loading watchlist...</p></div>;
+  }
 
   return (
     <div className="watchlist-page">
@@ -59,8 +109,8 @@ const WatchlistPage = () => {
         {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
         <div className="watchlist-grid">
-          {watchlist?.movies?.length ? (
-            watchlist.movies.map((movie) => (
+          {movies.length > 0 ? (
+            movies.map((movie) => (
               <Link
                 key={movie.id}
                 href={`/movies/${movie.id}`}
@@ -68,14 +118,19 @@ const WatchlistPage = () => {
               >
                 <div className="watchlist-title">{movie.title}</div>
                 <div className="watchlist-meta">
-                  {movie.release && new Date(movie.release).getFullYear()}
+                  {movie.release ? new Date(movie.release).getFullYear() : 'N/A'}
                   {movie.genre && ` • ${movie.genre}`}
                   {movie.rating != null && ` • ⭐ ${movie.rating.toFixed(1)}`}
                 </div>
               </Link>
             ))
           ) : (
-            <p>No movies in your watchlist.</p>
+            <div style={{ textAlign: 'center', width: '100%' }}>
+                <p>No movies in your watchlist.</p>
+                <Link href="/movies" style={{ color: 'white', textDecoration: 'underline' }}>
+                    Browse movies to add some!
+                </Link>
+            </div>
           )}
         </div>
       </div>
