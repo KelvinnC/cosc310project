@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import './watchlist.css';
+import { apiFetch } from '../../lib/api'; // Ensure this path is correct
 
 const FASTAPI_URL = "http://127.0.0.1:8000";
 
@@ -17,15 +18,13 @@ interface Movie {
   rating?: number;
 }
 
-// MATCHES THE JSON YOU FOUND
 interface WatchlistRawResponse {
   id: number;
   authorId: string;
-  movieIds: string[]; // We get IDs, not objects
+  movieIds: string[];
 }
 
 const WatchlistPage = () => {
-  // We will store the RESOLVED movies here, not the raw watchlist
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,18 +33,18 @@ const WatchlistPage = () => {
   useEffect(() => {
     const fetchWatchlistAndMovies = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) { router.push('/login'); return; }
+        // 1. Get Watchlist IDs using apiFetch
+        // apiFetch handles the Authorization header automatically
+        const watchlistRes = await apiFetch(`${FASTAPI_URL}/watchlist`);
 
-        // 1. Get Watchlist IDs
-        const watchlistRes = await fetch(`${FASTAPI_URL}/watchlist`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
+        // Handle Session Expiry
         if (watchlistRes.status === 401) {
-            localStorage.removeItem('token');
             router.push('/login');
             return;
+        }
+
+        if (!watchlistRes.ok) {
+            throw new Error('Failed to load watchlist');
         }
 
         const watchlistData: WatchlistRawResponse = await watchlistRes.json();
@@ -59,20 +58,18 @@ const WatchlistPage = () => {
         // 2. Fetch Details
         const moviePromises = watchlistData.movieIds.map(async (id) => {
             try {
-                const res = await fetch(`${FASTAPI_URL}/movies/${id}`);
+                // Using apiFetch here too for consistency, though movies might be public
+                const res = await apiFetch(`${FASTAPI_URL}/movies/${id}`);
+                
                 if (!res.ok) return null;
                 
                 let data = await res.json();
 
-                // --- THE FIX: Handle Array Response ---
-                // If the API returns [ {movie} ], grab the first item
+                // Handle Array Response
                 if (Array.isArray(data)) {
                     data = data.length > 0 ? data[0] : null;
                 }
-                // --------------------------------------
                 
-                // Validate the object has what we need
-                // We check for 'id' because sometimes empty objects {} slip through
                 if (!data || !data.id) return null; 
 
                 return data;

@@ -43,36 +43,37 @@ const MoviesPage = () => {
     e.preventDefault(); 
     e.stopPropagation();
 
-    // 1. GET THE TOKEN (Assuming you store it in localStorage after login)
-    const token = localStorage.getItem('token'); 
-    
-    if (!token) {
-      alert("You must be logged in to use the watchlist.");
-      return;
-    }
-
     setAddingId(movie.id);
 
     try {
-      // 2. CHANGE URL: Pass movieId as a Query Parameter to match backend signature
-      // Backend expects: /watchlist/add?movieId=123
-      const response = await apiFetch(`${FASTAPI_URL}/watchlist/add?movieId=${movie.id}`, {
+      // 1. URL: Keep it clean (no query parameters)
+      const response = await apiFetch(`${FASTAPI_URL}/watchlist/add`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          // 3. ADD AUTH HEADER
-          'Authorization': `Bearer ${token}` 
+          // 2. HEADER: Required so the backend knows to parse the body as JSON
+          'Content-Type': 'application/json', 
         },
-        // 4. REMOVE BODY: Since data is in the URL, you don't need a body
-        body: null, 
+        // 3. BODY: Send the ID as a JSON string
+        body: JSON.stringify({ movie_id: movie.id }), 
       });
-
+      
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to add to watchlist');
+        let errorMessage = 'Failed to add to watchlist';
+        
+        if (typeof errorData.detail === 'string') {
+            errorMessage = errorData.detail;
+        } else if (Array.isArray(errorData.detail)) {
+            errorMessage = errorData.detail[0]?.msg || JSON.stringify(errorData.detail);
+        } else if (errorData.detail) {
+            errorMessage = JSON.stringify(errorData.detail);
+        }
+        
+        throw new Error(errorMessage);
       }
       
-      alert(`${movie.title} added to watchlist!`);
+      const title = typeof movie.title === 'string' ? movie.title : 'Movie';
+      alert(`${title} added to watchlist!`);
     } catch (err: any) {
       console.error(err);
       alert(err.message);
