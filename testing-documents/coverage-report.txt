@@ -1,0 +1,70 @@
+tests/test_validate_access.py ....                                       [ 98%]
+tests/test_watchlist_endpoints.py ..                                     [ 98%]
+tests/test_watchlist_service.py ....                                     [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform darwin, python 3.12.3-final-0 _______________
+
+Name                                     Stmts   Miss  Cover   Missing
+----------------------------------------------------------------------
+app/__init__.py                              0      0   100%
+app/main.py                                 32      0   100%
+app/middleware/admin_dependency.py           6      0   100%
+app/middleware/auth_middleware.py           20      0   100%
+app/repositories/battle_repo.py             17      2    88%   16-17
+app/repositories/comments_repo.py           14      8    43%   8-11, 14-17
+app/repositories/flag_repo.py               16      3    81%   9, 13-14
+app/repositories/movie_repo.py              14      0   100%
+app/repositories/review_repo.py             62      2    97%   22, 95
+app/repositories/user_repo.py               14      0   100%
+app/repositories/watchlist_repo.py          14      6    57%   10-11, 14-17
+app/routers/__init__.py                      0      0   100%
+app/routers/achievements.py                  8      1    88%   13
+app/routers/admin_endpoints.py              12      0   100%
+app/routers/battles.py                      51      0   100%
+app/routers/leaderboard.py                   8      0   100%
+app/routers/login.py                         8      0   100%
+app/routers/movies.py                       36      3    92%   39, 43, 52
+app/routers/reviews.py                      80      6    92%   42-43, 80, 131-133
+app/routers/tmdb.py                         17      9    47%   13-16, 22-26
+app/routers/user_endpoints.py               35      2    94%   12, 33
+app/routers/user_home.py                    15      0   100%
+app/routers/watchlist_endpoints.py          18      1    94%   25
+app/schemas/__init__.py                      0      0   100%
+app/schemas/achievement.py                  16      0   100%
+app/schemas/admin.py                         7      0   100%
+app/schemas/battle.py                       19      0   100%
+app/schemas/comment.py                      12      0   100%
+app/schemas/flag.py                          6      6     0%   1-7
+app/schemas/movie.py                        32      0   100%
+app/schemas/review.py                       78     15    81%   7-9, 29-31, 50-55, 69-71
+app/schemas/search.py                       61     10    84%   8-14, 28, 35, 56
+app/schemas/user.py                         31      0   100%
+app/schemas/user_login.py                    5      0   100%
+app/schemas/watchlist.py                    15      3    80%   7-9
+app/services/__init__.py                     0      0   100%
+app/services/achievement_service.py         73      6    92%   11, 15-17, 67, 140
+app/services/admin_review_service.py        22      0   100%
+app/services/admin_summary_service.py        5      0   100%
+app/services/admin_user_service.py          15      0   100%
+app/services/battle_pair_selector.py        41      0   100%
+app/services/battle_service.py              54     10    81%   42-43, 83, 85-86, 96-100
+app/services/comment_service.py             22      0   100%
+app/services/flag_service.py                30      2    93%   63-64
+app/services/movie_service.py              139     39    72%   23-24, 70, 72, 77-83, 94, 133-147, 172-187, 191-196
+app/services/penalty_service.py             35      0   100%
+app/services/review_service.py             175     15    91%   39, 71, 127, 230-233, 237, 306, 314-321
+app/services/search_service.py             100     20    80%   43-45, 77-90, 120-121, 138-139
+app/services/tmdb_service.py                60      3    95%   26, 34, 39
+app/services/unified_search_service.py      18      0   100%
+app/services/user_login_service.py          29      1    97%   13
+app/services/user_service.py                66      0   100%
+app/services/user_summary_service.py        16      0   100%
+app/services/validate_access.py              8      1    88%   8
+app/services/watchlist_service.py           26      2    92%   32-33
+app/utils/__init__.py                        2      0   100%
+app/utils/list_helpers.py                   10      0   100%
+app/utils/logger.py                         34      3    91%   25, 46-47
+----------------------------------------------------------------------
+TOTAL                                     1759    179    90%
+============================= 356 passed in 10.53s =============================

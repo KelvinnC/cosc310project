@@ -54,7 +54,7 @@ def test_post_watchlist(mocker, client):
 
     response = client.post(
         "/watchlist/add",
-        params={"movieId": new_movie_id}
+        json={"movie_id": new_movie_id}   
     )
 
     app.dependency_overrides = {}

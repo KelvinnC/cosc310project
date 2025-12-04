@@ -7,6 +7,11 @@ from app.middleware.auth_middleware import jwt_auth_dependency
 
 router = APIRouter(prefix="/watchlist", tags=["watchlist"])
 
+from pydantic import BaseModel
+
+# 1. Define the schema for the body
+
+
 @router.post("/add", response_model=Watchlist, status_code=201)
 def post_watchlist(request: WatchlistRequest, current_user: dict = Depends(jwt_auth_dependency)):
     authorId = current_user.get("user_id")
@@ -16,4 +21,6 @@ def post_watchlist(request: WatchlistRequest, current_user: dict = Depends(jwt_a
 def get_watchlist(current_user: dict = Depends(jwt_auth_dependency)):
     authorId = current_user.get("user_id")
     watchlist = get_watchlist_by_author_id(author_id=authorId)
+    if watchlist is None:
+        raise HTTPException(status_code=404, detail="Watchlist not found")
     return watchlist
