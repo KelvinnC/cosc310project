@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import './movies.css';
 import { apiFetch } from '../../lib/api';
@@ -20,7 +20,7 @@ interface Movie {
 const MoviesPage = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [error, setError] = useState('');
-  // Optional: Track which movies are currently adding to prevent double clicks
+  const [searchQuery, setSearchQuery] = useState('');
   const [addingId, setAddingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,6 +38,24 @@ const MoviesPage = () => {
     };
     fetchMovies();
   }, []);
+
+  const filteredMovies = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    const filtered = query
+      ? movies.filter((movie) => {
+          const title = movie.title?.toLowerCase() || '';
+          const description = movie.description?.toLowerCase() || '';
+          const genre = movie.genre?.toLowerCase() || '';
+          return (
+            title.includes(query) ||
+            description.includes(query) ||
+            genre.includes(query)
+          );
+        })
+      : movies;
+
+    return [...filtered].sort((a, b) => a.title.localeCompare(b.title));
+  }, [movies, searchQuery]);
 
   const handleAddToWatchlist = async (e: React.MouseEvent, movie: Movie) => {
     e.preventDefault(); 
@@ -86,10 +104,17 @@ const MoviesPage = () => {
     <div className="movies-page">
       <div className="movies-box">
         <h1>All Movies</h1>
+        <input
+          type="text"
+          className="movies-search-input"
+          placeholder="Search by title, description, or genre..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
         {error && <p style={{ color: 'red' }}>Error: {error}</p>}
         <div className="movies-grid">
-          {movies.length > 0 ? (
-            movies.map((movie) => (
+          {filteredMovies.length > 0 ? (
+            filteredMovies.map((movie) => (
               <Link
                 key={movie.id}
                 href={`/movies/${movie.id}`}
