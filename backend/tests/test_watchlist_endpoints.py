@@ -54,14 +54,14 @@ def test_post_watchlist(mocker, client):
 
     response = client.post(
         "/watchlist/add",
-        json={"movie_id": new_movie_id}   
+        json={"movie_id": new_movie_id} 
     )
 
     app.dependency_overrides = {}
 
     assert response.status_code == 201
-
     data = response.json()
+    
     assert data["id"] == 50
     assert data["authorId"] == mock_user_id
     assert new_movie_id in data["movieIds"]
