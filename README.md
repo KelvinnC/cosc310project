@@ -99,12 +99,11 @@ docker-compose up --build    # Rebuild after changes
 Create a `.env` file in the project root:
 
 ```env
-# For grading: use these pre-configured values
-TMDB_API_KEY=e3367a0199e7175215e1e3a9d3cdaffa
-JWT_SECRET=Lj9q7og6S0p5PMxFT8ZMjj+nQDnfX/F3MXzvJxP2vxg=
+TMDB_API_KEY=your_tmdb_api_key
+JWT_SECRET=your_jwt_secret
 ```
 
-> **Note:** These credentials are provided for course grading purposes. In production, generate your own secrets.
+> **Note:** These credentials are available for graders in the PDF submitted by the team.
 
 ### TMDb API Key
 1. Create an account at [themoviedb.org](https://www.themoviedb.org/signup)
@@ -157,58 +156,24 @@ echo "[]" > backend/app/data/logs.json
 
 ---
 
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              FRONTEND (Next.js)                             │
-│  /login · /register · /home · /reviews · /battles · /leaderboard · /admin  │
-└─────────────────────────────────────┬───────────────────────────────────────┘
-                                      │ HTTP/REST
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              BACKEND (FastAPI)                              │
-│  ┌─────────────────────────────────────────────────────────────────────┐    │
-│  │ ROUTERS: login, users, reviews, battles, leaderboard, movies, admin │    │
-│  ├─────────────────────────────────────────────────────────────────────┤    │
-│  │ MIDDLEWARE: auth_middleware (JWT), admin_dependency (role check)    │    │
-│  ├─────────────────────────────────────────────────────────────────────┤    │
-│  │ SERVICES: review, battle, user, movie, flag, penalty, tmdb, admin   │    │
-│  ├─────────────────────────────────────────────────────────────────────┤    │
-│  │ REPOSITORIES: review_repo, battle_repo, user_repo, movie_repo, etc. │    │
-│  ├─────────────────────────────────────────────────────────────────────┤    │
-│  │ UTILITIES: Logger (Singleton) — thread-safe audit logging           │    │
-│  └─────────────────────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────┬───────────────────────────────────────┘
-                                      │
-         ┌────────────────────────────┼────────────────────────────┐
-         ▼                            ▼                            ▼
-┌──────────────────┐       ┌─────────────────────┐       ┌─────────────────┐
-│ JSON Data Files  │       │      TMDb API       │       │   Audit Logs    │
-│ backend/app/data │       │  (External Service) │       │   (logs.json)   │
-└──────────────────┘       └─────────────────────┘       └─────────────────┘
-```
-
----
-
 ## Project Structure
 
 ```
-├── backend/
-│   ├── app/
-│   │   ├── routers/       # API endpoints
-│   │   ├── services/      # Business logic
-│   │   ├── repositories/  # Data access (JSON)
-│   │   ├── schemas/       # Pydantic models
-│   │   ├── middleware/    # Auth & admin checks
-│   │   ├── utils/         # Logger (Singleton)
-│   │   └── data/          # JSON storage files
-│   └── tests/             # Pytest test suite
-├── frontend/
-│   ├── app/               # Next.js pages
-│   └── lib/               # API utilities
-├── scrum-documents/       # Sprint meeting notes
-└── test-evidence/         # Coverage reports
+backend/
+  app/
+    routers/         # API endpoints
+    services/        # Business logic
+    repositories/    # Data access (JSON)
+    schemas/         # Pydantic models
+    middleware/      # Auth & admin checks
+    utils/           # Logger (Singleton)
+    data/            # JSON storage files
+  tests/             # Pytest test suite
+frontend/
+  app/               # Next.js pages
+  lib/               # API utilities
+scrum-documents/     # Sprint meeting notes
+test-evidence/       # Coverage reports
 ```
 
 ---
