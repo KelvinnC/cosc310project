@@ -5,7 +5,7 @@ import Link from 'next/link';
 import './movies.css';
 import { apiFetch } from '../../lib/api';
 
-const FASTAPI_URL = "http://127.0.0.1:8000";;
+const FASTAPI_URL = "http://127.0.0.1:8000";
 
 interface Movie {
   id: string;
