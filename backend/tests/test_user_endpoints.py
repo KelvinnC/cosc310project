@@ -10,7 +10,7 @@ def client():
 def test_list_users(mocker, client, user_data):
     mocker.patch("app.services.user_service.load_all",
     return_value=[user_data])
-    response = client.get("/")
+    response = client.get("/users")
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1

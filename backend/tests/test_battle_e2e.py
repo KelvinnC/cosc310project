@@ -227,7 +227,9 @@ class TestBattleE2E:
         """Verify the server is accessible."""
         response = requests.get(f"{E2E_BASE_URL}/")
         assert response.status_code == 200
-        assert "message" in response.json()
+        data = response.json()
+        assert data["status"] == "healthy"
+        assert data["name"] == "Review Battle API"
     
     def test_create_battle_requires_auth(self, server_process):
         """Test that creating a battle requires authentication."""

@@ -8,6 +8,7 @@ from app.services.achievement_service import get_achievement_winners
 router = APIRouter(prefix="/achievements", tags=["achievements"])
 
 
-@router.get("", response_model=List[AchievementWinner])
+@router.get("", response_model=List[AchievementWinner], summary="List achievement badges")
 def list_achievements() -> List[AchievementWinner]:
+    """Retrieve all achievement badges and their current holders."""
     return get_achievement_winners()
